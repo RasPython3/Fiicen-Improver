@@ -1,0 +1,41 @@
+[
+    {
+        "id": 1,
+        "priority": 1,
+        "action":{
+            "type":"redirect",
+            "redirect":{
+                "extensionPath": "/images/badges/developer.svg"
+            }
+        },
+        "condition":{
+            "regexFilter":"fiicen.jp/_next/image[?]url[=]developer(?:[&](?:w|q)[=][^&]*)+$"
+        }
+    },
+    {
+        "id": 2,
+        "priority": 1,
+        "action":{
+            "type":"redirect",
+            "redirect":{
+                "extensionPath": "/images/badges/tester.svg"
+            }
+        },
+        "condition":{
+            "regexFilter":"fiicen.jp/_next/image[?]url[=]tester(?:[&](?:w|q)[=][^&]*)+$"
+        }
+    },
+    {
+        "id": 3,
+        "priority": 1,
+        "action":{
+            "type":"redirect",
+            "redirect":{
+                "extensionPath": "/images/badges/user.svg"
+            }
+        },
+        "condition":{
+            "regexFilter":"fiicen.jp/_next/image[?]url[=]user(?:[&](?:w|q)[=][^&]*)+$"
+        }
+    }
+]

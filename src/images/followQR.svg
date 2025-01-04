@@ -1,0 +1,10 @@
+<svg viewBox="0 0 32 32" width="32px" height="32px" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com">
+  <defs></defs>
+  <rect style="stroke: rgb(0, 0, 0); fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2px;" x="1" y="19" width="12" height="12" rx="2" ry="2"></rect>
+  <rect style="stroke-linecap: round; stroke-linejoin: round;" x="4" y="22" width="6" height="6" rx="1" ry="1"></rect>
+  <path d="M 23.781 18.5 H 26.219 V 23.781 H 31.5 V 26.219 H 26.219 V 31.5 H 23.781 V 26.219 H 18.5 V 23.781 H 23.781 Z" style="fill: none; stroke: rgb(0, 0, 0); stroke-linecap: round; stroke-linejoin: round;" bx:shape="cross 18.5 18.5 13 13 2.438 2.438 0.5 1@71aa0f9e"></path>
+  <rect style="stroke: rgb(0, 0, 0); fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2px;" x="1" y="1" width="12" height="12" rx="2" ry="2"></rect>
+  <rect style="stroke-linecap: round; stroke-linejoin: round;" x="4" y="4" width="6" height="6" rx="1" ry="1"></rect>
+  <rect style="stroke: rgb(0, 0, 0); fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2px;" x="19" y="1" width="12" height="12" rx="2" ry="2"></rect>
+  <rect style="stroke-linecap: round; stroke-linejoin: round;" x="22" y="4" width="6" height="6" rx="1" ry="1"></rect>
+</svg>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <style>
+      body {
+        min-width: 8rem;
+        width: max-content;
+      }
+      section {
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+        align-items: center;
+        border: solid 1px #444444;
+        padding: 0.5em;
+        gap: 2rem;
+        box-sizing: border-box;
+      }
+      input[type="checkbox"] {
+        display: inline-flex;
+        appearance: unset;
+        width: 3.5em;
+        height: 2em;
+        border-radius: 2em;
+        border:  solid 1px #444444;
+        align-items: center;
+        box-sizing: border-box;
+      }
+      input[type="checkbox"]:checked {
+        background-color: #6666ff;
+      }
+      input[type="checkbox"]::after {
+        content: "";
+        display: inline-block;
+        position: relative;
+        height: 80%;
+        aspect-ratio: 1;
+        margin: calc(8% - 0.5px);
+        background-color: white;
+        background-origin: content-box;
+        border-style: solid;
+        border-width: 1px;
+        border-color: #444444;
+        border-radius: 50%;
+        padding: 5%;
+        box-sizing: border-box;
+        left: 0;
+        background-size: contain;
+        transition: left 0.15s cubic-bezier(0.67, -0.01, 0.1, 1.5);
+      }
+      input[type="checkbox"]:checked::after {
+        left: 42%;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <label for="datasaver">データセーバー</label>
+      <input name="datasaver" type="checkbox">
+    </section>
+    <script src="popup.js"></script>
+  </body>
+</html>

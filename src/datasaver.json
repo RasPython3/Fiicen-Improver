@@ -1,0 +1,60 @@
+[
+    {
+        "id": 1,
+        "priority": 2,
+        "action":{
+            "type":"redirect",
+            "redirect":{
+                "transform":{
+                    "queryTransform":{
+                        "addOrReplaceParams":[
+                            {
+                                "key":"_",
+                                "value":""
+                            },
+                            {
+                                "key":"w",
+                                "value":"64"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "condition": {
+            "regexFilter":"fiicen.jp/_next/image[?]url[=]http[%]3[aA][%]2[fF][%]2[fF]localhost[%]3[aA]8000[%]2[fF]media[%]2[fF]user[%]2[fF][^&]*?(?:[&](?:w|q)[=][^&]*)+$",
+            "excludedResourceTypes":[
+                "main_frame"
+            ]
+        }
+    },
+    {
+        "id": 2,
+        "priority": 1,
+        "action":{
+            "type":"redirect",
+            "redirect":{
+                "transform":{
+                    "queryTransform":{
+                        "addOrReplaceParams":[
+                            {
+                                "key":"w",
+                                "value":"16"
+                            },
+                            {
+                                "key":"q",
+                                "value": "75"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "condition":{
+            "regexFilter":"fiicen.jp/_next/image[?]url[=](?:http|https)[%][^&]*?[^_](?:[?&](?:w|q)[=][^&=]*)+$",
+            "excludedResourceTypes":[
+                "main_frame"
+            ]
+        }
+    }
+]
