@@ -31,6 +31,9 @@ div.flex.flex-col.gap-4 > div.relative.flex) {
                     --imprv-saved: 1;
                 }
             }
+            > div.mt-1.whitespace-pre-wrap.break-all {
+                overflow-wrap: anywhere;
+            }
             > div.mt-1.whitespace-pre-wrap.break-all > :where(iframe, div) {
                 margin-top: 0.5rem;
                 margin-left: -0.625rem;
