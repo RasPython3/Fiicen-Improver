@@ -26,26 +26,32 @@ const testers = [
     "001",
     "Kawashiro",
     "yosiiiiii",
-    "yuu_8313"
+    "yuu_8313",
+    "note",
+    "ushii",
+    "non",
+    "tanasan_o38",
+    "katatsumuri"
 ];
 
 var circleAmount = 0;
 
-function messageExt(request, value) {
+function messageExt(request, value=undefined) {
     let id = 0;
     while (_msgIds.includes(id)) {
         id = Math.ceil(Math.random() * 4096);
     }
     _msgIds.push(id);
     let promise = new Promise((resolve, reject)=>{
-        window.addEventListener("ext-message", (e)=>{
+        let listener = (e)=>{
             let data = JSON.parse(e.detail);
             if (data.response == request && data.id == id) {
-                window.removeEventListener("ext-message", arguments.callee);
+                window.removeEventListener("ext-message", listener);
                 _msgIds.splice(_msgIds.indexOf(id), 1);
                 resolve(data.value);
             }
-        });
+        };
+        window.addEventListener("ext-message", listener);
     });
     let ev = new CustomEvent("ext-message", {
         detail: JSON.stringify({request:request, value:value, id:id})
@@ -63,6 +69,39 @@ const assets = {
 
 const username = document.querySelector("nav > a:last-child").href.match(".*/field/([^/]+)$")[1];
 
+var errorBoxes;
+
+function outputError(e) {
+    console.log(e);
+    let trace;
+    if (typeof(e) == "string") {
+        trace = `Error: ${e}`;
+    } else {
+        trace = `File "${e.filename}", line ${e.lineno}, col ${e.colno}\nError: ${e.message}`;
+    }
+    let box = document.createElement("span");
+    box.innerText = trace;
+    errorBoxes.append(box);
+    box.onclick = ()=>{
+        box.remove();
+    }
+    return true;
+}
+
+/* エラー検証 */
+messageExt("debug").then((debug)=>{
+    console.log(debug);
+    if (debug) {
+        errorBoxes = document.createElement("div");
+        errorBoxes.className = "errors";
+        document.body.append(errorBoxes);
+        window.addEventListener("error", (e)=>{
+            if (e.filename == _injectedjs_url) {
+                outputError(e);
+            }
+        });
+    }
+});
 
 // original alert
 function alertMoment(text) {
@@ -91,6 +130,13 @@ async function onLoaded() { // first load or nextjs's router
     console.log("onLoaded called");
     _loadedCalled = true;
     circleAmount = 0;
+    if (errorBoxes && location.pathname == "/field/RasPython3") {
+        let error = new ErrorEvent("error", {
+            message: "This is test.",
+            filename: _injectedjs_url
+        });
+        window.dispatchEvent(error);
+    }
     if (location.pathname.startsWith("/field/")) {
         if (document.querySelector("div:has(> main) > div > div").children.length > 2) {
             let card = document.querySelector("div:has(> main) > div > div");
@@ -100,39 +146,58 @@ async function onLoaded() { // first load or nextjs's router
         }
         if (location.pathname.match("\\/field\\/"+username+"(?=\\?|$)")) {
             (async ()=>{
-                // create QR code button
-                let url = await messageExt("extURL", "qr-button.html");
-                let text = await (await fetch(url)).text();
-                let btn = document.createElement("div");
-                btn.innerHTML = text;
-                btn.querySelector("div[title=\"field\"]").outerHTML = new QRCode(document.createElement("div"), {text: location.href, useSVG: true})._el.innerHTML;
-                btn.querySelector("div._qrcode svg").style.border = "solid 2rem white";
-                btn.querySelector("div._qrcode svg").style.borderRadius = "1.5rem";
-                btn.children[0].addEventListener("click", ()=>{
-                    btn.children[1].classList.add("bg-black/20");
-                    btn.children[1].classList.remove("pointer-events-none", "bg-transparent");
-                    btn.children[1].children[0].classList.remove("blur", "scale-75", "opacity-0");
-                });
-                let close = ()=>{
-                    btn.children[1].classList.remove("bg-black/20");
-                    btn.children[1].classList.add("pointer-events-none", "bg-transparent");
-                    btn.children[1].children[0].classList.add("blur", "scale-75", "opacity-0");
-                };
-                btn.children[1].addEventListener("click", (ev)=>{
-                    if (ev.target == btn.children[1]) {
-                        close();
+                try {
+                    // create QR code button
+                    if (errorBoxes) {
+                        outputError("qr 1");
                     }
-                });
-                btn.children[1].querySelector("button").addEventListener("click", close);
-                await _ext_ready;
-                let _inject_button = setInterval(()=>{
-                    let buttons = document.querySelector("div:has(> main:nth-child(3)) > div > div:not(:has(> div:nth-child(3))) > div:first-child > div.flex:has(div)");
-                    if (buttons == undefined) {
-                        return;
+                    let url = await messageExt("extURL", "qr-button.html");
+                    if (errorBoxes) {
+                        outputError("qr 2");
                     }
-                    clearInterval(_inject_button);
-                    buttons.append(btn);
-                }, 10);
+                    let text = await (await fetch(url)).text();
+                    if (errorBoxes) {
+                        outputError("qr 3");
+                    }
+                    let btn = document.createElement("div");
+                    btn.innerHTML = text;
+                    btn.querySelector("div[title=\"field\"]").outerHTML = new QRCode(document.createElement("div"), {text: location.href, useSVG: true})._el.innerHTML;
+                    btn.querySelector("div._qrcode svg").style.border = "solid 2rem white";
+                    btn.querySelector("div._qrcode svg").style.borderRadius = "1.5rem";
+                    btn.children[0].addEventListener("click", ()=>{
+                        btn.children[1].classList.add("bg-black/20");
+                        btn.children[1].classList.remove("pointer-events-none", "bg-transparent");
+                        btn.children[1].children[0].classList.remove("blur", "scale-75", "opacity-0");
+                    });
+                    let close = ()=>{
+                        btn.children[1].classList.remove("bg-black/20");
+                        btn.children[1].classList.add("pointer-events-none", "bg-transparent");
+                        btn.children[1].children[0].classList.add("blur", "scale-75", "opacity-0");
+                    };
+                    btn.children[1].addEventListener("click", (ev)=>{
+                        if (ev.target == btn.children[1]) {
+                            close();
+                        }
+                    });
+                    btn.children[1].querySelector("button").addEventListener("click", close);
+                    await _ext_ready;
+                    let _inject_button = setInterval(()=>{
+                        if (errorBoxes) {
+                            outputError("qr 4");
+                        }
+                        let buttons = document.querySelector("div:has(> main:nth-child(3)) > div > div:not(:has(> div:nth-child(3))) > div:first-child > div.flex:has(div)");
+                        if (buttons == undefined) {
+                            return;
+                        }
+                        clearInterval(_inject_button);
+                        if (errorBoxes) {
+                            outputError("qr 5");
+                        }
+                        buttons.append(btn);
+                    }, 10);
+                } catch (e) {
+                    outputError(e);
+                }
             })();
         }
         if (location.pathname == "/field/RasPython3") {
@@ -180,7 +245,7 @@ async function onLoaded() { // first load or nextjs's router
                 }, 10);
             })();
         }
-    } else if (location.pathname.startsWith("/home") || location.pathname.startsWith("/explore/")) {
+    } else if (location.pathname.startsWith("/home") || location.pathname.startsWith("/explore/") || location.pathname.startsWith("/search/")) {
         clearInterval(__timer_id);
         __timer_id = setInterval(()=>{
             let circles = document.querySelectorAll(":where(main:nth-child(3) > div > div > div:first-child > div.relative, main:not(:nth-child(3)) > div > div > div.relative)");
@@ -449,6 +514,7 @@ function modifyEmbed(url) {
         let quoted = document.createElement("div");
         quoted.append(circle.children[0].cloneNode(3), document.createElement("div"));
         quoted.children[1].append(...[...circle.children[1].querySelectorAll("& > div:first-child, & > p:first-child, & > p:first-child + div")].map((el)=>el.cloneNode(2)));
+        quoted.children[1].children[0].querySelectorAll("& > div").forEach((div)=>div.remove());
         // handle badge
         let author = quoted.querySelector("div:first-child > div:first-child > div > a").href.split("/").at(-1);
         if (author == "RasPython3") {
@@ -463,7 +529,7 @@ function modifyEmbed(url) {
             badge.srcset = "/_next/image?url=" + encodeURIComponent(badgeURLs.developer) + "&w=16&q=75 1x, /_next/image?url=" + encodeURIComponent(badgeURLs.developer) + "&w=32&q=75 2x";
             badge.src="/_next/image?url=" + encodeURIComponent(badgeURLs.developer) + "&w=32&q=75";
             quoted.querySelector("div:first-child > div:first-child > div > a").append(badge);
-        } else if (testers.includes(author == username)) {
+        } else if (testers.includes(author)) {
             let badge = document.createElement("img");
             badge.alt = "extension-tester";
             badge.loading = "lazy";
@@ -528,7 +594,7 @@ function modifyEmbed(url) {
             + " div.relative:has(> a[href=\"" + url + "\"])");
         for (let embed of embeds) {
             embed.classList.add("quoted-circle");
-            embed.classList.remove("items-center", "second-bg-hover");
+            embed.classList.remove("relative", "items-center", "second-bg-hover");
             embed.replaceChildren(...quoted.cloneNode(5).children);
             let img = embed.querySelector(".media-group > div > img");
             let bigImg = img ? img.nextElementSibling : undefined;
@@ -566,6 +632,57 @@ function modifyEmbed(url) {
     })();
 }
 
+// Improve post form
+
+document.addEventListener("paste", async (e)=>{
+    if (!e.target.form || !e.target.form.elements["circle-form-image"] || !e.target.form.elements["circle-form-video"]) {
+        return;
+    }
+    let form = e.target.form;
+    if (e.clipboardData.files.length > 0) {
+        let file = e.clipboardData.files[0];
+        console.log(file, file.size);
+        if (file.type.startsWith("image/")) {
+            file.arrayBuffer().then((buffer)=>{
+                let imageInput = form.elements["circle-form-image"];
+                imageInput[Object.keys(imageInput).filter(key=>key.startsWith("__reactProps"))[0]].onChange({
+                    target: {
+                        id: "circle-form-image",
+                        files: [new File([buffer,], file.name, {
+                            type: file.type,
+                            lastModified: file.lastModified
+                        }),]
+                    }
+                });
+                console.log(file);
+            });
+        } else if (file.type.startsWith("video/")) {
+            file.arrayBuffer().then((buffer)=>{
+                let videoInput = form.elements["circle-form-video"];
+                videoInput[Object.keys(videoInput).filter(key=>key.startsWith("__reactProps"))[0]].onChange({
+                    target: {
+                        id: "circle-form-video",
+                        files: [new File([buffer,], file.name, {
+                            type: file.type,
+                            lastModified: file.lastModified
+                        }),]
+                    }
+                });
+                console.log(file);
+            });
+        }
+        form.onformdata = (e)=>{
+            let data = e.formData;
+            if (data.get("image") != null) {
+                data.set("image", form[Object.keys(form).filter(key=>key.startsWith("__reactProps"))[0]].children[2].props.media.image);
+            }
+            if (data.get("video") != null) {
+                data.set("video", form[Object.keys(form).filter(key=>key.startsWith("__reactProps"))[0]].children[2].props.media.video);
+            }
+        };
+    }
+});
+
 // Hack fetch(...)
 
 window.fetch = async (...args)=>{
@@ -573,6 +690,7 @@ window.fetch = async (...args)=>{
         // when this called, document must be already loaded
         window.dispatchEvent(new Event("load"));
     }
+    console.log("fetch", args);
     try {
         args[0] = new URL(args[0]);
     } catch {

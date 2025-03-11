@@ -142,6 +142,15 @@ svg[name="qrcode"]:where(.dark,.dark *) {
     width: 100%;
 }
 
+.quoted-circle > div:first-child > div:last-child {
+    white-space: nowrap;
+    > a {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+
 .quoted-circle > div:nth-child(2) {
     padding-left: 1.75rem ! important;
 }
@@ -233,4 +242,35 @@ p {
     /* animation */
     animation-duration: 2.5s;
     animation-name: alert-motion;
+}
+
+/* error handling */
+body > .errors {
+    position: fixed;
+    display: flex;
+    width: calc(100% - 2rem);
+    height: fit-content;
+    bottom: 1rem;
+    left: 1rem;
+    flex-direction: column-reverse;
+    align-items: flex-end;
+    gap: 0.5rem;
+    z-index: 10000;
+
+    > span {
+        width: 100%;
+        max-width: 32rem;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        white-space: pre-line;
+        word-break: break-all;
+        overflow-wrap: anywhere;
+        color: rgb(255 255 255/var(--tw-bg-opacity));
+        background: rgb(0 0 0/var(--tw-bg-opacity));
+    }
+
+    > span:where(.dark,.dark *) {
+        color: rgb(0 0 0/var(--tw-bg-opacity));
+        background: rgb(255 255 255/var(--tw-bg-opacity));
+    }
 }

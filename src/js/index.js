@@ -33,9 +33,19 @@ window.addEventListener("ext-message", (ev)=>{
         responseData = {id:data.id, response:"extURL", value:""};
       }
       break;
+    case "debug":
+      chrome.runtime.sendMessage(JSON.stringify(data));
+      return;
   }
   let response = new CustomEvent("ext-message", {
     detail: JSON.stringify(responseData)
   });
   window.dispatchEvent(response);
 });
+
+chrome.runtime.onMessage.addListener((message) => {
+  let response = new CustomEvent("ext-message", {
+    detail: message
+  });
+  window.dispatchEvent(response);
+})
