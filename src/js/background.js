@@ -24,11 +24,13 @@ function webRequestHandler(details) {
     };
   } else if (datasaverMatch) {
     let redirectUrl = new URL(details.url);
-    redirectUrl.searchParams.set("w", 16);
-    redirectUrl.searchParams.set("q", 75);
-    return {
-      redirectUrl: redirectUrl.href
-    };
+    if (redirectUrl.searchParams.get("w") != "16") {
+      redirectUrl.searchParams.set("w", 16);
+      redirectUrl.searchParams.set("q", 75);
+      return {
+        redirectUrl: redirectUrl.href
+      };
+    }
   }
 }
 
@@ -55,11 +57,8 @@ chrome.storage.local.get({
       webRequestHandler,
       {
         urls:[
-          "https://fiicen.jp/_next/image[?]url[=](developer|tester|user)(?:[&](?:w|q)[=][^&]*)+",
-          "https://fiicen.jp/_next/image[?]url[=](?:http|https)[%][^&]*?[^_](?:[?&](?:w|q)[=][^&=]*)+",
-          "https://fiicen.jp/_next/image[?]url[=]http[%]3[aA][%]2[fF][%]2[fF]localhost[%]3[aA]8000[%]2[fF]media[%]2[fF]user[%]2[fF][^&]*?(?:[&](?:w|q)[=][^&]*)+"
-        ],
-        types:["image", "other", "sub_frame"]
+          "https://fiicen.jp/_next/image?url=*"
+        ]
       },
       ["blocking"]
     );
