@@ -36,6 +36,18 @@ def build_firefox():
     with open("build/firefox/manifest.json", mode="w") as f:
         manifest = json.dump(manifest, f)
 
+def build_orion():
+    shutil.copy("LICENSE", "build/orion/Fiicen-Improver/LICENSE")
+    manifest = ""
+    with open("build/orion/Fiicen-Improver/manifest.json", mode="r") as f:
+        manifest = json.load(f)
+
+    manifest["permissions"] = ["storage", "webRequest", "webRequestBlocking"]
+    del manifest["declarative_net_request"]
+
+    with open("build/orion/Fiicen-Improver/manifest.json", mode="w") as f:
+        manifest = json.dump(manifest, f)
+
 def build():
     try:
         shutil.rmtree("build")
@@ -54,6 +66,10 @@ def build():
     shutil.copytree("src", "build/firefox")
     build_firefox()
     zip_files("build/firefox", f"build/firefox-{version}.zip")
+
+    shutil.copytree("src", "build/orion/Fiicen-Improver")
+    build_orion()
+    zip_files("build/orion", f"build/orion-{version}.zip")
 
 if __name__ == "__main__":
     build()
