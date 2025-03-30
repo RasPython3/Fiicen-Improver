@@ -1,3 +1,4 @@
+import base64
 import os
 import glob
 import shutil
@@ -49,6 +50,16 @@ def build_orion():
 
     with open("build/orion/manifest.json", mode="w") as f:
         manifest = json.dump(manifest, f)
+
+    with open("build/orion/js/index.js", mode="r", encoding="utf-8") as f:
+        indexjs = f.read()
+    with open("build/orion/qr-button.html", mode="r", encoding="utf-8") as f:
+        qrbutton = f.read()
+
+    indexjs = indexjs.replace("/*qr-button.html*/", "value:\"data:text/html;base64,{}\"".format(base64.b64encode(qrbutton.encode()).decode()))
+
+    with open("build/orion/js/index.js", mode="w", encoding="utf-8") as f:
+        f.write(indexjs)
 
 def build():
     try:

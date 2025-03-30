@@ -27,10 +27,14 @@ window.addEventListener("ext-message", (ev)=>{
   let responseData = null;
   switch (data.request) {
     case "extURL":
-      try {
-        responseData = {id:data.id, response:"extURL", value:chrome.runtime.getURL(data.value)};
-      } catch {
-        responseData = {id:data.id, response:"extURL", value:""};
+      if (data.value == "qr-button.html" && window.KAGI != undefined) {
+        responseData = {id:data.id, response:"extURL", /*qr-button.html*/};
+      } else {
+        try {
+          responseData = {id:data.id, response:"extURL", value:chrome.runtime.getURL(data.value)};
+        } catch {
+          responseData = {id:data.id, response:"extURL", value:""};
+        }
       }
       break;
     case "debug":
