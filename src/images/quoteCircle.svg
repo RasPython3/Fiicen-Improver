@@ -1,0 +1,15 @@
+<svg viewBox="0 0 32 32" width="32px" height="32px" xmlns="http://www.w3.org/2000/svg">
+  <defs></defs>
+  <g transform="matrix(0.817518, 0, 0, 0.817518, -180.977603, -126.90381)">
+    <g data-paper-data="{&quot;isPaintingLayer&quot;:true}" fill="none" fill-rule="nonzero" stroke="#808080" stroke-width="3" stroke-linecap="round" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" style="mix-blend-mode: normal">
+      <path d="M228.5,192.875h14.625"></path>
+      <path d="M228,167.125v25.75"></path>
+      <path d="M228,167.125l5,5"></path>
+      <path d="M227.875,167.25l-5,5" data-paper-data="{&quot;index&quot;:null}"></path>
+      <path d="M 252 192.875 L 251.955 177.248" data-paper-data="{&quot;index&quot;:null}"></path>
+      <path d="M252,192.875l-5,-5" data-paper-data="{&quot;index&quot;:null}"></path>
+      <path d="M252.125,192.75l5,-5" data-paper-data="{&quot;index&quot;:null}"></path>
+    </g>
+  </g>
+  <path d="M 6 10 L 22 10 L 30 14 L 22 18 L 6 18 L 6 10 Z" style="stroke-width: 2.453px; stroke-linecap: round; stroke-linejoin: round; stroke: rgb(128, 128, 128); fill: none; transform-box: fill-box; transform-origin: 50% 50%;" transform="matrix(-0.707107, 0.707107, -0.707107, -0.707107, 0, -0.000001)"></path>
+</svg>

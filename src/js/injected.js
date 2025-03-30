@@ -64,7 +64,7 @@ const urls = {}; // currently not used
 
 const assets = {
     "qr": messageExt("extURL", "images/followQR.svg"),
-    "share": messageExt("extURL", "images/shareLink.svg")
+    "quote": messageExt("extURL", "images/quoteCircle.svg")
 };
 
 const username = document.querySelector("nav > a:last-child").href.match(".*/field/([^/]+)$")[1];
@@ -446,25 +446,32 @@ async function modifyFieldLayout(data) {
 }
 
 function modifyDynamicCircle(circle, data) {
-    if (circle.querySelector("& > div:last-child > div:last-child button.share") == undefined) {
+    if (circle.querySelector("& > div:last-child > div:last-child button.quote") == undefined) {
         if (data && data.id) {
             let shareBtn = document.createElement("button");
-            shareBtn.className = "share base-bg-hover flex w-full gap-4 px-4 py-3";
+            shareBtn.className = "quote base-bg-hover flex w-full gap-4 px-4 py-3";
             shareBtn.append(document.createElement("img"));
-            assets["share"].then((url)=>{
+            assets["quote"].then((url)=>{
                 shareBtn.firstChild.src = url;
             });
             shareBtn.firstChild.className = "size-5";
             shareBtn.firstChild.style.color = "transparent";
             shareBtn.append(document.createElement("p"));
-            shareBtn.lastChild.innerText = "サークルのURLをクリップボードにコピー";
+            shareBtn.lastChild.innerText = "サークルを引用";
             let circleURL = "https://fiicen.jp/circle/" + data.id;
             shareBtn.addEventListener("click", ()=>{
-                navigator.clipboard.writeText(circleURL);
-                alertMoment("コピーしました");
-                shareBtn.nextElementSibling.firstChild.click();
+                let createCircleBtn = document.querySelector("nav > button");
+                let circleTextArea = document.querySelector("nav > button + div textarea");
+                circle.lastChild.lastChild.lastChild.lastChild.lastChild.lastChild.lastChild.click();
+                createCircleBtn.click();
+                let timer = setInterval(()=>{
+                    if (!circleTextArea.disabled) {
+                        clearInterval(timer);
+                        circleTextArea.value = `${circleURL}`;
+                    }
+                }, 10);
             });
-            circle.lastChild.lastChild.lastChild.lastChild.lastChild.insertAdjacentElement("beforebegin", shareBtn);
+            circle.lastChild.lastChild.lastChild.lastChild.lastChild.lastChild.insertAdjacentElement("beforebegin", shareBtn);
         }
     }
 }
