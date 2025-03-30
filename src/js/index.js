@@ -48,4 +48,4 @@ chrome.runtime.onMessage.addListener((message) => {
     detail: message
   });
   window.dispatchEvent(response);
-})
+});
