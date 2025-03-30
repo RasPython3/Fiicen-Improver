@@ -32,20 +32,22 @@ def build_firefox():
             "id": "FiicenImprover@RasPython3"
         }
     }
+    manifest["permissions"] = ["storage", "webRequest", "webRequestBlocking"]
+    del manifest["declarative_net_request"]
 
     with open("build/firefox/manifest.json", mode="w") as f:
         manifest = json.dump(manifest, f)
 
 def build_orion():
-    shutil.copy("LICENSE", "build/orion/Fiicen-Improver/LICENSE")
+    shutil.copy("LICENSE", "build/orion/LICENSE")
     manifest = ""
-    with open("build/orion/Fiicen-Improver/manifest.json", mode="r") as f:
+    with open("build/orion/manifest.json", mode="r") as f:
         manifest = json.load(f)
 
     manifest["permissions"] = ["storage", "webRequest", "webRequestBlocking"]
     del manifest["declarative_net_request"]
 
-    with open("build/orion/Fiicen-Improver/manifest.json", mode="w") as f:
+    with open("build/orion/manifest.json", mode="w") as f:
         manifest = json.dump(manifest, f)
 
 def build():
@@ -67,7 +69,7 @@ def build():
     build_firefox()
     zip_files("build/firefox", f"build/firefox-{version}.zip")
 
-    shutil.copytree("src", "build/orion/Fiicen-Improver")
+    shutil.copytree("src", "build/orion")
     build_orion()
     zip_files("build/orion", f"build/orion-{version}.zip")
 
