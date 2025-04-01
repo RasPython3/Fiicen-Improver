@@ -33,8 +33,6 @@ def build_firefox():
             "id": "FiicenImprover@RasPython3"
         }
     }
-    manifest["permissions"] = ["storage", "webRequest", "webRequestBlocking"]
-    del manifest["declarative_net_request"]
 
     with open("build/firefox/manifest.json", mode="w") as f:
         manifest = json.dump(manifest, f)
