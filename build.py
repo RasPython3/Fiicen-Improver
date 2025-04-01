@@ -56,9 +56,9 @@ def build_orion():
     with open("build/orion/qr-button.html", mode="r", encoding="utf-8") as f:
         qrbutton = f.read()
 
-    for badge in glob.glob("**", root_dir="src/images/badges"):
+    for badge in glob.glob("**", root_dir="build/orion/images/badges"):
         badgename = badge.split(".")[0]
-        with open(f"src/images/badges/{badge}", mode="r", encoding="utf-8") as f:
+        with open(f"build/orion/images/badges/{badge}", mode="r", encoding="utf-8") as f:
             badgesrc = f.read()
         backgroundjs = backgroundjs.replace(f"/*{badgename} badge base64*/", base64.b64encode(badgesrc.encode()).decode())
 
