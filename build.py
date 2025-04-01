@@ -55,6 +55,8 @@ def build_orion():
         indexjs = f.read()
     with open("build/orion/qr-button.html", mode="r", encoding="utf-8") as f:
         qrbutton = f.read()
+    with open("build/orion/images/quoteCircle.svg", mode="r", encoding="utf-8") as f:
+        quote_circle_svg = f.read()
 
     for badge in glob.glob("**", root_dir="build/orion/images/badges"):
         badgename = badge.split(".")[0]
@@ -63,6 +65,7 @@ def build_orion():
         backgroundjs = backgroundjs.replace(f"/*{badgename} badge base64*/", base64.b64encode(badgesrc.encode()).decode())
 
     indexjs = indexjs.replace("/*qr-button.html*/", "value:\"data:text/html;base64,{}\"".format(base64.b64encode(qrbutton.encode()).decode()))
+    indexjs = indexjs.replace("/*quoteCircle.svg*/", "value:\"data:image/svg+xml;base64,{}\"".format(base64.b64encode(quote_circle_svg.encode()).decode()))
 
     with open("build/orion/js/background.js", mode="w", encoding="utf-8") as f:
         f.write(backgroundjs)

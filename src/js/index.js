@@ -29,6 +29,8 @@ window.addEventListener("ext-message", (ev)=>{
     case "extURL":
       if (data.value == "qr-button.html" && window.KAGI != undefined) {
         responseData = {id:data.id, response:"extURL", /*qr-button.html*/};
+      } else if (data.value == "images/quoteCircle.svg" && window.KAGI != undefined) {
+        responseData = {id:data.id, response:"extURL", /*quoteCircle.svg*/};
       } else {
         try {
           responseData = {id:data.id, response:"extURL", value:chrome.runtime.getURL(data.value)};
