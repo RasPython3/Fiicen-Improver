@@ -477,28 +477,31 @@ function modifyDynamicCircle(circle, data) {
 }
 
 function modifyCircle(circleData) {
-    if (circleData.reply_to) {
-        modifyCircle(circleData.reply_to);
-    }
-    if (circleData.refly_from) {
-        modifyCircle(circleData.refly_from);
-    }
-    if (!circleData.author.badge) {
-        if (circleData.author.account_name == "RasPython3") {
-            circleData.author.badge = {
-                type: "extension-developer",
-                image: badgeURLs.developer
-            };
-        } else if (testers.includes(circleData.author.account_name)) {
-            circleData.author.badge = {
-                type: "extension-tester",
-                image: badgeURLs.tester
-            };
-        } else if (circleData.author.account_name == username) {
-            circleData.author.badge = {
-                type: "extension-user",
-                image: badgeURLs.user
-            };
+    console.log(circleData);
+    if (Object.prototype.isPrototypeOf(circleData)) {
+        if (circleData.reply_to) {
+            modifyCircle(circleData.reply_to);
+        }
+        if (circleData.refly_from) {
+            modifyCircle(circleData.refly_from);
+        }
+        if (!circleData.author.badge) {
+            if (circleData.author.account_name == "RasPython3") {
+                circleData.author.badge = {
+                    type: "extension-developer",
+                    image: badgeURLs.developer
+                };
+            } else if (testers.includes(circleData.author.account_name)) {
+                circleData.author.badge = {
+                    type: "extension-tester",
+                    image: badgeURLs.tester
+                };
+            } else if (circleData.author.account_name == username) {
+                circleData.author.badge = {
+                    type: "extension-user",
+                    image: badgeURLs.user
+                };
+            }
         }
     }
     return circleData;
@@ -750,7 +753,8 @@ window.fetch = async (...args)=>{
                     Object.keys(data).reduce((body, key)=>body+key+":"+JSON.stringify(data[key])+"\n", ""),
                     result
                 );
-            } catch {
+            } catch(e) {
+                console.error(e);
                 return new Response(text, result);
             }
         } else if ((args.length == 1 || args[1].method == undefined || args[1].method.toLowerCase() == "get") && args[0].search.includes("_rsc=")) {
