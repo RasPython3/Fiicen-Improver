@@ -51,12 +51,23 @@ def build_orion():
     with open("build/orion/manifest.json", mode="w") as f:
         manifest = json.dump(manifest, f)
 
+    with open("build/orion/js/background.js", mode="r", encoding="utf-8") as f:
+        backgroundjs = f.read()
     with open("build/orion/js/index.js", mode="r", encoding="utf-8") as f:
         indexjs = f.read()
     with open("build/orion/qr-button.html", mode="r", encoding="utf-8") as f:
         qrbutton = f.read()
 
+    for badge in glob.glob("**", root_dir="src/images/badges"):
+        badgename = badge.split(".")[0]
+        with open(f"src/images/badges/{badge}", mode="r", encoding="utf-8") as f:
+            badgesrc = f.read()
+        backgroundjs = backgroundjs.replace(f"/*{badgename} badge base64*/", base64.b64encode(badgesrc.encode()).decode())
+
     indexjs = indexjs.replace("/*qr-button.html*/", "value:\"data:text/html;base64,{}\"".format(base64.b64encode(qrbutton.encode()).decode()))
+
+    with open("build/orion/js/background.js", mode="w", encoding="utf-8") as f:
+        f.write(backgroundjs)
 
     with open("build/orion/js/index.js", mode="w", encoding="utf-8") as f:
         f.write(indexjs)

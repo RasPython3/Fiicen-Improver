@@ -37,6 +37,17 @@ window.addEventListener("ext-message", (ev)=>{
         }
       }
       break;
+    case "webRequestReplace":
+      {
+        let targetUrl = new URL(data.value);
+        for (let el of document.body.querySelectorAll(`img[srcset~=\"${targetUrl.href}\"], img[srcset~=\"${targetUrl.pathname+targetUrl.search}\"]`)) {
+          el.setAttribute("_src", el.src);
+          el.setAttribute("_srcset", el.srcset);
+          el.removeAttribute("srcset");
+          el.src = data.replacer;
+        }
+      }
+      return;
     case "debug":
       chrome.runtime.sendMessage(JSON.stringify(data));
       return;

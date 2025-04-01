@@ -7,30 +7,51 @@ function webRequestHandler(details) {
   let badgeMatch = details.url.match(badgeRegExp);
   let datasaverMatch;
   let datasaverExceptMatch;
+
+  let doCancel = false;
+  let redirectUrl;
+
   if (dataSaving && details.type != "main_frame") {
     datasaverMatch = details.url.match(datasaverRegExp);
     datasaverExceptMatch = details.url.match(datasaverExceptRegExp);
   }
   if (badgeMatch) {
-    return {
-      redirectUrl: chrome.runtime.getURL("/images/badges/" + badgeMatch[1] + ".svg")
-    };
+    switch (badgeMatch[1]) {
+      case "developer":
+        redirectUrl = "data:image/svg+xml;base64,/*developer badge base64*/";
+        break;
+      case "tester":
+        redirectUrl = "data:image/svg+xml;base64,/*tester badge base64*/";
+        break;
+      case "user":
+        redirectUrl = "data:image/svg+xml;base64,/*user badge base64*/";
+        break;
+    }
+    doCancel = true;
   } else if (datasaverExceptMatch) {
-    let redirectUrl = new URL(details.url);
+    redirectUrl = new URL(details.url);
     redirectUrl.searchParams.set("_", "");
     redirectUrl.searchParams.set("w", 64);
-    return {
-      redirectUrl: redirectUrl.href
-    };
+    doCancel = true;
   } else if (datasaverMatch) {
-    let redirectUrl = new URL(details.url);
+    redirectUrl = new URL(details.url);
     if (redirectUrl.searchParams.get("w") != "16") {
       redirectUrl.searchParams.set("w", 16);
       redirectUrl.searchParams.set("q", 75);
-      return {
-        redirectUrl: redirectUrl.href
-      };
+      doCancel = true;
     }
+  }
+
+  if (doCancel) {
+    chrome.tabs.sendMessage(details.tabId, JSON.stringify({
+      id: undefined,
+      request: "webRequestReplace",
+      value: details.url,
+      replacer: (redirectUrl && redirectUrl.href ? redirectUrl.href : redirectUrl)
+    }));
+    return {
+      cancel: true
+    };
   }
 }
 
