@@ -649,8 +649,10 @@ function modifyEmbed(url) {
             + " div.min-h-screen.border-x > div:first-child > div:first-child div.relative:has(> a[href=\"" + url + "\"])");
         for (let embed of embeds) {
             embed.classList.add("quoted-circle");
-            embed.classList.remove("relative", "items-center", "second-bg-hover");
-            embed.replaceChildren(...quoted.cloneNode(5).children);
+            embed.classList.remove("relative", "group", "items-center", "second-bg-hover");
+            embed.replaceChildren(document.createElement("button"), document.createElement("div"));
+            embed.lastChild.append(...quoted.cloneNode(5).children);
+            embed.lastChild.lastChild.remove();
             let img = embed.querySelector(".media-group > div > img");
             let bigImg = img ? img.nextElementSibling : undefined;
             if (img != undefined) {
@@ -676,7 +678,7 @@ function modifyEmbed(url) {
                     }
                 });
             }
-            embed.lastChild.addEventListener("click", ()=>{
+            embed.firstChild.addEventListener("click", ()=>{
                 try {
                     next.router.push(url);
                 } catch {

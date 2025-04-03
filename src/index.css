@@ -4,7 +4,7 @@ div.flex.flex-col.gap-4 > div.relative.flex) {
     > div:nth-last-child(2),
     > div:nth-last-child(2) > div:last-child > div > div > div:nth-child(2) > div:first-child > div:not(.relative),
     > div:nth-last-child(2) > div:last-child > div > div > div:nth-child(2) > div:first-child > div.relative > div,
-    > div .quoted-circle {
+    > div .quoted-circle > div {
         > div:first-child > div > p {
             font-size: 0.8em;
         }
@@ -131,18 +131,30 @@ svg[name="qrcode"]:where(.dark,.dark *) {
 
 /* quoted circle */
 
-.quoted-circle {
+.quoted-circle, .quoted-circle > div {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    padding: 0.5rem;
+}
+
+.quoted-circle > button:first-child {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    margin-bottom: -100vh;
+    inset: 0;
+    cursor: pointer;
 }
 
 .quoted-circle > div {
+    padding: 0.5rem;
+}
+
+.quoted-circle > div, .quoted-circle > div > div {
     width: 100%;
 }
 
-.quoted-circle > div:first-child > div:last-child {
+.quoted-circle > div  > div:first-child > div:last-child {
     white-space: nowrap;
     > a {
         overflow: hidden;
@@ -151,11 +163,11 @@ svg[name="qrcode"]:where(.dark,.dark *) {
 }
 
 
-.quoted-circle > div:nth-child(2) {
+.quoted-circle > div  > div:nth-child(2) {
     padding-left: 1.75rem ! important;
 }
 
-.quoted-circle > .media-group {
+.quoted-circle > div  > .media-group {
     display: flex;
     width: calc(100% + 1rem);
     flex-direction: row;
@@ -170,7 +182,7 @@ svg[name="qrcode"]:where(.dark,.dark *) {
     border-top-width: 1px;
 }
 
-.quoted-circle > .media-group > div {
+.quoted-circle > div  > .media-group > div {
     flex: 1;
     height: fit-content;
     display: flex;
@@ -181,24 +193,16 @@ svg[name="qrcode"]:where(.dark,.dark *) {
     box-sizing: content-box;
 }
 
-.quoted-circle > .media-group > div:not(:first-child) {
+.quoted-circle > div  > .media-group > div:not(:first-child) {
     border-left-style: solid;
     border-left-width: 1px;
 }
 
-.quoted-circle > .media-group :where(img, video) {
+.quoted-circle > div  > .media-group :where(img, video) {
     width: 100%;
     height: auto;
     cursor: pointer;
     z-index: 10;
-}
-
-.quoted-circle > button {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    inset: 0;
-    cursor: pointer;
 }
 
 /* alert - moment */
