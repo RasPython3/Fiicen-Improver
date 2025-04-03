@@ -1,10 +1,12 @@
 :where(main:nth-child(3) > div > div > div:first-child > div.relative,
 main:not(:nth-child(3)) > div > div > div.relative,
-div.flex.flex-col.gap-4 > div.relative.flex) {
+div.flex.flex-col.gap-4 > div.relative.flex,
+div.min-h-screen.border-x > div:first-child > div:first-child) {
     > div:nth-last-child(2),
     > div:nth-last-child(2) > div:last-child > div > div > div:nth-child(2) > div:first-child > div:not(.relative),
     > div:nth-last-child(2) > div:last-child > div > div > div:nth-child(2) > div:first-child > div.relative > div,
-    > div .quoted-circle > div {
+    > div .quoted-circle > div,
+    > div:first-child:last-child {
         > div:first-child > div > p {
             font-size: 0.8em;
         }
@@ -45,7 +47,7 @@ div.flex.flex-col.gap-4 > div.relative.flex) {
             }
         }
     }
-    > div:last-child {
+    > div:last-child:nth-child(3) {
         justify-content: space-around;
     }
 }
@@ -85,6 +87,13 @@ div:has(> main:nth-child(3)) > div:first-child {
     div:has(> main:nth-child(3)) > div:first-child {
         max-width: calc(100vw - 6rem);
     }
+}
+
+div:has(> div.min-h-screen.border-x) {
+    max-width: 42rem;
+}
+div.min-h-screen.border-x {
+    padding-top: 1rem;
 }
 
 div:has(> main:nth-child(3)) > div:first-child > div {
