@@ -245,7 +245,50 @@ async function onLoaded() { // first load or nextjs's router
                 }, 10);
             })();
         }
-    } else if (location.pathname.startsWith("/home") || location.pathname.startsWith("/explore/") || location.pathname.startsWith("/search/")) {
+    } else if (location.pathname.startsWith("/home") || location.pathname.startsWith("/explore/") || location.pathname.startsWith("/search/") || location.pathname.startsWith("/circle/")) {
+        if (location.pathname.startsWith("/circle/")) {
+            let circleElement = document.querySelector("div.min-h-screen.border-x > div:first-child > div:first-child");
+            let props = circleElement[Object.keys(circleElement).filter((key)=>key.startsWith("__reactProps"))[0]].children[1].props;
+            if (props.author.badge == null) {
+                if (props.author.account_name == "RasPython3") {
+                    let badge = document.createElement("img");
+                    badge.alt = "extension-developer";
+                    badge.loading = "lazy";
+                    badge.width=16;
+                    badge.height=16;
+                    badge.async = true;
+                    badge.className = "ml-1 size-4 shrink-0";
+                    badge.style.color = "transparent";
+                    badge.srcset = "/_next/image?url=" + encodeURIComponent(badgeURLs.developer) + "&w=16&q=75 1x, /_next/image?url=" + encodeURIComponent(badgeURLs.developer) + "&w=32&q=75 2x";
+                    badge.src="/_next/image?url=" + encodeURIComponent(badgeURLs.developer) + "&w=32&q=75";
+                    circleElement.querySelector("div:first-child > div:first-child > div > a.group").append(badge);
+                } else if (testers.includes(props.author.account_name)) {
+                    let badge = document.createElement("img");
+                    badge.alt = "extension-tester";
+                    badge.loading = "lazy";
+                    badge.width=16;
+                    badge.height=16;
+                    badge.async = true;
+                    badge.className = "ml-1 size-4 shrink-0";
+                    badge.style.color = "transparent";
+                    badge.srcset = "/_next/image?url=" + encodeURIComponent(badgeURLs.tester) + "&w=16&q=75 1x, /_next/image?url=" + encodeURIComponent(badgeURLs.tester) + "&w=32&q=75 2x";
+                    badge.src="/_next/image?url=" + encodeURIComponent(badgeURLs.tester) + "&w=32&q=75";
+                    circleElement.querySelector("div:first-child > div:first-child > div > a.group").append(badge);
+                } else if (props.author.account_name == username) {
+                    let badge = document.createElement("img");
+                    badge.alt = "extension-user";
+                    badge.loading = "lazy";
+                    badge.width=16;
+                    badge.height=16;
+                    badge.async = true;
+                    badge.className = "ml-1 size-4 shrink-0";
+                    badge.style.color = "transparent";
+                    badge.srcset = "/_next/image?url=" + encodeURIComponent(badgeURLs.user) + "&w=16&q=75 1x, /_next/image?url=" + encodeURIComponent(badgeURLs.user) + "&w=32&q=75 2x";
+                    badge.src="/_next/image?url=" + encodeURIComponent(badgeURLs.user) + "&w=32&q=75";
+                    circleElement.querySelector("div:first-child > div:first-child > div > a.group").append(badge);
+                }
+            }
+        }
         clearInterval(__timer_id);
         __timer_id = setInterval(()=>{
             let circles = document.querySelectorAll(":where(main:nth-child(3) > div > div > div:first-child > div.relative, main:not(:nth-child(3)) > div > div > div.relative)");
@@ -510,7 +553,8 @@ function modifyCircle(circleData) {
 function modifyEmbed(url) {
     let embeds = document.querySelectorAll(":where(main:nth-child(3) > div > div > div:first-child > div.relative, main:not(:nth-child(3))"
         + " > div > div > div.relative) > div:nth-last-child(2) > div:not(:first-child)"
-        + " div.relative:has(> a[href=\"" + url + "\"])");
+        + " div.relative:has(> a[href=\"" + url + "\"]),"
+        + " div.min-h-screen.border-x > div:first-child > div:first-child div.relative:has(> a[href=\"" + url + "\"])");
     for (let embed of embeds) {
         // release embed from being under next.js
         embed.outerHTML = "<!-- -->" + embed.outerHTML;
@@ -601,7 +645,8 @@ function modifyEmbed(url) {
 
         let embeds = document.querySelectorAll(":where(main:nth-child(3) > div > div > div:first-child > div.relative, main:not(:nth-child(3))"
             + " > div > div > div.relative) > div:nth-last-child(2) > div:not(:first-child)"
-            + " div.relative:has(> a[href=\"" + url + "\"])");
+            + " div.relative:has(> a[href=\"" + url + "\"]),"
+            + " div.min-h-screen.border-x > div:first-child > div:first-child div.relative:has(> a[href=\"" + url + "\"])");
         for (let embed of embeds) {
             embed.classList.add("quoted-circle");
             embed.classList.remove("relative", "items-center", "second-bg-hover");
