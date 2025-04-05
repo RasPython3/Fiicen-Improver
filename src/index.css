@@ -6,7 +6,9 @@ div.min-h-screen.border-x > div:first-child > div:first-child) {
     > div:nth-last-child(2) > div:last-child > div > div > div:nth-child(2) > div:first-child > div:not(.relative),
     > div:nth-last-child(2) > div:last-child > div > div > div:nth-child(2) > div:first-child > div.relative > div,
     > div .quoted-circle > div,
-    > div:first-child:last-child {
+    > div.relative:not(:last-child) > div,
+    > div.relative:not(:last-child) + div:last-child:not(.relative),
+    > div:first-child:last-child:not(.relative) {
         > div:first-child > div > p {
             font-size: 0.8em;
         }

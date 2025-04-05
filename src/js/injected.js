@@ -247,45 +247,65 @@ async function onLoaded() { // first load or nextjs's router
         }
     } else if (location.pathname.startsWith("/home") || location.pathname.startsWith("/explore/") || location.pathname.startsWith("/search/") || location.pathname.startsWith("/circle/")) {
         if (location.pathname.startsWith("/circle/")) {
-            let circleElement = document.querySelector("div.min-h-screen.border-x > div:first-child > div:first-child");
-            let props = circleElement[Object.keys(circleElement).filter((key)=>key.startsWith("__reactProps"))[0]].children[1].props;
-            if (props.author.badge == null) {
-                if (props.author.account_name == "RasPython3") {
-                    let badge = document.createElement("img");
-                    badge.alt = "extension-developer";
-                    badge.loading = "lazy";
-                    badge.width=16;
-                    badge.height=16;
-                    badge.async = true;
-                    badge.className = "ml-1 size-4 shrink-0";
-                    badge.style.color = "transparent";
-                    badge.srcset = "/_next/image?url=" + encodeURIComponent(badgeURLs.developer) + "&w=16&q=75 1x, /_next/image?url=" + encodeURIComponent(badgeURLs.developer) + "&w=32&q=75 2x";
-                    badge.src="/_next/image?url=" + encodeURIComponent(badgeURLs.developer) + "&w=32&q=75";
-                    circleElement.querySelector("div:first-child > div:first-child > div > a.group").append(badge);
-                } else if (testers.includes(props.author.account_name)) {
-                    let badge = document.createElement("img");
-                    badge.alt = "extension-tester";
-                    badge.loading = "lazy";
-                    badge.width=16;
-                    badge.height=16;
-                    badge.async = true;
-                    badge.className = "ml-1 size-4 shrink-0";
-                    badge.style.color = "transparent";
-                    badge.srcset = "/_next/image?url=" + encodeURIComponent(badgeURLs.tester) + "&w=16&q=75 1x, /_next/image?url=" + encodeURIComponent(badgeURLs.tester) + "&w=32&q=75 2x";
-                    badge.src="/_next/image?url=" + encodeURIComponent(badgeURLs.tester) + "&w=32&q=75";
-                    circleElement.querySelector("div:first-child > div:first-child > div > a.group").append(badge);
-                } else if (props.author.account_name == username) {
-                    let badge = document.createElement("img");
-                    badge.alt = "extension-user";
-                    badge.loading = "lazy";
-                    badge.width=16;
-                    badge.height=16;
-                    badge.async = true;
-                    badge.className = "ml-1 size-4 shrink-0";
-                    badge.style.color = "transparent";
-                    badge.srcset = "/_next/image?url=" + encodeURIComponent(badgeURLs.user) + "&w=16&q=75 1x, /_next/image?url=" + encodeURIComponent(badgeURLs.user) + "&w=32&q=75 2x";
-                    badge.src="/_next/image?url=" + encodeURIComponent(badgeURLs.user) + "&w=32&q=75";
-                    circleElement.querySelector("div:first-child > div:first-child > div > a.group").append(badge);
+            for (let circleElement of document.querySelectorAll(
+                "div.min-h-screen.border-x > div:first-child > div:first-child,"
+                + "div.min-h-screen.border-x > div:first-child > div:first-child > div.relative")) {
+                let props;
+                if (circleElement.classList.contains("relative")) {
+                    props = circleElement[Object.keys(circleElement).filter((key)=>key.startsWith("__reactProps"))[0]].children.props;
+                } else {
+                    props = circleElement[Object.keys(circleElement).filter((key)=>key.startsWith("__reactProps"))[0]].children[1].props;
+                }
+                if (props.author.badge == null) {
+                    if (props.author.account_name == "RasPython3") {
+                        props.author.badge = {
+                            type: "extension-developer",
+                            image: badgeURLs.developer
+                        };
+                        let badge = document.createElement("img");
+                        badge.alt = "extension-developer";
+                        badge.loading = "lazy";
+                        badge.width=16;
+                        badge.height=16;
+                        badge.async = true;
+                        badge.className = "ml-1 size-4 shrink-0";
+                        badge.style.color = "transparent";
+                        badge.srcset = "/_next/image?url=" + encodeURIComponent(badgeURLs.developer) + "&w=16&q=75 1x, /_next/image?url=" + encodeURIComponent(badgeURLs.developer) + "&w=32&q=75 2x";
+                        badge.src="/_next/image?url=" + encodeURIComponent(badgeURLs.developer) + "&w=32&q=75";
+                        circleElement.lastChild.querySelector("div:first-child > div > a.group").append(badge);
+                    } else if (testers.includes(props.author.account_name)) {
+                        props.author.badge = {
+                            type: "extension-tester",
+                            image: badgeURLs.tester
+                        };
+                        let badge = document.createElement("img");
+                        badge.alt = "extension-tester";
+                        badge.loading = "lazy";
+                        badge.width=16;
+                        badge.height=16;
+                        badge.async = true;
+                        badge.className = "ml-1 size-4 shrink-0";
+                        badge.style.color = "transparent";
+                        badge.srcset = "/_next/image?url=" + encodeURIComponent(badgeURLs.tester) + "&w=16&q=75 1x, /_next/image?url=" + encodeURIComponent(badgeURLs.tester) + "&w=32&q=75 2x";
+                        badge.src="/_next/image?url=" + encodeURIComponent(badgeURLs.tester) + "&w=32&q=75";
+                        circleElement.lastChild.querySelector("div:first-child > div > a.group").append(badge);
+                    } else if (props.author.account_name == username) {
+                        props.author.badge = {
+                            type: "extension-user",
+                            image: badgeURLs.user
+                        };
+                        let badge = document.createElement("img");
+                        badge.alt = "extension-user";
+                        badge.loading = "lazy";
+                        badge.width=16;
+                        badge.height=16;
+                        badge.async = true;
+                        badge.className = "ml-1 size-4 shrink-0";
+                        badge.style.color = "transparent";
+                        badge.srcset = "/_next/image?url=" + encodeURIComponent(badgeURLs.user) + "&w=16&q=75 1x, /_next/image?url=" + encodeURIComponent(badgeURLs.user) + "&w=32&q=75 2x";
+                        badge.src="/_next/image?url=" + encodeURIComponent(badgeURLs.user) + "&w=32&q=75";
+                        circleElement.lastChild.querySelector("div:first-child > div > a.group").append(badge);
+                    }
                 }
             }
         }
