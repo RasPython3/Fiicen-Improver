@@ -510,7 +510,11 @@ function modifyDynamicCircle(circle, data) {
                 let timer = setInterval(()=>{
                     if (!circleTextArea.disabled) {
                         clearInterval(timer);
-                        circleTextArea.value = `${circleURL}`;
+                        circleTextArea.value = `\n${circleURL}`;
+                        circleTextArea.nextElementSibling.textContent = `${circleTextArea.value}\u200b`;
+                        circleTextArea.style.height = `${circleTextArea.nextElementSibling.clientHeight}px`;
+                        circleTextArea.selectionStart = circleTextArea.selectionEnd = 0;
+                        circleTextArea.focus();
                     }
                 }, 10);
             });
