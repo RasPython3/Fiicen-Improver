@@ -52,6 +52,15 @@ div.min-h-screen.border-x > div:first-child > div:first-child) {
     }
 }
 
+body > div > nav > button + div{
+    overflow-y: hidden;
+}
+
+main > div > header + h1 + div{
+    max-height: calc(100vh - 3.75rem);
+    overflow-y: scroll;
+}
+
 div:has(> main:nth-child(3)) > div > div:not(:has(> div:nth-child(3))) > div:first-child > div.flex {
     align-items: center;
 }
