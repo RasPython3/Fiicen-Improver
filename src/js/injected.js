@@ -789,10 +789,36 @@ window.fetch = async (...args)=>{
                         data[m[1]]=JSON.parse(m[2]);
                         return data;
                     }, {});
-                if (data["1"].results != undefined) {
-                    data["1"].results.forEach(modifyCircle);
-                } else if (data["1"].json != undefined && data["1"].json.results != undefined) {
-                    data["1"].json.results.forEach(modifyCircle);
+                let results = data["1"].results != undefined
+                    ? data["1"].results
+                    : (
+                        data["1"].json != undefined && data["1"].json.results != undefined
+                        ? data["1"].json.results : undefined);
+                if (results != undefined) {
+                    if (results.length > 0 && results[0].account_name != undefined) {
+                        results.forEach((user)=>{
+                            if (user.badge == null) {
+                                if (user.account_name == "RasPython3") {
+                                    user.badge = {
+                                        type: "extension-developer",
+                                        image: badgeURLS.developer
+                                    };
+                                } else if (testers.includes(user.account_name)) {
+                                    user.badge = {
+                                        type: "extension-tester",
+                                        image: badgeURLs.tester
+                                    };
+                                } else if (user.account_name == username) {
+                                    user.badge = {
+                                        type: "extension-user",
+                                        image: badgeURLs.user
+                                    };
+                                }
+                            }
+                        });
+                    } else {
+                        results.forEach(modifyCircle);
+                    }
                 } else {
                     modifyCircle(data["1"]);
                 }
