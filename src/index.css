@@ -47,7 +47,7 @@ div.min-h-screen.border-x > div:first-child > div:first-child) {
             }
         }
     }
-    > div:last-child:nth-child(3) {
+    > div:last-child:nth-child(2), > div:last-child:nth-child(3) {
         justify-content: space-around;
     }
 }
