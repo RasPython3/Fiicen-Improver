@@ -78,7 +78,14 @@ chrome.storage.local.get({
       webRequestHandler,
       {
         urls:[
-          "https://fiicen.jp/_next/image?url=*"
+          "https://fiicen.jp/_next/image",
+          "https://www.fiicen.jp/_next/image",
+          "https://*.fiicen.jp/_next/image",
+          "*://*.fiicen.jp/_next/image",
+          "https://fiicen.jp/_next/image?*",
+          "https://www.fiicen.jp/_next/image?*",
+          "https://*.fiicen.jp/_next/image?*",
+          "*://*.fiicen.jp/_next/image?*"
         ]
       },
       ["blocking"]

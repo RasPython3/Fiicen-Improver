@@ -41,6 +41,14 @@ window.addEventListener("ext-message", (ev)=>{
       break;
     case "webRequestReplace":
       {
+        let alertPopup = document.createElement("span");
+        alertPopup.className = "alert-moment accent-bg";
+        alertPopup.innerText = `webRequestReplace\nfrom: ${data.value}\nto: ${data.replacer}`;
+        alertPopup.addEventListener("animationend", (ev)=>{
+            alertPopup.remove();
+        }, {once: true});
+        document.body.append(alertPopup);
+
         let targetUrl = new URL(data.value);
         for (let el of document.body.querySelectorAll(`img[srcset~=\"${targetUrl.href}\"], img[srcset~=\"${targetUrl.pathname+targetUrl.search}\"]`)) {
           el.setAttribute("_src", el.src);
