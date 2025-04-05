@@ -825,7 +825,7 @@ window.fetch = async (...args)=>{
                                 if (user.account_name == "RasPython3") {
                                     user.badge = {
                                         type: "extension-developer",
-                                        image: badgeURLS.developer
+                                        image: badgeURLs.developer
                                     };
                                 } else if (testers.includes(user.account_name)) {
                                     user.badge = {
