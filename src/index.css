@@ -227,22 +227,21 @@ svg[name="qrcode"]:where(.dark,.dark *) {
 
 /* setting */
 
-section:has(input[type="checkbox"]) {
+._fiicen_improver_setting section {
     display: flex;
     width: 100%;
     justify-content: space-between;
     align-items: center;
-    border: solid 1px #444444;
     padding: 0.5em;
     gap: 2rem;
     box-sizing: border-box;
 }
 
-section:has(input[type="checkbox"]) + section {
+._fiicen_improver_setting section + section {
     margin-top: 0.5rem;
 }
 
-section > input[type="checkbox"] {
+._fiicen_improver_setting section > input[type="checkbox"] {
     display: inline-flex;
     appearance: unset;
     width: 3.5em;
@@ -253,11 +252,11 @@ section > input[type="checkbox"] {
     box-sizing: border-box;
 }
 
-section > input[type="checkbox"]:checked {
+._fiicen_improver_setting section > input[type="checkbox"]:checked {
     background-color: #6666ff;
 }
 
-section > input[type="checkbox"]::after {
+._fiicen_improver_setting section > input[type="checkbox"]::after {
     content: "";
     display: inline-block;
     position: relative;
@@ -277,7 +276,7 @@ section > input[type="checkbox"]::after {
     transition: left 0.15s cubic-bezier(0.67, -0.01, 0.1, 1.5);
 }
 
-section > input[type="checkbox"]:checked::after {
+._fiicen_improver_setting section > input[type="checkbox"]:checked::after {
     left: 42%;
 }
 

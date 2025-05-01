@@ -727,11 +727,16 @@ function modifySettings() {
     let settingPopup = document.createElement("div");
 
     // setting item
+
+    settingItem.className = "relative false _fiicen_improver_setting";
+
     settingItem.append(document.createElement("div"));
     settingItem.firstChild.append(
         document.createElement("div"),
         document.createElementNS("http://www.w3.org/2000/svg","svg")
     );
+
+    settingItem.firstChild.className = "base-bg-hover flex items-center justify-between p-4";
 
     settingItem.firstChild.firstChild.appendChild(document.createElement("p"));
     settingItem.firstChild.firstChild.firstChild.innerText = "Fiicen Improver の設定";
@@ -746,9 +751,6 @@ function modifySettings() {
     );
 
     settingItem.firstChild.lastChild.firstChild.setAttribute("d", "M 3 4 C 3 3.448 3.448 3 4 3 L 19.978 3 C 20.241 2.994 20.506 3.092 20.707 3.293 C 20.908 3.494 21.006 3.759 21 4.022 L 21 20 C 21 20.552 20.552 21 20 21 C 19.448 21 19 20.552 19 20 L 19 6.414 L 4.707 20.707 C 4.317 21.098 3.683 21.098 3.293 20.707 C 2.902 20.317 2.902 19.683 3.293 19.293 L 17.586 5 L 4 5 C 3.448 5 3 4.552 3 4 Z");
-
-    settingItem.className = "relative false";
-    settingItem.firstChild.className = "base-bg-hover flex items-center justify-between p-4";
 
     // setting popup
     settingPopup.className = "fixed bottom-0 left-0 z-10 h-screen w-screen duration-300 pointer-events-none bg-transparent z-20 flex flex-col justify-end p-4 md:justify-center undefined";
