@@ -128,6 +128,37 @@ chrome.runtime.onMessage.addListener((message, sender) => {
 
   let responseData = null;
   switch (data.request) {
+    case "setSettings":
+      {
+        let settings = data.value;
+        if (settings.hasOwnProperty("datasaver")) {
+          chrome.storage.local.set({
+            datasaver: settings.datasaver
+          }, ()=>{});
+        }
+        if (settings.hasOwnProperty("debug")) {
+          chrome.storage.local.set({
+            dabug: settings.debug
+          }, ()=>{});
+        }
+      }
+      chrome.tabs.sendMessage(tabId, JSON.stringify({
+        id: data.id, response: "setSettings", value: true
+      }));
+      return;
+    case "getSettings":
+      chrome.storage.local.get({
+        datasaver: false,
+        debug: false
+      }, (items)=>{
+        responseData = {
+          id: data.id,
+          response: "getSettings",
+          value: items
+        };
+        chrome.tabs.sendMessage(tabId, JSON.stringify(responseData));
+      });
+      return;
     case "debug":
       chrome.storage.local.get({
         debug: false

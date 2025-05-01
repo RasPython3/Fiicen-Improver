@@ -58,6 +58,8 @@ window.addEventListener("ext-message", (ev)=>{
         }
       }
       return;
+    case "setSettings":
+    case "getSettings":
     case "debug":
       chrome.runtime.sendMessage(JSON.stringify(data));
       return;
