@@ -730,10 +730,22 @@ function modifySettings() {
     settingItem.append(document.createElement("div"));
     settingItem.firstChild.append(
         document.createElement("div"),
-        document.createElement("svg")
+        document.createElementNS("http://www.w3.org/2000/svg","svg")
     );
+
     settingItem.firstChild.firstChild.appendChild(document.createElement("p"));
     settingItem.firstChild.firstChild.firstChild.innerText = "Fiicen Improver の設定";
+
+    settingItem.firstChild.lastChild.setAttribute("class", "size-6 shrink-0 opacity-50");
+    settingItem.firstChild.lastChild.setAttribute("fill", "currentColor");
+    settingItem.firstChild.lastChild.setAttribute("viewBox", "0 0 24 24");
+    settingItem.firstChild.lastChild.setAttribute("stroke", "none");
+
+    settingItem.firstChild.lastChild.append(
+        document.createElementNS("http://www.w3.org/2000/svg","path")
+    );
+
+    settingItem.firstChild.lastChild.firstChild.setAttribute("d", "M 3 4 C 3 3.448 3.448 3 4 3 L 19.978 3 C 20.241 2.994 20.506 3.092 20.707 3.293 C 20.908 3.494 21.006 3.759 21 4.022 L 21 20 C 21 20.552 20.552 21 20 21 C 19.448 21 19 20.552 19 20 L 19 6.414 L 4.707 20.707 C 4.317 21.098 3.683 21.098 3.293 20.707 C 2.902 20.317 2.902 19.683 3.293 19.293 L 17.586 5 L 4 5 C 3.448 5 3 4.552 3 4 Z");
 
     settingItem.className = "relative false";
     settingItem.firstChild.className = "base-bg-hover flex items-center justify-between p-4";
