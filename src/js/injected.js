@@ -827,6 +827,16 @@ function modifySettings() {
         settingBody.lastChild.lastChild.setAttribute("type", "checkbox");
     }
 
+    settingBody.append(document.createElement("section"));
+
+    settingBody.lastChild.append(document.createElement("a"));
+
+    messageExt("extURL", "about.html").then((about_url)=>{
+        settingBody.lastChild.lastChild.href = about_url;
+    });
+    settingBody.lastChild.lastChild.target = "_blank";
+    settingBody.lastChild.lastChild.innerText = "Fiicen Improver について";
+
     messageExt("getSettings").then((settings)=>{
         for (let key of Object.keys(settings)) {
             let item = settingBody.querySelector(`input[name="${key}"]`);

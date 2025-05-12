@@ -32,7 +32,7 @@
 
   "web_accessible_resources": [
     {
-      "resources": ["images/*", "js/*", "qr-button.html"],
+      "resources": ["images/*", "js/*", "about.html", "qr-button.html"],
       "matches": ["<all_urls>"]
     }
   ],

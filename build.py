@@ -4,6 +4,9 @@ import glob
 import shutil
 import zipfile
 import json
+import re
+
+about_html = ""
 
 def zip_files(directory, output):
     files = glob.glob("**", root_dir=directory, recursive=True)
@@ -17,8 +20,15 @@ def zip_files(directory, output):
 def build_chrome():
     shutil.copy("LICENSE", "build/chrome/Fiicen-Improver/LICENSE")
 
+    with open("build/chrome/Fiicen-Improver/about.html", encoding="utf-8", mode="w") as f:
+        f.write(about_html)
+
 def build_firefox():
     shutil.copy("LICENSE", "build/firefox/LICENSE")
+
+    with open("build/firefox/about.html", encoding="utf-8", mode="w") as f:
+        f.write(about_html)
+
     manifest = ""
     with open("build/firefox/manifest.json", mode="r") as f:
         manifest = json.load(f)
@@ -39,6 +49,10 @@ def build_firefox():
 
 def build_orion():
     shutil.copy("LICENSE", "build/orion/LICENSE")
+
+    with open("build/orion/about.html", encoding="utf-8", mode="w") as f:
+        f.write(about_html)
+
     manifest = ""
     with open("build/orion/manifest.json", mode="r") as f:
         manifest = json.load(f)
@@ -73,6 +87,29 @@ def build_orion():
     with open("build/orion/js/index.js", mode="w", encoding="utf-8") as f:
         f.write(indexjs)
 
+def build_about():
+    global about_html
+
+    with open("src/manifest.json", encoding="utf-8", mode="r") as f:
+        version = json.load(f)["version"]
+
+    with open("src/js/injected.js", encoding="utf-8", mode="r") as f:
+        testers = re.split(r"[ \",\r\n]+",
+            re.search(r" testers\s*=\s*\[((?:\s|\S)+?)\]", f.read())[1])[1:-1]
+
+    with open("src/about.html", encoding="utf-8", mode="r") as f:
+        about_html = f.read()
+
+    with open("LICENSE", encoding="utf-8", mode="r") as f:
+        copyright = re.search(r"^Copyright\s+\(c\)\s+([0-9]+(?:-[0-9]+)?)\s+(.*)$", f.read(), flags=re.MULTILINE)
+
+    about_html = about_html\
+        .replace("<!--VERSION-->", version)\
+        .replace("<!--COPYRIGHT-->", " ".join((copyright[1], copyright[2])))\
+        .replace("<!--TESTERS-->", "\n".join(
+            ["<li><a href=\"https://fiicen.jp/field/{0}\">@{0}</a></li>".format(tester) for tester in testers]
+        ))
+
 def build():
     try:
         shutil.rmtree("build")
@@ -81,6 +118,8 @@ def build():
 
     with open("src/manifest.json", mode="r") as f:
         version = json.load(f)["version"]
+
+    build_about()
 
     os.makedirs("build/chrome")
 
