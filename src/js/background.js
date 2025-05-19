@@ -138,7 +138,7 @@ chrome.runtime.onMessage.addListener((message, sender) => {
         }
         if (settings.hasOwnProperty("debug")) {
           chrome.storage.local.set({
-            dabug: settings.debug
+            debug: settings.debug
           }, ()=>{});
         }
       }
