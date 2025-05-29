@@ -1,5 +1,17 @@
 console.log("Injected Fiicen Extension's script");
 
+console.log("check if nextjs is ready...");
+var _nextjs_ready = new Promise((resolve, reject)=>{
+    let __nextjs_timer_id = setInterval(()=>{
+        if (document[Object.keys(document).filter(key=>key.startsWith("__reactContainer"))[0]].child != null) {
+            // nextjs is ready!
+            clearInterval(__nextjs_timer_id);
+            console.log("nextjs is ready");
+            resolve();
+        }
+    }, 10);
+});
+
 window._org_fetch = window._org_fetch || window.fetch;
 
 var _injectedjs_url = (document.currentScript || {}).src;
@@ -128,6 +140,8 @@ var _loadedCalled = false;
 async function onLoaded() { // first load or nextjs's router
     // re-arrange field header
     console.log("onLoaded called");
+    await _nextjs_ready;
+    console.log("nextjs seems to be ready");
     _loadedCalled = true;
     circleAmount = 0;
     if (errorBoxes && location.pathname == "/field/RasPython3") {
