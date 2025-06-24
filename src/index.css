@@ -290,6 +290,7 @@ svg[name="qrcode"]:where(.dark,.dark *) {
     display: inline-flex;
     appearance: unset;
     width: 3.5em;
+    min-width: 3.5em;
     height: 2em;
     border-radius: 2em;
     border:  solid 1px #444444;
