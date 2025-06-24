@@ -3,11 +3,17 @@ console.log("Injected Fiicen Extension's script");
 console.log("check if nextjs is ready...");
 var _nextjs_ready = new Promise((resolve, reject)=>{
     let __nextjs_timer_id = setInterval(()=>{
-        if (document[Object.keys(document).filter(key=>key.startsWith("__reactContainer"))[0]].child != null) {
-            // nextjs is ready!
+        try {
+            if (document[Object.keys(document).filter(key=>key.startsWith("__reactContainer"))[0]].child != null) {
+                // nextjs is ready!
+                clearInterval(__nextjs_timer_id);
+                console.log("nextjs is ready");
+                resolve();
+            }
+        } catch {
+            // it seems like this is something like login page...
             clearInterval(__nextjs_timer_id);
-            console.log("nextjs is ready");
-            resolve();
+            reject();
         }
     }, 10);
 });
