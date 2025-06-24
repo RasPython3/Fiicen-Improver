@@ -767,6 +767,38 @@ function modifyEmbed(url) {
 
 // modify settings page
 function modifySettings() {
+    if (location.pathname == "/settings/language-and-display/visual" && document.querySelector("input.fiicen-improver-checkbox[name=\"prefer-system-theme\"]") == undefined) {
+        let settingForm = document.querySelector("main > div:last-child > header + form");
+
+        let systemThemeButton = document.createElement("label");
+        systemThemeButton.className = "flex items-center gap-4 p-4 dark-bg-base";
+
+        systemThemeButton.append(
+            document.createElement("input"),
+            document.createElement("p")
+        );
+
+        systemThemeButton.firstChild.type = "checkbox";
+        systemThemeButton.firstChild.name = "prefer-system-theme";
+        systemThemeButton.firstChild.className = "fiicen-improver-checkbox";
+        systemThemeButton.firstChild.disabled = true;
+        //systemThemeButton.firstChild.checked = document.documentElement.classList.contains("")
+
+        systemThemeButton.lastChild.innerText = "可能であればシステムのテーマを優先する(このデバイスのみ)";
+
+        settingForm.querySelector("label:last-child").insertAdjacentElement("afterend", systemThemeButton);
+
+        messageExt("getSettings").then((settings)=>{
+            if (settings.systemTheme != undefined) {
+                systemThemeButton.firstChild.checked = settings.systemTheme;
+                systemThemeButton.firstChild.disabled = false;
+                settingForm.addEventListener("submit", ()=>{
+                    messageExt("setSettings", {systemTheme: systemThemeButton.firstChild.checked});
+                });
+            }
+        });
+    }
+
     let settingList = document.querySelector("main > div > ul");
 
     if (settingList.lastChild.lastChild.tagName.toUpperCase() == "DIV") {
@@ -901,6 +933,9 @@ function modifySettings() {
     messageExt("getSettings").then((settings)=>{
         for (let key of Object.keys(settings)) {
             let item = settingBody.querySelector(`input[name="${key}"]`);
+            if (item == undefined) {
+                continue;
+            }
             item.checked = settings[key];
             item.addEventListener("change", (ev)=>{
                 let data = {};

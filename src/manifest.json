@@ -20,6 +20,11 @@
   "content_scripts": [
     {
       "matches": ["https://fiicen.jp/*"],
+      "run_at": "document_start",
+      "js": ["js/startup.js"]
+    },
+    {
+      "matches": ["https://fiicen.jp/*"],
       "run_at": "document_end",
       "css": ["index.css"],
       "js": ["js/qrcode.js", "js/index.js"]

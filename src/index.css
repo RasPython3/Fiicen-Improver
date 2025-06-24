@@ -244,7 +244,7 @@ svg[name="qrcode"]:where(.dark,.dark *) {
     margin-top: 0.5rem;
 }
 
-._fiicen_improver_setting section > input[type="checkbox"] {
+._fiicen_improver_setting section > input[type="checkbox"], input.fiicen-improver-checkbox[type="checkbox"] {
     display: inline-flex;
     appearance: unset;
     width: 3.5em;
@@ -255,11 +255,11 @@ svg[name="qrcode"]:where(.dark,.dark *) {
     box-sizing: border-box;
 }
 
-._fiicen_improver_setting section > input[type="checkbox"]:checked {
+._fiicen_improver_setting section > input[type="checkbox"]:checked, input.fiicen-improver-checkbox[type="checkbox"]:checked {
     background-color: #6666ff;
 }
 
-._fiicen_improver_setting section > input[type="checkbox"]::after {
+._fiicen_improver_setting section > input[type="checkbox"]::after, input.fiicen-improver-checkbox[type="checkbox"]::after {
     content: "";
     display: inline-block;
     position: relative;
@@ -279,7 +279,7 @@ svg[name="qrcode"]:where(.dark,.dark *) {
     transition: left 0.15s cubic-bezier(0.67, -0.01, 0.1, 1.5);
 }
 
-._fiicen_improver_setting section > input[type="checkbox"]:checked::after {
+._fiicen_improver_setting section > input[type="checkbox"]:checked::after, input.fiicen-improver-checkbox[type="checkbox"]:checked::after {
     left: 42%;
 }
 

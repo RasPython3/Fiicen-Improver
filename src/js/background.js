@@ -136,6 +136,11 @@ chrome.runtime.onMessage.addListener((message, sender) => {
             datasaver: settings.datasaver
           }, ()=>{});
         }
+        if (settings.hasOwnProperty("systemTheme")) {
+          chrome.storage.local.set({
+            systemTheme: settings.systemTheme
+          }, ()=>{});
+        }
         if (settings.hasOwnProperty("debug")) {
           chrome.storage.local.set({
             debug: settings.debug
@@ -149,7 +154,8 @@ chrome.runtime.onMessage.addListener((message, sender) => {
     case "getSettings":
       chrome.storage.local.get({
         datasaver: false,
-        debug: false
+        systemTheme: false,
+        debug: false,
       }, (items)=>{
         responseData = {
           id: data.id,
