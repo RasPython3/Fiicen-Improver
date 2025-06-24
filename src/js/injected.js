@@ -878,14 +878,25 @@ function modifySettings() {
     }
 
     settingBody.append(document.createElement("section"));
+    settingBody.lastChild.className = "base-bg-hover";
 
     settingBody.lastChild.append(document.createElement("a"));
 
     messageExt("extURL", "about.html").then((about_url)=>{
-        settingBody.lastChild.lastChild.href = about_url;
+        settingBody.children[2].lastChild.href = about_url;
     });
     settingBody.lastChild.lastChild.target = "_blank";
-    settingBody.lastChild.lastChild.innerText = "Fiicen Improver について";
+    settingBody.lastChild.lastChild.innerText = "Fiicen Improver について...";
+
+    settingBody.append(document.createElement("section"));
+    settingBody.lastChild.style.display = "none";
+
+    settingBody.lastChild.append(document.createElement("span"));
+
+    messageExt("version").then((version)=>{
+        settingBody.lastChild.lastChild.innerText = "ver. " + version;
+        settingBody.lastChild.style.display = "";
+    });
 
     messageExt("getSettings").then((settings)=>{
         for (let key of Object.keys(settings)) {

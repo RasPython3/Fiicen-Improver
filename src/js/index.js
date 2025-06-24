@@ -63,6 +63,9 @@ window.addEventListener("ext-message", (ev)=>{
     case "debug":
       chrome.runtime.sendMessage(JSON.stringify(data));
       return;
+    case "version":
+      responseData = {id:data.id, response:"version", value: chrome.runtime.getManifest().version};
+      break;
   }
   let response = new CustomEvent("ext-message", {
     detail: JSON.stringify(responseData)
