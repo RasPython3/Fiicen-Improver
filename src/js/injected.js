@@ -1020,16 +1020,20 @@ window.fetch = async (...args)=>{
             let text = await result.text();
             try {
                 let data = text
-                    .matchAll(/^([0-9a-f]+):(.*)$/mg)
+                    .matchAll(/^([0-9a-f]+):([I]?)(.*)$/mg)
                     .reduce((data, m)=>{
-                        data[m[1]]=JSON.parse(m[2]);
+                        data.keys.push(m[1]);
+                        data[m[1]] = {
+                            I: m[2] == "I",
+                            data: JSON.parse(m[3])
+                        };
                         return data;
-                    }, {});
-                let results = data["1"].results != undefined
-                    ? data["1"].results
+                    }, {keys: []});
+                let results = data["1"].data.results != undefined
+                    ? data["1"].data.results
                     : (
-                        data["1"].json != undefined && data["1"].json.results != undefined
-                        ? data["1"].json.results : undefined);
+                        data["1"].data.json != undefined && data["1"].data.json.results != undefined
+                        ? data["1"].data.json.results : undefined);
                 if (results != undefined) {
                     if (results.length > 0 && results[0].account_name != undefined) {
                         results.forEach((user)=>{
@@ -1056,10 +1060,10 @@ window.fetch = async (...args)=>{
                         results.forEach(modifyCircle);
                     }
                 } else {
-                    modifyCircle(data["1"]);
+                    modifyCircle(data["1"].data);
                 }
                 return new Response(
-                    Object.keys(data).reduce((body, key)=>body+key+":"+JSON.stringify(data[key])+"\n", ""),
+                    data.keys.reduce((body, key)=>body+key+":"+(data[key].I?"I":"")+JSON.stringify(data[key].data)+"\n", ""),
                     result
                 );
             } catch(e) {
@@ -1076,12 +1080,13 @@ window.fetch = async (...args)=>{
                     let data = text
                         .matchAll(/^([0-9a-f]+):(.*)$/mg)
                         .reduce((data, m)=>{
+                            data.keys.push(m[1]);
                             data[m[1]]={"I": m[2].startsWith("I[") ? true : false, "data":JSON.parse(m[2].startsWith("I[") ? m[2].slice(1) : m[2])};
                             return data;
-                        }, {});
+                        }, {keys: []});
                     await modifyFieldLayout(data[targetUser == username ? "3" : "1"].data);
                     return new Response(
-                        Object.keys(data).reduce((body, key)=>body+key+":"+(data[key].I ? "I" : "")+JSON.stringify(data[key].data)+"\n", ""),
+                        data.keys.reduce((body, key)=>body+key+":"+(data[key].I ? "I" : "")+JSON.stringify(data[key].data)+"\n", ""),
                         result
                     );
                 } catch {
