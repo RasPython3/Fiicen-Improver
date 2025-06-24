@@ -47,6 +47,20 @@ div.min-h-screen.border-x > div:first-child > div:first-child) {
                 margin-left: -1rem;
                 margin-top: 0.5rem;
             }
+            @media (max-width: 768px) {
+                > div:not(.mt-1.whitespace-pre-wrap.break-all):has(> a), > video {
+                    margin-left: -1.5rem;
+                    margin-right: -.875rem;
+                    max-width: calc(100% + 1.75rem);
+                    width: calc(100% + 1.75rem);
+                }
+                > div:not(.mt-1.whitespace-pre-wrap.break-all):not(:has(> a)),
+                > div.mt-1.whitespace-pre-wrap.break-all > :where(iframe, div) {
+                    margin-left: -1.5rem;
+                    margin-right: -.25rem;
+                    width: calc(100% + 1.75rem);
+                }
+            }
         }
     }
     > div:last-child:nth-child(2), > div:last-child:nth-child(3),
@@ -206,6 +220,13 @@ svg[name="qrcode"]:where(.dark,.dark *) {
 
 .quoted-circle > div  > div:nth-child(2) {
     padding-left: 1.75rem ! important;
+}
+
+@media (max-width: 768px) {
+    .quoted-circle > div  > div:nth-child(2) {
+        padding-left: 1rem ! important;
+        padding-right: 0.25rem ! important;
+    }
 }
 
 .quoted-circle > div  > .media-group {
