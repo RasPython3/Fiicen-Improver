@@ -28,6 +28,8 @@ const badgeURLs = {
     "user": "user"
 };
 
+const developer_account = "RasPython3";
+
 const testers = [
     "nyannyan110011",
     "sunaookami_bridg",
@@ -144,7 +146,7 @@ async function onLoaded() { // first load or nextjs's router
     console.log("nextjs seems to be ready");
     _loadedCalled = true;
     circleAmount = 0;
-    if (errorBoxes && location.pathname == "/field/RasPython3") {
+    if (errorBoxes && location.pathname == "/field/" + developer_account) {
         let error = new ErrorEvent("error", {
             message: "This is test.",
             filename: _injectedjs_url
@@ -214,7 +216,7 @@ async function onLoaded() { // first load or nextjs's router
                 }
             })();
         }
-        if (location.pathname == "/field/RasPython3") {
+        if (location.pathname == "/field/" + developer_account) {
             (async ()=>{
                 let badge = document.createElement("img");
                 badge.alt = "extension-developer";
@@ -271,7 +273,7 @@ async function onLoaded() { // first load or nextjs's router
                     props = circleElement[Object.keys(circleElement).filter((key)=>key.startsWith("__reactProps"))[0]].children[1].props;
                 }
                 if (props.author.badge == null) {
-                    if (props.author.account_name == "RasPython3") {
+                    if (props.author.account_name == developer_account) {
                         props.author.badge = {
                             type: "extension-developer",
                             image: badgeURLs.developer
@@ -345,7 +347,7 @@ async function onLoaded() { // first load or nextjs's router
                     modifyDynamicCircle(circle, props);
                     let _props = props;
                     do {
-                        if (_props.author.account_name == "RasPython3" && !_props.author.badge) {
+                        if (_props.author.account_name == developer_account && !_props.author.badge) {
                             // extension developper
                             _props.author.badge = {
                                 kind: "extension-developer",
@@ -569,7 +571,7 @@ function modifyCircle(circleData) {
             modifyCircle(circleData.refly_from);
         }
         if (!circleData.author.badge) {
-            if (circleData.author.account_name == "RasPython3") {
+            if (circleData.author.account_name == developer_account) {
                 circleData.author.badge = {
                     type: "extension-developer",
                     image: badgeURLs.developer
@@ -611,7 +613,7 @@ function modifyEmbed(url) {
         quoted.children[1].children[0].querySelectorAll("& > div").forEach((div)=>div.remove());
         // handle badge
         let author = quoted.querySelector("div:first-child > div:first-child > div > a").href.split("/").at(-1);
-        if (author == "RasPython3") {
+        if (author == developer_account) {
             let badge = document.createElement("img");
             badge.alt = "extension-developer";
             badge.loading = "lazy";
@@ -998,7 +1000,7 @@ window.fetch = async (...args)=>{
                     if (results.length > 0 && results[0].account_name != undefined) {
                         results.forEach((user)=>{
                             if (user.badge == null) {
-                                if (user.account_name == "RasPython3") {
+                                if (user.account_name == developer_account) {
                                     user.badge = {
                                         type: "extension-developer",
                                         image: badgeURLs.developer
