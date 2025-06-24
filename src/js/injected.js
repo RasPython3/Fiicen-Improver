@@ -414,9 +414,23 @@ window.addEventListener("popstate", ()=>{
     _ext_ready = new Promise((resolve, reject)=>{
         _ext_ready_resolve = resolve;
     });
+    let count = 0;
     let id = setInterval(()=>{
-        if (_prev_url != location.href) {
+        if (document[Object.keys(document).filter(key=>key.startsWith("__reactContainer"))[0]].flags == 0) {
             clearInterval(id);
+            _prev_url = location.href;
+            try {
+                document.querySelector("div:has(> main) > div > div").children.length;
+            } catch {
+                console.log("something is going wrong!");
+            }
+            onLoaded();
+        }
+        count++;
+        if (count >= 300) {
+            // maybe something went wrong so that the loop likely to go forever
+            clearInterval(id);
+            console.error("popstate handler is not likely to stop looping maybe bacause something went wrong.");
             _prev_url = location.href;
             onLoaded();
         }
