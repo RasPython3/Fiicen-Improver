@@ -512,18 +512,24 @@ if (window.navigation) {
                         _ext_ready = new Promise((resolve, reject)=>{
                             _ext_ready_resolve = resolve;
                         });
-                        let obs = new MutationObserver((records, observer)=>{
+                        let obs_callback = (records, observer)=>{
                             let main = document.querySelector("main");
                             let _mainProps = main ? (main[Object.keys(main).filter(key=>key.startsWith("__reactProps"))[0]] || {children:{}}).children.props : null;
-                            if (mainProps != _mainProps) {
+                            let pageState = document[Object.keys(document).filter(key=>key.startsWith("__reactContainer"))[0]].updateQueue.baseState.element.props.children.props.children.props.value.state;
+                            if (mainProps != _mainProps
+                                || !pageState.focusAndScrollRef.apply
+                            ) {
                                 observer.disconnect();
+                                clearInterval(__hist_timer_id);
                                 try {
                                     onLoaded();
                                 } catch {
                                     _ext_ready_resolve();
                                 }
                             }
-                        });
+                        };
+                        let obs = new MutationObserver(obs_callback);
+                        let __hist_timer_id = setInterval(()=>obs_callback([], obs), 100);
                         obs.observe(document.body, {subtree: true, childList: true});
                         _prev_url = location.href;
                     }
