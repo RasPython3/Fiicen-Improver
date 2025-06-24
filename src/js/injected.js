@@ -81,7 +81,18 @@ const assets = {
     "quote": messageExt("extURL", "images/quoteCircle.svg")
 };
 
-const username = document.querySelector("nav > a:last-child").href.match(".*/field/([^/]+)$")[1];
+var username = "";
+
+function setUsername() {
+    if (!username) {
+        try {
+            username = document.querySelector("nav > a:last-child").href.match(".*/field/([^/]+)$")[1];
+        } catch {}
+    } else if (location.pathname.startsWith("/login")) {
+        username = "";
+    }
+    return username;
+}
 
 var errorBoxes;
 
@@ -146,6 +157,7 @@ async function onLoaded() { // first load or nextjs's router
     console.log("nextjs seems to be ready");
     _loadedCalled = true;
     circleAmount = 0;
+    setUsername();
     if (errorBoxes && location.pathname == "/field/" + developer_account) {
         let error = new ErrorEvent("error", {
             message: "This is test.",
