@@ -10,9 +10,10 @@ var _nextjs_ready = new Promise((resolve, reject)=>{
                 console.log("nextjs is ready");
                 resolve();
             }
-        } catch {
+        } catch (e) {
             // it seems like this is something like login page...
             clearInterval(__nextjs_timer_id);
+            alertMoment("Failed to start injected script: " + e);
             reject();
         }
     }, 10);
