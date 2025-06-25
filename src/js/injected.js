@@ -386,7 +386,7 @@ async function onLoaded() { // first load or nextjs's router
                                 image: badgeURLs.user
                             };
                         }
-                    } while (_props = _props.reply_to || (_props != props.refly_from ? props.refly_from : null));
+                    } while (_props = _props == props ? props.refly_from : _props.reply_to);
                     redrawCircles();
                     let embededAnchors = circle.querySelectorAll("& > div:nth-last-child(2) > div.mt-1.whitespace-pre-wrap.break-all > div:not(.quoted-circle):has(> a) > a");
                     let embeddedUrls = [];
