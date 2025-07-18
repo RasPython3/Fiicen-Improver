@@ -580,7 +580,12 @@ function modifyDynamicCircle(circle, data) {
             shareBtn.firstChild.style.color = "transparent";
             shareBtn.append(document.createElement("p"));
             shareBtn.lastChild.innerText = "サークルを引用";
-            let circleURL = "https://fiicen.jp/circle/" + data.id;
+            let circleURL = "https://fiicen.jp/circle/" + ((data)=>{
+                while (data.refly_from) {
+                    data = data.refly_from;
+                }
+                return data.id;
+            })(data);
             shareBtn.addEventListener("click", ()=>{
                 let createCircleBtn = document.querySelector("nav > button");
                 let circleTextArea = document.querySelector("nav > button + div textarea");
