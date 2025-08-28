@@ -106,7 +106,7 @@ div:has(> main:nth-child(3)) > div > div {
     gap: 0.25rem;
 }
 
-div:has(> main:nth-child(3)) > div > div > div:nth-child(2) {
+div:has(> main:nth-child(3)) > div > div > div:last-child:has(> p) {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -142,30 +142,47 @@ div.min-h-screen.border-x {
     padding-top: 1rem;
 }
 
-div:has(> main:nth-child(3)) > div:first-child > div {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-}
+@media (min-width: 38.5rem) {
+    div:has(> main:nth-child(3)) > div:first-child > div {
+        position: relative;
+        display: flex;
+        padding-right: calc(50% + 1rem);
+        flex-direction: column;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
 
-div:has(> main:nth-child(3)) > div:first-child > div > div {
-    flex: 1;
-    min-width: 16rem;
-}
+    div:has(> main:nth-child(3)) > div:first-child > div:not(:has(> div:last-child)) {
+        padding-left: 20%;
+        padding-right: 20%;
+    }
 
-div:has(> main:nth-child(3)) > div:first-child > div > div:first-child {
-    display: inline-flex;
-    flex-direction: column;
-    align-items: stretch;
-    flex-wrap: nowrap;
-    align-content: center;
-    flex-shrink: 0;
-    max-width: calc(100vw - 4.5rem);
-}
+    /*div:has(> main:nth-child(3)) > div:first-child > div > div {
+        flex: 1;
+        min-width: 16rem;
+    }*/
 
-div:has(> main:nth-child(3)) > div:first-child > div > div:last-child {
-    flex-shrink: 1;
+    div:has(> main:nth-child(3)) > div:first-child > div > * {
+        max-width: calc(100vw - 4.5rem);
+    }
+
+    div:has(> main:nth-child(3)) > div:first-child > div > *:not(:last-child) {
+        /*display: inline-flex;
+        flex-direction: column;
+        align-items: stretch;
+        flex-wrap: nowrap;
+        align-content: center;
+        flex-shrink: 0;
+        */
+    }
+
+    div:has(> main:nth-child(3)) > div:first-child > div > div:last-child {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        width: calc(50% - 1rem);
+        height: calc(100% - 2rem);
+    }
 }
 
 div:has(> main:nth-child(3)) > div:first-child > div > div:last-child > p {

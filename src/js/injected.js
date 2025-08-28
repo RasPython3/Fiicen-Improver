@@ -173,12 +173,12 @@ async function onLoaded() { // first load or nextjs's router
         window.dispatchEvent(error);
     }
     if (location.pathname.startsWith("/field/")) {
-        if (document.querySelector("div:has(> main) > div > div").children.length > 2) {
+        /*if (document.querySelector("div:has(> main) > div > div").children.length > 2) {
             let card = document.querySelector("div:has(> main) > div > div");
             let info = document.createElement("div");
             info.append(...document.querySelectorAll("div:has(> main) > div > div > *:not(div:last-child)"));
             card.insertAdjacentElement("afterbegin", info);
-        }
+        }*/
         if (location.pathname.match("\\/field\\/"+username+"(?:[?/].*)?$") && !document.querySelector("button > svg[name=\"qrcode\"]")) {
             (async ()=>{
                 try {
@@ -220,7 +220,7 @@ async function onLoaded() { // first load or nextjs's router
                         if (errorBoxes) {
                             outputError("qr 4");
                         }
-                        let buttons = document.querySelector("div:has(> main:nth-child(3)) > div > div:not(:has(> div:nth-child(3))) > div:first-child > div.flex:has(div)");
+                        let buttons = document.querySelector("div:has(> main:nth-child(3)) > div > div:not(:has(> div:nth-child(3))) > div.flex:has(div)");
                         if (buttons == undefined) {
                             return;
                         }
@@ -235,7 +235,7 @@ async function onLoaded() { // first load or nextjs's router
                 }
             })();
         }
-        if (!document.querySelector("div:has(> main:nth-child(3)) > div > div:not(:has(> div:nth-child(3))) > div:first-child > p:nth-child(2) > img")) {
+        if (!document.querySelector("div:has(> main:nth-child(3)) > div > div:not(:has(> div:nth-child(3))) > p:nth-child(2) > img")) {
             if (location.pathname.match("/field/" + developer_account + "(?:[?/].*)?$")) {
                 (async ()=>{
                     let badge = document.createElement("img");
@@ -250,7 +250,7 @@ async function onLoaded() { // first load or nextjs's router
                     badge.src="/_next/image?url=" + encodeURIComponent(badgeURLs.developer) + "&w=32&q=75";
                     await _ext_ready;
                     let _inject_badge = setInterval(()=>{
-                        let displayNameP = document.querySelector("div:has(> main:nth-child(3)) > div > div:not(:has(> div:nth-child(3))) > div:first-child > p:nth-child(2)");
+                        let displayNameP = document.querySelector("div:has(> main:nth-child(3)) > div > div:not(:has(> div:nth-child(3))) > p:nth-child(2)");
                         if (displayNameP == undefined) {
                             return;
                         }
@@ -272,7 +272,7 @@ async function onLoaded() { // first load or nextjs's router
                     badge.src="/_next/image?url=" + encodeURIComponent(badgeURLs.tester) + "&w=32&q=75";
                     await _ext_ready;
                     let _inject_badge = setInterval(()=>{
-                        let displayNameP = document.querySelector("div:has(> main:nth-child(3)) > div > div:not(:has(> div:nth-child(3))) > div:first-child > p:nth-child(2)");
+                        let displayNameP = document.querySelector("div:has(> main:nth-child(3)) > div > div:not(:has(> div:nth-child(3))) > p:nth-child(2)");
                         if (displayNameP == undefined) {
                             return;
                         }
@@ -552,7 +552,7 @@ if (window.navigation) {
 }
 
 async function modifyFieldLayout(data) {
-    data[3].children[0][3].children[3].children = [
+    /*data[3].children[0][3].children[3].children = [
         [
             "$",
             "div",
@@ -563,7 +563,7 @@ async function modifyFieldLayout(data) {
             }
         ],
         data[3].children[0][3].children[3].children.slice(7)[0] || false
-    ];
+    ];*/
     return data;
 }
 
