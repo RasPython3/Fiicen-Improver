@@ -146,6 +146,31 @@ function alertMoment(text) {
     document.body.append(alertPopup);
 }
 
+function modifyUser(userData) {
+    console.log(userData);
+    if (Object.prototype.isPrototypeOf(userData)) {
+        if (!userData.badge) {
+            if (userData.account_name == developer_account) {
+                userData.badge = {
+                    type: "extension-developer",
+                    image: badgeURLs.developer
+                };
+            } else if (testers.includes(userData.account_name)) {
+                userData.badge = {
+                    type: "extension-tester",
+                    image: badgeURLs.tester
+                };
+            } else if (userData.account_name == username) {
+                userData.badge = {
+                    type: "extension-user",
+                    image: badgeURLs.user
+                };
+            }
+        }
+    }
+    return userData;
+}
+
 
 var __timer_id;
 
@@ -236,62 +261,36 @@ async function onLoaded() { // first load or nextjs's router
             })();
         }
         if (!document.querySelector("div:has(> main:nth-child(3)) > div > div:not(:has(> div:nth-child(3))) > p:nth-child(2) > img")) {
+            let badgeData;
             if (location.pathname.match("/field/" + developer_account + "(?:[?/].*)?$")) {
-                (async ()=>{
-                    let badge = document.createElement("img");
-                    badge.alt = "extension-developer";
-                    badge.loading = "lazy";
-                    badge.width=16;
-                    badge.height=16;
-                    badge.async = true;
-                    badge.className = "ml-1 size-4 inline align-middle";
-                    badge.style.color = "transparent";
-                    badge.srcset = "/_next/image?url=" + encodeURIComponent(badgeURLs.developer) + "&w=16&q=75 1x, /_next/image?url=" + encodeURIComponent(badgeURLs.developer) + "&w=32&q=75 2x";
-                    badge.src="/_next/image?url=" + encodeURIComponent(badgeURLs.developer) + "&w=32&q=75";
-                    await _ext_ready;
-                    let _inject_badge = setInterval(()=>{
-                        let displayNameP = document.querySelector("div:has(> main:nth-child(3)) > div > div:not(:has(> div:nth-child(3))) > p:nth-child(2)");
-                        if (displayNameP == undefined) {
-                            return;
-                        }
-                        clearInterval(_inject_badge);
-                        displayNameP.append(badge);
-                    }, 10);
-                })();
+                badgeData = {
+                    type: "extension-developer",
+                    image: badgeURLs.developer
+                };
             } else if (testers.includes(location.pathname.replace(/\/field\/(.*)(?:[?/].*)?$/, "$1"))) {
-                (async ()=>{
-                    let badge = document.createElement("img");
-                    badge.alt = "extension-tester";
-                    badge.loading = "lazy";
-                    badge.width=16;
-                    badge.height=16;
-                    badge.async = true;
-                    badge.className = "ml-1 size-4 inline align-middle";
-                    badge.style.color = "transparent";
-                    badge.srcset = "/_next/image?url=" + encodeURIComponent(badgeURLs.tester) + "&w=16&q=75 1x, /_next/image?url=" + encodeURIComponent(badgeURLs.tester) + "&w=32&q=75 2x";
-                    badge.src="/_next/image?url=" + encodeURIComponent(badgeURLs.tester) + "&w=32&q=75";
-                    await _ext_ready;
-                    let _inject_badge = setInterval(()=>{
-                        let displayNameP = document.querySelector("div:has(> main:nth-child(3)) > div > div:not(:has(> div:nth-child(3))) > p:nth-child(2)");
-                        if (displayNameP == undefined) {
-                            return;
-                        }
-                        clearInterval(_inject_badge);
-                        displayNameP.append(badge);
-                    }, 10);
-                })();
+                badgeData = {
+                    type: "extension-tester",
+                    image: badgeURLs.tester
+                };
             } else if (location.pathname.match("/field/" + username + "(?:[?/].*)?$")) {
+                badgeData = {
+                    type: "extension-user",
+                    image: badgeURLs.user
+                };
+            }
+            if (badgeData) {
                 (async ()=>{
                     let badge = document.createElement("img");
-                    badge.alt = "extension-user";
+                    let encodedBadgeURI = encodeURIComponent(badgeData.image);
+                    badge.alt = badgeData.type;
                     badge.loading = "lazy";
-                    badge.width=16;
-                    badge.height=16;
+                    badge.width = 16;
+                    badge.height = 16;
                     badge.async = true;
                     badge.className = "ml-1 size-4 inline align-middle";
                     badge.style.color = "transparent";
-                    badge.srcset = "/_next/image?url=" + encodeURIComponent(badgeURLs.user) + "&w=16&q=75 1x, /_next/image?url=" + encodeURIComponent(badgeURLs.user) + "&w=32&q=75 2x";
-                    badge.src="/_next/image?url=" + encodeURIComponent(badgeURLs.user) + "&w=32&q=75";
+                    badge.srcset = "/_next/image?url=" + encodedBadgeURI + "&w=16&q=75 1x, /_next/image?url=" + encodedBadgeURI + "&w=32&q=75 2x";
+                    badge.src="/_next/image?url=" + encodedBadgeURI + "&w=32&q=75";
                     await _ext_ready;
                     let _inject_badge = setInterval(()=>{
                         let displayNameP = document.querySelector("div:has(> main:nth-child(3)) > div > div:not(:has(> div:nth-child(3))) > p:nth-child(2)");
@@ -316,53 +315,19 @@ async function onLoaded() { // first load or nextjs's router
                     props = circleElement[Object.keys(circleElement).filter((key)=>key.startsWith("__reactProps"))[0]].children[1].props;
                 }
                 if (props.author.badge == null) {
-                    if (props.author.account_name == developer_account) {
-                        props.author.badge = {
-                            type: "extension-developer",
-                            image: badgeURLs.developer
-                        };
+                    props.author = modifyUser(props.author);
+                    if (props.author.badge != null) {
                         let badge = document.createElement("img");
-                        badge.alt = "extension-developer";
+                        let encodedBadgeURI = encodeURIComponent(props.author.badge.image);
+                        badge.alt = props.author.badge.type;
                         badge.loading = "lazy";
-                        badge.width=16;
-                        badge.height=16;
+                        badge.width = 16;
+                        badge.height = 16;
                         badge.async = true;
                         badge.className = "ml-1 size-4 shrink-0";
                         badge.style.color = "transparent";
-                        badge.srcset = "/_next/image?url=" + encodeURIComponent(badgeURLs.developer) + "&w=16&q=75 1x, /_next/image?url=" + encodeURIComponent(badgeURLs.developer) + "&w=32&q=75 2x";
-                        badge.src="/_next/image?url=" + encodeURIComponent(badgeURLs.developer) + "&w=32&q=75";
-                        circleElement.lastChild.querySelector("div:first-child > div > a.group").append(badge);
-                    } else if (testers.includes(props.author.account_name)) {
-                        props.author.badge = {
-                            type: "extension-tester",
-                            image: badgeURLs.tester
-                        };
-                        let badge = document.createElement("img");
-                        badge.alt = "extension-tester";
-                        badge.loading = "lazy";
-                        badge.width=16;
-                        badge.height=16;
-                        badge.async = true;
-                        badge.className = "ml-1 size-4 shrink-0";
-                        badge.style.color = "transparent";
-                        badge.srcset = "/_next/image?url=" + encodeURIComponent(badgeURLs.tester) + "&w=16&q=75 1x, /_next/image?url=" + encodeURIComponent(badgeURLs.tester) + "&w=32&q=75 2x";
-                        badge.src="/_next/image?url=" + encodeURIComponent(badgeURLs.tester) + "&w=32&q=75";
-                        circleElement.lastChild.querySelector("div:first-child > div > a.group").append(badge);
-                    } else if (props.author.account_name == username) {
-                        props.author.badge = {
-                            type: "extension-user",
-                            image: badgeURLs.user
-                        };
-                        let badge = document.createElement("img");
-                        badge.alt = "extension-user";
-                        badge.loading = "lazy";
-                        badge.width=16;
-                        badge.height=16;
-                        badge.async = true;
-                        badge.className = "ml-1 size-4 shrink-0";
-                        badge.style.color = "transparent";
-                        badge.srcset = "/_next/image?url=" + encodeURIComponent(badgeURLs.user) + "&w=16&q=75 1x, /_next/image?url=" + encodeURIComponent(badgeURLs.user) + "&w=32&q=75 2x";
-                        badge.src="/_next/image?url=" + encodeURIComponent(badgeURLs.user) + "&w=32&q=75";
+                        badge.srcset = "/_next/image?url=" + encodedBadgeURI + "&w=16&q=75 1x, /_next/image?url=" + encodedBadgeURI + "&w=32&q=75 2x";
+                        badge.src="/_next/image?url=" + encodedBadgeURI + "&w=32&q=75";
                         circleElement.lastChild.querySelector("div:first-child > div > a.group").append(badge);
                     }
                 }
@@ -390,25 +355,7 @@ async function onLoaded() { // first load or nextjs's router
                     modifyDynamicCircle(circle, props);
                     let _props = props;
                     do {
-                        if (_props.author.account_name == developer_account && !_props.author.badge) {
-                            // extension developper
-                            _props.author.badge = {
-                                kind: "extension-developer",
-                                image: badgeURLs.developer
-                            };
-                        } else if (testers.includes(_props.author.account_name) && !_props.author.badge) {
-                            // extension tester
-                            _props.author.badge = {
-                                kind: "extension-tester",
-                                image: badgeURLs.tester
-                            };
-                        } else if (_props.author.account_name == username && !_props.author.badge) {
-                            // extension user
-                            _props.author.badge = {
-                                kind: "extension-user",
-                                image: badgeURLs.user
-                            };
-                        }
+                        _props.author = modifyUser(_props.author);
                     } while (_props = _props == props ? props.refly_from : _props.reply_to);
                     redrawCircles();
                     let embededAnchors = circle.querySelectorAll("& > div:nth-last-child(2) > div.mt-1.whitespace-pre-wrap.break-all > div:not(.quoted-circle):has(> a) > a");
@@ -638,24 +585,7 @@ function modifyCircle(circleData) {
         if (circleData.refly_from) {
             modifyCircle(circleData.refly_from);
         }
-        if (!circleData.author.badge) {
-            if (circleData.author.account_name == developer_account) {
-                circleData.author.badge = {
-                    type: "extension-developer",
-                    image: badgeURLs.developer
-                };
-            } else if (testers.includes(circleData.author.account_name)) {
-                circleData.author.badge = {
-                    type: "extension-tester",
-                    image: badgeURLs.tester
-                };
-            } else if (circleData.author.account_name == username) {
-                circleData.author.badge = {
-                    type: "extension-user",
-                    image: badgeURLs.user
-                };
-            }
-        }
+        circleData.author = modifyUser(circleData.author)
     }
     return circleData;
 }
