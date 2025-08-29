@@ -280,6 +280,28 @@ async function onLoaded() { // first load or nextjs's router
                         displayNameP.append(badge);
                     }, 10);
                 })();
+            } else if (location.pathname.match("/field/" + username + "(?:[?/].*)?$")) {
+                (async ()=>{
+                    let badge = document.createElement("img");
+                    badge.alt = "extension-user";
+                    badge.loading = "lazy";
+                    badge.width=16;
+                    badge.height=16;
+                    badge.async = true;
+                    badge.className = "ml-1 size-4 inline align-middle";
+                    badge.style.color = "transparent";
+                    badge.srcset = "/_next/image?url=" + encodeURIComponent(badgeURLs.user) + "&w=16&q=75 1x, /_next/image?url=" + encodeURIComponent(badgeURLs.user) + "&w=32&q=75 2x";
+                    badge.src="/_next/image?url=" + encodeURIComponent(badgeURLs.user) + "&w=32&q=75";
+                    await _ext_ready;
+                    let _inject_badge = setInterval(()=>{
+                        let displayNameP = document.querySelector("div:has(> main:nth-child(3)) > div > div:not(:has(> div:nth-child(3))) > p:nth-child(2)");
+                        if (displayNameP == undefined) {
+                            return;
+                        }
+                        clearInterval(_inject_badge);
+                        displayNameP.append(badge);
+                    }, 10);
+                })();
             }
         }
     } else if (location.pathname.startsWith("/home") || location.pathname.startsWith("/explore/") || location.pathname.startsWith("/search/") || location.pathname.startsWith("/circle/")) {
