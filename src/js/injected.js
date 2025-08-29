@@ -377,6 +377,13 @@ async function onLoaded() { // first load or nextjs's router
         modifySettings();
     }
     _ext_ready_resolve();
+
+    // just in case
+    setTimeout(()=>{
+        try {
+            redrawCircles();
+        } catch {}
+    }, 1000);
 }
 
 window.addEventListener("popstate", ()=>{
