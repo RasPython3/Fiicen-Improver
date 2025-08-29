@@ -175,7 +175,7 @@ function modifyUser(userData) {
 var __timer_id;
 
 function redrawCircles() {
-    let circleParent = document.querySelector(":where(main:nth-child(3) > div > div > div:first-child, main:not(:nth-child(3)) > div > div:first-child)");
+    let circleParent = document.querySelector(":where(main:nth-child(3) > div > div > div:first-child, main:not(:nth-child(3)) > div > div, header + div.flex > div.mt-10 > div:last-child > div.flex)");
     let updater = circleParent[Object.keys(circleParent).filter(key=>key.startsWith("__reactProps"))[0]].children.props.value;
     updater(null);
 }
@@ -303,7 +303,7 @@ async function onLoaded() { // first load or nextjs's router
                 })();
             }
         }
-    } else if (location.pathname.startsWith("/home") || location.pathname.startsWith("/explore/") || location.pathname.startsWith("/search/") || location.pathname.startsWith("/circle/")) {
+    } else if (location.pathname.startsWith("/home") || location.pathname.startsWith("/explore/") || location.pathname.startsWith("/search/") || location.pathname.startsWith("/tag/") || location.pathname.startsWith("/circle/")) {
         if (location.pathname.startsWith("/circle/")) {
             for (let circleElement of document.querySelectorAll(
                 "div.min-h-screen.border-x > div:first-child > div:first-child,"
@@ -335,7 +335,7 @@ async function onLoaded() { // first load or nextjs's router
         }
         clearInterval(__timer_id);
         __timer_id = setInterval(()=>{
-            let circles = document.querySelectorAll(":where(main:nth-child(3) > div > div > div:first-child > div.relative, main:not(:nth-child(3)) > div > div > div.relative)");
+            let circles = document.querySelectorAll(":where(main:nth-child(3) > div > div > div:first-child, main:not(:nth-child(3)) > div > div, header + div.flex > div.mt-10 > div:last-child > div.flex) > div.relative");
             if (circles.length == 0) {
                 return;
             } else {
@@ -591,8 +591,9 @@ function modifyCircle(circleData) {
 }
 
 function modifyEmbed(url) {
-    let embeds = document.querySelectorAll(":where(main:nth-child(3) > div > div > div:first-child > div.relative, main:not(:nth-child(3))"
-        + " > div > div > div.relative) > div:nth-last-child(2) > div:not(:first-child)"
+    let embeds = document.querySelectorAll(":where(main:nth-child(3) > div > div > div:first-child, main:not(:nth-child(3))"
+        + " > div > div, header + div.flex > div.mt-10 > div:last-child > div.flex)"
+        + " > div.relative > div:nth-last-child(2) > div:not(:first-child)"
         + " div.relative:has(> a[href=\"" + url + "\"]),"
         + " div.min-h-screen.border-x > div:first-child > div:first-child div.relative:has(> a[href=\"" + url + "\"])");
     for (let embed of embeds) {
@@ -683,8 +684,13 @@ function modifyEmbed(url) {
         quoted.children[0].querySelector("a.relative + div").classList.replace("flex-col", "flex-row");
         quoted.children[0].querySelector("a.relative + div").classList.add("gap-2");
 
-        let embeds = document.querySelectorAll(":where(main:nth-child(3) > div > div > div:first-child > div.relative, main:not(:nth-child(3))"
+        /*let embeds = document.querySelectorAll(":where(main:nth-child(3) > div > div > div:first-child > div.relative, main:not(:nth-child(3))"
             + " > div > div > div.relative) > div:nth-last-child(2) > div:not(:first-child)"
+            + " div.relative:has(> a[href=\"" + url + "\"]),"
+            + " div.min-h-screen.border-x > div:first-child > div:first-child div.relative:has(> a[href=\"" + url + "\"])");*/
+        let embeds = document.querySelectorAll(":where(main:nth-child(3) > div > div > div:first-child, main:not(:nth-child(3))"
+            + " > div > div, header + div.flex > div.mt-10 > div:last-child > div.flex)"
+            + " > div.relative > div:nth-last-child(2) > div:not(:first-child)"
             + " div.relative:has(> a[href=\"" + url + "\"]),"
             + " div.min-h-screen.border-x > div:first-child > div:first-child div.relative:has(> a[href=\"" + url + "\"])");
         for (let embed of embeds) {
