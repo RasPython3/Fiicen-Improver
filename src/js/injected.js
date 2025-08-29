@@ -590,6 +590,19 @@ function modifyCircle(circleData) {
     return circleData;
 }
 
+function modifyMessage(messageData) {
+    console.log(messageData);
+    if (Object.prototype.isPrototypeOf(messageData)) {
+        /*if (messageData.reply_to) {
+            modifyMessage(messageData.reply_to);
+        }*/
+        if (messageData.sender && !messageData.sender.badge) {
+            messageData.sender = modifyUser(messageData.sender);
+        }
+    }
+    return messageData;
+}
+
 function modifyEmbed(url) {
     let embeds = document.querySelectorAll(":where(main:nth-child(3) > div > div > div:first-child, main:not(:nth-child(3))"
         + " > div > div, header + div.flex > div.mt-10 > div:last-child > div.flex)"
@@ -1050,8 +1063,8 @@ window.fetch = async (...args)=>{
                     : (
                         data["1"].data.json != undefined && data["1"].data.json.results != undefined
                         ? data["1"].data.json.results : undefined);
-                if (results != undefined) {
-                    if (results.length > 0 && results[0].account_name != undefined) {
+                if (results != undefined && results.length > 0) {
+                    if (results[0].account_name != undefined) {
                         results.forEach((user)=>{
                             if (user.badge == null) {
                                 if (user.account_name == developer_account) {
@@ -1072,7 +1085,9 @@ window.fetch = async (...args)=>{
                                 }
                             }
                         });
-                    } else {
+                    } else if (results[0].conversation_type != undefined) {
+                        results.forEach(modifyMessage);
+                    } else if (results[0].author != undefined) {
                         results.forEach(modifyCircle);
                     }
                 } else {
@@ -1101,6 +1116,23 @@ window.fetch = async (...args)=>{
                             return data;
                         }, {keys: []});
                     await modifyFieldLayout(data[targetUser == username ? "3" : "1"].data);
+                    return new Response(
+                        data.keys.reduce((body, key)=>body+key+":"+(data[key].I ? "I" : "")+JSON.stringify(data[key].data)+"\n", ""),
+                        result
+                    );
+                } catch {
+                    return new Response(text, result);
+                }
+            } else if (args[0].pathname.match(/^\/message\/[^/]+$/)) {
+                let text = await result.text();
+                try {
+                    let data = text
+                        .matchAll(/^([0-9a-f]+):(.*)$/mg)
+                        .reduce((data, m)=>{
+                            data.keys.push(m[1]);
+                            data[m[1]]={"I": m[2].startsWith("I[") ? true : false, "data":JSON.parse(m[2].startsWith("I[") ? m[2].slice(1) : m[2])};
+                            return data;
+                        }, {keys: []});
                     return new Response(
                         data.keys.reduce((body, key)=>body+key+":"+(data[key].I ? "I" : "")+JSON.stringify(data[key].data)+"\n", ""),
                         result
