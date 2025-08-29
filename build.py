@@ -60,6 +60,9 @@ def build_orion():
     manifest["permissions"] = ["storage", "webRequest", "webRequestBlocking"]
     del manifest["declarative_net_request"]
 
+    # startup.js is not working well on Orion
+    manifest["content_scripts"].pop(0)
+
     with open("build/orion/manifest.json", mode="w") as f:
         manifest = json.dump(manifest, f)
 
