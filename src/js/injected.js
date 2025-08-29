@@ -358,7 +358,7 @@ async function onLoaded() { // first load or nextjs's router
                         _props.author = modifyUser(_props.author);
                     } while (_props = _props == props && props.refly_from ? props.refly_from : _props.reply_to);
                     redrawCircles();
-                    let embededAnchors = circle.querySelectorAll("& > div:nth-last-child(2) > div.mt-1.whitespace-pre-wrap.break-all > div:not(.quoted-circle):has(> a) > a");
+                    let embededAnchors = circle.querySelectorAll("& > div:nth-last-child(2) > div:nth-last-child(2) > div.mt-1.whitespace-pre-wrap.break-all > div:not(.quoted-circle):has(> a) > a");
                     let embeddedUrls = [];
                     for (let anchor of embededAnchors) {
                         if (anchor.href.startsWith("https://fiicen.jp/circle/") && !embeddedUrls.includes(anchor.href)) {
