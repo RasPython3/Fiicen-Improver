@@ -5,7 +5,7 @@
 
   "description": "This extension improves Fiicen",
 
-  "permissions": ["storage", "declarativeNetRequest"],
+  "permissions": ["storage", "declarativeNetRequest", "notifications"],
 
   "icons": {
     "128": "images/icon_128x128.png"

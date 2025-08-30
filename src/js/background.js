@@ -3,6 +3,56 @@ const badgeRegExp = /fiicen.jp\/_next\/image[?]url[=](developer|tester|user)(?:[
 const datasaverRegExp = /fiicen.jp\/_next\/image[?]url[=](?:http|https)[%][^&]*?[^_](?:[?&](?:w|q)[=][^&=]*)+$/;
 const datasaverExceptRegExp = /fiicen.jp\/_next\/image[?]url[=]http[%]3[aA][%]2[fF][%]2[fF]localhost[%]3[aA]8000[%]2[fF]media[%]2[fF]user[%]2[fF][^&]*?(?:[&](?:w|q)[=][^&]*)+$/;
 
+var NextActionValue;
+var inactiveCount = 0;
+var notificationCounts = {
+  notification: 0,
+  message: 0
+};
+
+chrome.notifications.onClicked.addListener((notificationId)=>{
+  chrome.tabs.create({url:notificationId});
+});
+
+fetch("https://fiicen.jp/search/tag?q=%00").then((res)=>{
+  res.text().then((pagehtml)=>{
+    const pagejspath = pagehtml.match(/<script(?= )[^>]* src="(\/_next\/static\/chunks\/app(?=\/)[^"]*\/page-[0-9a-z-]+[.]js)"/)?.at(1);
+    if (pagejspath) {
+      fetch(new URL(pagejspath, "https://fiicen.jp/")).then((res)=>{
+        res.text().then((pagejs)=>{
+          NextActionValue = pagejs.match(/\("([0-9a-z]+)"\)[^"]+[.]results\)/)?.at(1);
+          console.log(NextActionValue);
+          setTimeout(checkNotificationCounts, 1000);
+        });
+      });
+    }
+  });
+});
+
+async function checkNotificationCounts() {
+  if (NextActionValue) {
+
+    let tabId = (await chrome.tabs.query({url:"https://fiicen.jp/*", status:"complete"})).sort((a,b)=>b.lastAccessed-a.lastAccessed).at(0)?.id;
+
+    if (tabId) {
+      try {
+        chrome.tabs.sendMessage(tabId, JSON.stringify({request: "checkNotificationCount", value: NextActionValue}));
+      } catch {}
+    }
+  }
+
+  if ((await chrome.tabs.query({url:"https://fiicen.jp/*", active:true})).length > 0) {
+    inactiveCount = 0;
+  } else {
+    if (inactiveCount <= 20) {
+      inactiveCount++;
+    }
+  }
+
+  setTimeout(checkNotificationCounts, inactiveCount <= 10 ? 10000 : (inactiveCount <= 15 ? 30000 : (inactiveCount <= 20 ? 90000 : 300000)));
+}
+
+
 function webRequestHandler(details) {
   let badgeMatch = details.url.match(badgeRegExp);
   let datasaverMatch;
@@ -163,6 +213,38 @@ chrome.runtime.onMessage.addListener((message, sender) => {
           value: items
         };
         chrome.tabs.sendMessage(tabId, JSON.stringify(responseData));
+      });
+      return;
+    case "updateNotificationCount":
+      let result = JSON.parse(data.value);
+      if (result) {
+        if (result.notification > notificationCounts.notification) {
+          let	options={
+            type: "basic",
+            title: "Fiicen",
+            message: `新しい通知が ${result.notification} 件あります`,
+            iconUrl: "https://fiicen.jp/favicon.ico"
+          };
+	        chrome.notifications.create("https://fiicen.jp/notification", options);
+        }
+        if (result.message > notificationCounts.message) {
+          let	options={
+            type: "basic",
+            title: "Fiicen",
+            message: `新しいメッセージが ${result.message} 件あります`,
+            iconUrl: "https://fiicen.jp/favicon.ico"
+          };
+	        chrome.notifications.create("https://fiicen.jp/message", options);
+        }
+        notificationCounts.notification = result.notification || 0;
+        notificationCounts.message = result.message || 0;
+      }
+      chrome.tabs.query({url:"https://fiicen.jp/*"}).then((tabs)=>{
+        tabs.forEach((tab)=>{
+          try {
+            chrome.tabs.sendMessage(tab.id, message);
+          } catch {}
+        });
       });
       return;
     case "debug":

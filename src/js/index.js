@@ -74,6 +74,51 @@ window.addEventListener("ext-message", (ev)=>{
 });
 
 chrome.runtime.onMessage.addListener((message) => {
+  let data;
+  try {
+    data = JSON.parse(message);
+  } catch {
+    return;
+  }
+  if (Object.prototype.isPrototypeOf(data) && data.request) {
+    switch (data.request) {
+      case "checkNotificationCount":
+        (async (NextActionValue)=>{
+          let result = {};
+          for (let i of [
+            {
+              name: "notification",
+              url: "https://fiicen.jp/notification",
+              body: "[\"http://localhost:8000/notifications/count\"]"
+            },
+            {
+              name: "message",
+              url: "https://fiicen.jp/message",
+              body: "[\"http://localhost:8000/message/count\"]"
+            },
+          ]) {
+            let res = await fetch(i.url, {
+              method: "POST",
+              body: i.body,
+              headers: {
+                "next-action": NextActionValue,
+                "sec-fetch-dest": "empty",
+                "sec-fetch-mode": "cors",
+                "sec-fetch-site": "same-origin"
+              },
+              "mode": "cors",
+              "credentials": "include"
+            });
+            result[i.name] = JSON.parse((await res.text()).match(/1:(.*)/)?.at(1) || "{}").json?.count;
+          }
+          chrome.runtime.sendMessage(JSON.stringify({
+            request: "updateNotificationCount",
+            value: JSON.stringify(result)
+          }));
+        })(data.value);
+        return;
+    }
+  }
   let response = new CustomEvent("ext-message", {
     detail: message
   });

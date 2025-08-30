@@ -81,6 +81,60 @@ function messageExt(request, value=undefined) {
     return promise;
 }
 
+window.addEventListener("ext-message", (e)=>{
+    let data;
+    try {
+        data = JSON.parse(e.detail);
+    } catch {}
+    if (data && data.request) {
+        switch (data.request) {
+            case "updateNotificationCount":
+                let counts = JSON.parse(data.value);
+                let notificationItem = document.querySelector("nav a[href=\"/notification\"]");
+                let messageItem = document.querySelector("nav a[href=\"/message\"]");
+                for (let i of [
+                    {
+                        name: "notification",
+                        item: notificationItem
+                    },
+                    {
+                        name: "message",
+                        item: messageItem
+                    }
+                ]) {
+                    if (!i.item || i.name == "message" && location.pathname.startsWith("/message")) {
+                        continue;
+                    }
+                    let countBadge = i.item.querySelector("div:last-child");
+                    if (counts[i.name] > 0) {
+                        if (!countBadge) {
+                            countBadge = document.createElement("div");
+                            countBadge.className = "absolute right-0 top-0 size-5 text-center leading-5 rounded-full bg-main font-bold text-white";
+                        }
+                        countBadge.innerText = counts[i.name] > 99 ? "99+" : counts[i.name];
+                        if (counts[i.name] > 99) {
+                            countBadge.classList.add("text-[0.5rem]");
+                            countBadge.classList.remove("text-xs");
+                        } else {
+                            countBadge.classList.add("text-xs");
+                            countBadge.classList.remove("text-[0.5rem]");
+                        }
+                        i.item.appendChild(countBadge);
+                    } else if (counts[i.name] != undefined && counts[i.name] != null) {
+                        if (countBadge) {
+                            countBadge.remove();
+                        }
+                    } else {
+                        continue;
+                    }
+                }
+            default:
+                return;
+        }
+        e.stopImmediatePropagation();
+    }
+});
+
 const urls = {}; // currently not used
 
 const assets = {
@@ -375,6 +429,12 @@ async function onLoaded() { // first load or nextjs's router
         }, 50);
     } else if (location.pathname.startsWith("/settings")) {
         modifySettings();
+    }
+    if (location.pathname.startsWith("/notification") || location.pathname.startsWith("/message")) {
+        let countBadge = document.querySelector("nav a > p.font-bold + div");
+        if (countBadge && Object.keys(countBadge).filter(key=>key.startsWith("__reactProps")).length == 0) {
+            countBadge.remove();
+        }
     }
     _ext_ready_resolve();
 
