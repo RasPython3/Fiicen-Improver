@@ -346,14 +346,17 @@ async function onLoaded() { // first load or nextjs's router
                     badge.srcset = "/_next/image?url=" + encodedBadgeURI + "&w=16&q=75 1x, /_next/image?url=" + encodedBadgeURI + "&w=32&q=75 2x";
                     badge.src="/_next/image?url=" + encodedBadgeURI + "&w=32&q=75";
                     await _ext_ready;
-                    let _inject_badge = setInterval(()=>{
-                        let displayNameP = document.querySelector("div:has(> main:nth-child(3)) > div > div:not(:has(> div:nth-child(3))) > p:nth-child(2)");
-                        if (displayNameP == undefined) {
-                            return;
-                        }
-                        clearInterval(_inject_badge);
-                        displayNameP.append(badge);
-                    }, 10);
+                    if (document.querySelector("div:has(> main:nth-child(3))")) {
+                        // user seems to exist
+                        let _inject_badge = setInterval(()=>{
+                            let displayNameP = document.querySelector("div:has(> main:nth-child(3)) > div > div:not(:has(> div:nth-child(3))) > p:nth-child(2)");
+                            if (displayNameP == undefined) {
+                                return;
+                            }
+                            clearInterval(_inject_badge);
+                            displayNameP.append(badge);
+                        }, 10);
+                    }
                 })();
             }
         }
@@ -627,16 +630,18 @@ function modifyDynamicCircle(circle, data) {
                 let circleTextArea = document.querySelector("nav > button + div textarea");
                 circle.lastChild.lastChild.lastChild.lastChild.lastChild.lastChild.lastChild.click();
                 createCircleBtn.click();
-                let timer = setInterval(()=>{
-                    if (!circleTextArea.disabled) {
-                        clearInterval(timer);
-                        circleTextArea.value = `\n${circleURL}`;
-                        circleTextArea.nextElementSibling.textContent = `${circleTextArea.value}\u200b`;
-                        circleTextArea.style.height = `${circleTextArea.nextElementSibling.clientHeight}px`;
-                        circleTextArea.selectionStart = circleTextArea.selectionEnd = 0;
-                        circleTextArea.focus();
-                    }
-                }, 10);
+                if (circleTextArea) { // if not, not logined
+                    let timer = setInterval(()=>{
+                        if (!circleTextArea.disabled) {
+                            clearInterval(timer);
+                            circleTextArea.value = `\n${circleURL}`;
+                            circleTextArea.nextElementSibling.textContent = `${circleTextArea.value}\u200b`;
+                            circleTextArea.style.height = `${circleTextArea.nextElementSibling.clientHeight}px`;
+                            circleTextArea.selectionStart = circleTextArea.selectionEnd = 0;
+                            circleTextArea.focus();
+                        }
+                    }, 10);
+                }
             });
             circle.lastChild.lastChild.lastChild.lastChild.lastChild.lastChild.insertAdjacentElement("beforebegin", shareBtn);
         }
