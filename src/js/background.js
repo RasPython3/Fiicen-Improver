@@ -42,7 +42,7 @@ async function checkNotificationCounts() {
 
     if (tabId) {
       try {
-        chrome.tabs.sendMessage(tabId, JSON.stringify({request: "checkNotificationCount", value: NextActionValue}));
+        chrome.tabs.sendMessage(tabId, JSON.stringify({request: "checkNotificationCount", value: NextActionValue})).catch(()=>{});
       } catch {}
     }
   }
@@ -108,7 +108,7 @@ function webRequestHandler(details) {
       request: "webRequestReplace",
       value: details.url,
       replacer: (redirectUrl && redirectUrl.href ? redirectUrl.href : redirectUrl)
-    }));
+    })).catch(()=>{});
     return {
       cancel: true
     };

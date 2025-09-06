@@ -13,11 +13,16 @@ var _nextjs_ready = new Promise((resolve, reject)=>{
         } catch (e) {
             // it seems like this is something like login page...
             clearInterval(__nextjs_timer_id);
-            alertMoment("Failed to start injected script: " + e);
+            if (document.head.children.length > 1) {
+                alertMoment("Failed to start injected script: " + e);
+            } else {
+                // error page
+            }
             reject();
         }
     }, 10);
 });
+_nextjs_ready.catch((e)=>{}); // to prevent "Uncaught (in promise)"
 
 window._org_fetch = window._org_fetch || window.fetch;
 
@@ -239,7 +244,13 @@ var _loadedCalled = false;
 async function onLoaded() { // first load or nextjs's router
     // re-arrange field header
     console.log("onLoaded called");
-    await _nextjs_ready;
+    try {
+        await _nextjs_ready;
+    } catch {
+        // something failed
+        console.log("nextjs seems to get something wrong");
+        return;
+    }
     console.log("nextjs seems to be ready");
     _loadedCalled = true;
     circleAmount = 0;
@@ -562,7 +573,7 @@ if (window.navigation) {
                                 observer.disconnect();
                                 clearInterval(__hist_timer_id);
                                 try {
-                                    onLoaded();
+                                    onLoaded().catch(()=>_ext_ready_resolve());
                                 } catch {
                                     _ext_ready_resolve();
                                 }

@@ -97,19 +97,22 @@ chrome.runtime.onMessage.addListener((message) => {
               body: "[\"http://localhost:8000/message/count\"]"
             },
           ]) {
-            let res = await fetch(i.url, {
-              method: "POST",
-              body: i.body,
-              headers: {
-                "next-action": NextActionValue,
-                "sec-fetch-dest": "empty",
-                "sec-fetch-mode": "cors",
-                "sec-fetch-site": "same-origin"
-              },
-              "mode": "cors",
-              "credentials": "include"
-            });
-            result[i.name] = JSON.parse((await res.text()).match(/1:(.*)/)?.at(1) || "{}").json?.count;
+            let res;
+            try {
+              res = await fetch(i.url, {
+                method: "POST",
+                body: i.body,
+                headers: {
+                  "next-action": NextActionValue,
+                  "sec-fetch-dest": "empty",
+                  "sec-fetch-mode": "cors",
+                  "sec-fetch-site": "same-origin"
+                },
+                "mode": "cors",
+                "credentials": "include"
+              });
+              result[i.name] = JSON.parse((await res.text()).match(/1:(.*)/)?.at(1) || "{}").json?.count;
+            } catch {}
           }
           chrome.runtime.sendMessage(JSON.stringify({
             request: "updateNotificationCount",
