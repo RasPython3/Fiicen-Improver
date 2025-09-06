@@ -22,7 +22,7 @@ fetch("https://fiicen.jp/search/tag?q=%00").then((res)=>{
         res.text().then((pagejs)=>{
           NextActionValue = pagejs.match(/\("([0-9a-z]+)"\)[^"]+[.]results\)/)?.at(1);
           console.log(NextActionValue);
-          setTimeout(checkNotificationCounts, 1000);
+          setTimeout(repeatNotificationCheck, 1000);
         });
       });
     }
@@ -40,6 +40,10 @@ async function checkNotificationCounts() {
       } catch {}
     }
   }
+}
+
+async function repeatNotificationCheck() {
+  await checkNotificationCounts();
 
   if ((await chrome.tabs.query({url:"https://fiicen.jp/*", active:true})).length > 0) {
     inactiveCount = 0;
@@ -49,7 +53,7 @@ async function checkNotificationCounts() {
     }
   }
 
-  setTimeout(checkNotificationCounts, inactiveCount <= 10 ? 10000 : (inactiveCount <= 15 ? 30000 : (inactiveCount <= 20 ? 90000 : 300000)));
+  setTimeout(repeatNotificationCheck, inactiveCount <= 10 ? 10000 : (inactiveCount <= 15 ? 30000 : (inactiveCount <= 20 ? 90000 : 300000)));
 }
 
 
