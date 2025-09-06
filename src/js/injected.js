@@ -263,12 +263,6 @@ async function onLoaded() { // first load or nextjs's router
         window.dispatchEvent(error);
     }
     if (location.pathname.startsWith("/field/")) {
-        /*if (document.querySelector("div:has(> main) > div > div").children.length > 2) {
-            let card = document.querySelector("div:has(> main) > div > div");
-            let info = document.createElement("div");
-            info.append(...document.querySelectorAll("div:has(> main) > div > div > *:not(div:last-child)"));
-            card.insertAdjacentElement("afterbegin", info);
-        }*/
         if (location.pathname.match("\\/field\\/"+username+"(?:[?/].*)?$") && !document.querySelector("button > svg[name=\"qrcode\"]")) {
             (async ()=>{
                 try {
@@ -461,7 +455,6 @@ async function onLoaded() { // first load or nextjs's router
 }
 
 window.addEventListener("popstate", ()=>{
-    console.log("popstate");
     _ext_ready = new Promise((resolve, reject)=>{
         _ext_ready_resolve = resolve;
     });
@@ -504,9 +497,6 @@ var _hack_next_interval = setInterval(()=>{
         next.router[key] = (...args)=>{
             let prevState = JSON.stringify(history.state);
             let result = (next.router["_org_"+key])(...args);
-            /*if (prevState != JSON.stringify(history.state)) {
-                console.log("history.state was changed!");
-            }*/
             return result;
         };
     }
@@ -537,8 +527,6 @@ if (window.navigation) {
                 let func = (...args)=>{
                     let result, error;
                     if (!history._processing) {
-                        /*console.log(key, args);
-                        console.log((this["_" + key] || this["_org_" + key]));*/
                         history._processing = true;
                         try {
                             result = ((this["_" + key]) || this["_org_" + key])(...args);
@@ -602,18 +590,6 @@ if (window.navigation) {
 }
 
 async function modifyFieldLayout(data) {
-    /*data[3].children[0][3].children[3].children = [
-        [
-            "$",
-            "div",
-            null,
-            {
-                "className": "",
-                "children": data[3].children[0][3].children[3].children.slice(0, 7)
-            }
-        ],
-        data[3].children[0][3].children[3].children.slice(7)[0] || false
-    ];*/
     return data;
 }
 
@@ -780,10 +756,6 @@ function modifyEmbed(url) {
         quoted.children[0].querySelector("a.relative + div").classList.replace("flex-col", "flex-row");
         quoted.children[0].querySelector("a.relative + div").classList.add("gap-2");
 
-        /*let embeds = document.querySelectorAll(":where(main:nth-child(3) > div > div > div:first-child > div.relative, main:not(:nth-child(3))"
-            + " > div > div > div.relative) > div:nth-last-child(2) > div:not(:first-child)"
-            + " div.relative:has(> a[href=\"" + url + "\"]),"
-            + " div.min-h-screen.border-x > div:first-child > div:first-child div.relative:has(> a[href=\"" + url + "\"])");*/
         let embeds = document.querySelectorAll(":where(main:nth-child(3) > div > div > div:first-child, main:not(:nth-child(3))"
             + " > div > div, header + div.flex > div.mt-10 > div:last-child > div.flex)"
             + " > div.relative > div:nth-last-child(2) > div:not(:first-child)"
@@ -1047,7 +1019,6 @@ document.addEventListener("paste", async (e)=>{
     let form = e.target.form;
     if (e.clipboardData.files.length > 0) {
         let file = e.clipboardData.files[0];
-        console.log(file, file.size);
         if (file.type.startsWith("image/")) {
             file.arrayBuffer().then((buffer)=>{
                 let imageInput = form.elements["circle-form-image"];
@@ -1060,7 +1031,6 @@ document.addEventListener("paste", async (e)=>{
                         }),]
                     }
                 });
-                console.log(file);
             });
         } else if (file.type.startsWith("video/")) {
             file.arrayBuffer().then((buffer)=>{
@@ -1074,7 +1044,6 @@ document.addEventListener("paste", async (e)=>{
                         }),]
                     }
                 });
-                console.log(file);
             });
         }
         form.onformdata = (e)=>{
@@ -1096,7 +1065,6 @@ window.fetch = async (...args)=>{
         // when this called, document must be already loaded
         window.dispatchEvent(new Event("load"));
     }
-    console.log("fetch", args);
     try {
         args[0] = new URL(args[0]);
     } catch {

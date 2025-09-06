@@ -13,7 +13,6 @@ const isDark = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dar
 
 function changeTheme() {
     if (isDark) {
-        //console.log("dark", window.matchMedia('(prefers-color-scheme: dark)').matches);
         const classList = document.documentElement.classList;
         if (classList.contains("dark") && !classList.contains("system-dark")) {
             classList.replace("dark", "application-dark");
