@@ -44,7 +44,7 @@ const developer_account = "RasPython3";
 
 const testers = [
     "nyannyan110011",
-    "sunaookami_bridg",
+    "shiroko_bridge",
     "momizimoti",
     "Ponzu",
     "shirotarou",
@@ -57,7 +57,7 @@ const testers = [
     "ushii",
     "non",
     "tanasan_o38",
-    "katatsumuri"
+    "878"
 ];
 
 var circleAmount = 0;
