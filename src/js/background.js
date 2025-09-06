@@ -30,7 +30,13 @@ fetch("https://fiicen.jp/search/tag?q=%00").then((res)=>{
 });
 
 async function checkNotificationCounts() {
-  if (NextActionValue) {
+  if (await new Promise((resolve, reject)=>{
+    chrome.storage.local.get({
+      asyncNotification: true
+    }, (items)=>{
+      resolve(items.asyncNotification);
+    });
+  }) && NextActionValue) {
 
     let tabId = (await chrome.tabs.query({url:"https://fiicen.jp/*", status:"complete"})).sort((a,b)=>b.lastAccessed-a.lastAccessed).at(0)?.id;
 
@@ -195,6 +201,11 @@ chrome.runtime.onMessage.addListener((message, sender) => {
             systemTheme: settings.systemTheme
           }, ()=>{});
         }
+        if (settings.hasOwnProperty("asyncNotification")) {
+          chrome.storage.local.set({
+            asyncNotification: settings.asyncNotification
+          }, ()=>{});
+        }
         if (settings.hasOwnProperty("debug")) {
           chrome.storage.local.set({
             debug: settings.debug
@@ -209,6 +220,7 @@ chrome.runtime.onMessage.addListener((message, sender) => {
       chrome.storage.local.get({
         datasaver: false,
         systemTheme: false,
+        asyncNotification: true,
         debug: false,
       }, (items)=>{
         responseData = {
@@ -221,33 +233,39 @@ chrome.runtime.onMessage.addListener((message, sender) => {
       return;
     case "updateNotificationCount":
       let result = JSON.parse(data.value);
-      if (result) {
-        if (result.notification > notificationCounts.notification) {
-          let	options={
-            type: "basic",
-            title: "Fiicen",
-            message: `新しい通知が ${result.notification} 件あります`,
-            iconUrl: "https://fiicen.jp/favicon.ico"
-          };
-	        chrome.notifications.create("https://fiicen.jp/notification", options);
+      chrome.storage.local.get({
+        asyncNotification: true
+      }, (items)=>{
+        if (result) {
+          if (items.asyncNotification) {
+            if (result.notification > notificationCounts.notification) {
+              let	options={
+                type: "basic",
+                title: "Fiicen",
+                message: `新しい通知が ${result.notification} 件あります`,
+                iconUrl: "https://fiicen.jp/favicon.ico"
+              };
+              chrome.notifications.create("https://fiicen.jp/notification", options);
+            }
+            if (result.message > notificationCounts.message) {
+              let	options={
+                type: "basic",
+                title: "Fiicen",
+                message: `新しいメッセージが ${result.message} 件あります`,
+                iconUrl: "https://fiicen.jp/favicon.ico"
+              };
+              chrome.notifications.create("https://fiicen.jp/message", options);
+            }
+          }
+          notificationCounts.notification = result.notification || 0;
+          notificationCounts.message = result.message || 0;
         }
-        if (result.message > notificationCounts.message) {
-          let	options={
-            type: "basic",
-            title: "Fiicen",
-            message: `新しいメッセージが ${result.message} 件あります`,
-            iconUrl: "https://fiicen.jp/favicon.ico"
-          };
-	        chrome.notifications.create("https://fiicen.jp/message", options);
-        }
-        notificationCounts.notification = result.notification || 0;
-        notificationCounts.message = result.message || 0;
-      }
-      chrome.tabs.query({url:"https://fiicen.jp/*"}).then((tabs)=>{
-        tabs.forEach((tab)=>{
-          try {
-            chrome.tabs.sendMessage(tab.id, message);
-          } catch {}
+        chrome.tabs.query({url:"https://fiicen.jp/*"}).then((tabs)=>{
+          tabs.forEach((tab)=>{
+            try {
+              chrome.tabs.sendMessage(tab.id, message);
+            } catch {}
+          });
         });
       });
       return;

@@ -941,6 +941,7 @@ function modifySettings() {
 
     for (let item of [
         {name: "datasaver", text: "データセーバー"},
+        {name: "asyncNotification", text: "リアルタイム通知"},
         {name: "debug", text: "デバッグモード"}
     ]) {
         settingBody.append(
@@ -965,7 +966,7 @@ function modifySettings() {
     settingBody.lastChild.append(document.createElement("a"));
 
     messageExt("extURL", "about.html").then((about_url)=>{
-        settingBody.children[2].lastChild.href = about_url;
+        settingBody.querySelector("section:nth-last-child(2) > a").href = about_url;
     });
     settingBody.lastChild.lastChild.target = "_blank";
     settingBody.lastChild.lastChild.innerText = "Fiicen Improver について...";
