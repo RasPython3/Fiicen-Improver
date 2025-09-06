@@ -1222,17 +1222,21 @@ window.fetch = async (...args)=>{
 document.addEventListener("click", (e)=>{
     if (e.target.computedStyleMap && e.target.computedStyleMap().get("--imprv-saved") || window.getComputedStyle && window.getComputedStyle(e.target).getPropertyValue("--imprv-saved")) {
         // it is data-saved image
-        let bigImg = e.target.parentElement.nextElementSibling.children[0];
+        let bigImg = e.target.parentElement.parentElement.classList.contains("media-group") ? e.target.nextElementSibling.children[0] : e.target.parentElement.nextElementSibling.children[0];
         e.target.srcset = (e.target.srcset || e.target.getAttribute("_srcset") || "").replaceAll("image?url=", "image?_&url=");
         e.target.src = (e.target.src || e.target.getAttribute("_src") || "").replace("image?url=", "image?_&url=");
         bigImg.srcset = (bigImg.srcset || bigImg.getAttribute("_srcset") || "").replaceAll("image?url=", "image?_&url=");
         bigImg.src = (bigImg.src || bigImg.getAttribute("_src") || "").replace("image?url=", "image?_&url=");
         let circle = e.target.parentElement.parentElement.parentElement.parentElement.parentElement;
-        let props = circle[Object.keys(circle).filter(key=>key.startsWith("__reactProps"))[0]].children[2].props;
-        if (props.image.includes("?")) {
-            props.image += "&_=_";
-        } else {
-            props.image += "?_=_";
+        if (circle.classList.contains("relative")) {
+            try {
+                let props = circle[Object.keys(circle).filter(key=>key.startsWith("__reactProps"))[0]].children[2].props;
+                if (props.image.includes("?")) {
+                    props.image += "&_=_";
+                } else {
+                    props.image += "?_=_";
+                }
+            } catch {}
         }
     }
 });

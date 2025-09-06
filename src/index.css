@@ -106,6 +106,10 @@ div:has(> main:nth-child(3)) > div > div {
     gap: 0.25rem;
 }
 
+div:has(> main:nth-child(3)) > div > div > div:first-child div:not(.fixed) > img {
+    --imprv-saved: 1;
+}
+
 div:has(> main:nth-child(3)) > div > div > div:last-child:has(> p) {
     display: flex;
     align-items: center;
@@ -259,6 +263,7 @@ svg[name="qrcode"]:where(.dark,.dark *) {
     margin-right: -0.5rem;
     border-top-style: solid;
     border-top-width: 1px;
+    --imprv-saved: 1;
 }
 
 .quoted-circle > div  > .media-group > div {
