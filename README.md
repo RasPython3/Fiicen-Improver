@@ -1,5 +1,5 @@
-<h1 align="center">
-<img src="src/images/logo.svg" style="width: 2em; height: 2em;">
+<h1 align="center" style="font-size: 3em;">
+<img src="src/images/logo.svg" style="width: 1.5em; height: 1.5em;" />
 Fiicen Improver
 </h1>
 
@@ -44,29 +44,38 @@ Fiicen Improver は、[Fiicen](https://fiicen.jp/)の「もうちょっとこう
 
 ### 魔改造された見た目
 
-* サークル
-
-* プロフィール
+| ____________ | Before | After |
+| -------- | -------- | -------- |
+| サークル | ![circle before](<assets/circle-before.png>) | ![circle after](<assets/circle-after.png>) |
+| プロフィール | ![profile before](<assets/profile-before.png>) | ![profile after](<assets/profile-after.png>) |
 
 ### 独自バッジの追加
 
 * あなただけのバッジを追加(ほかの人からは見えません)
+* 拡張機能の開発者やテスターは一目瞭然
 
-* この拡張機能の開発者やテスターは一目瞭然
+  | ユーザー | 開発者 | テスター |
+  | -------- | -------- | -------- |
+  | ![extension user badge](src/images/badges/user.svg) | ![extension developer badge](src/images/badges/developer.svg) | ![extension tester badge](src/images/badges/tester.svg) |
 
 ### 疑似引用サークル
 
 * サークルの右下から疑似的な引用が可能
 
+![alt text](<assets/image1.png>)
+
 * urlをペーストすれば同時に複数の引用も
+
+![alt text](<assets/image2.png>)
 
 * 相手に通知は届かないので適宜メンションしましょう
 
 ### データセーバー
 
 * 画質をめちゃくちゃ低くして通信量を節約
-
 * 画像をタップすると元画像に戻ります
+
+![alt text](<assets/image3.png>)
 
 ### リアルタイム通知
 
