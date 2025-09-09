@@ -14,13 +14,16 @@ div.min-h-screen.border-x > div:first-child > div:first-child) {
         }
         > div:nth-child(2) {
             padding-left: 2.25rem;
-            padding-right: 1rem;
+            padding-right: 1.625rem;
             > div:not(.mt-1.whitespace-pre-wrap.break-all):has(> a), > video {
                 margin-left: -0.625rem;
+                margin-right: -0.625rem;
+                max-width: calc(100% + 0.625rem);
+                width: calc(100% + 0.625rem);
             }
             > div:not(.mt-1.whitespace-pre-wrap.break-all):not(:has(> a)) {
                 margin-left: -0.625rem;
-                margin-right: 0.625rem;
+                margin-right: 0;
                 > div {
                     display: flex;
                     align-content: center;
@@ -41,7 +44,7 @@ div.min-h-screen.border-x > div:first-child > div:first-child) {
             > div.mt-1.whitespace-pre-wrap.break-all > :where(iframe, div) {
                 margin-top: 0.5rem;
                 margin-left: -0.625rem;
-                margin-right: 0.625rem;
+                margin-right: 0;
             }
             > div.mt-1.whitespace-pre-wrap.break-all > video {
                 margin-left: -1rem;
@@ -50,15 +53,15 @@ div.min-h-screen.border-x > div:first-child > div:first-child) {
             @media (max-width: 768px) {
                 > div:not(.mt-1.whitespace-pre-wrap.break-all):has(> a), > video {
                     margin-left: -1.5rem;
-                    margin-right: -.875rem;
-                    max-width: calc(100% + 1.75rem);
-                    width: calc(100% + 1.75rem);
+                    margin-right: -0.875rem;
+                    max-width: calc(100% + 2.375rem);
+                    width: calc(100% + 2.375rem);
                 }
                 > div:not(.mt-1.whitespace-pre-wrap.break-all):not(:has(> a)),
                 > div.mt-1.whitespace-pre-wrap.break-all > :where(iframe, div) {
                     margin-left: -1.5rem;
-                    margin-right: -.25rem;
-                    width: calc(100% + 1.75rem);
+                    margin-right: -0.875rem;
+                    width: calc(100% + 2.375rem);
                 }
             }
         }
@@ -275,7 +278,7 @@ svg[name="qrcode"]:where(.dark,.dark *) {
     width: 100%;
     height: auto;
     cursor: pointer;
-    z-index: 10;
+    z-index: 9;
 }
 
 /* setting */
