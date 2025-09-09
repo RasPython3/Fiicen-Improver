@@ -238,7 +238,9 @@ chrome.runtime.onMessage.addListener((message, sender) => {
       }, (items)=>{
         if (result) {
           if (items.asyncNotification) {
-            if (result.notification > notificationCounts.notification) {
+            result.notification = result.notification || 0;
+            result.message = result.message || 0;
+            if (result.notification != notificationCounts.notification && result.notification > 0) {
               let	options={
                 type: "basic",
                 title: "Fiicen",
@@ -246,8 +248,10 @@ chrome.runtime.onMessage.addListener((message, sender) => {
                 iconUrl: "https://fiicen.jp/favicon.ico"
               };
               chrome.notifications.create("https://fiicen.jp/notification", options);
+            } else if (result.notification == 0) {
+              chrome.notifications.clear("https://fiicen.jp/notification")
             }
-            if (result.message > notificationCounts.message) {
+            if (result.message != notificationCounts.message && result.message > 0) {
               let	options={
                 type: "basic",
                 title: "Fiicen",
@@ -255,10 +259,12 @@ chrome.runtime.onMessage.addListener((message, sender) => {
                 iconUrl: "https://fiicen.jp/favicon.ico"
               };
               chrome.notifications.create("https://fiicen.jp/message", options);
+            } else if (result.message == 0) {
+              chrome.notifications.clear("https://fiicen.jp/message")
             }
           }
-          notificationCounts.notification = result.notification || 0;
-          notificationCounts.message = result.message || 0;
+          notificationCounts.notification = result.notification;
+          notificationCounts.message = result.message;
         }
         chrome.tabs.query({url:"https://fiicen.jp/*"}).then((tabs)=>{
           tabs.forEach((tab)=>{
