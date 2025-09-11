@@ -1,21 +1,25 @@
-// inject injected.js
-const injectedScript = document.createElement("script");
-injectedScript.src = chrome.runtime.getURL("js/injected.js");
-document.body.insertAdjacentElement("afterbegin", injectedScript);
+const injectSuccess = document.head?.querySelector("link[rel=\"manifest\"]") != undefined;
 
-// inject other scripts
-for (let js of [
+if (injectSuccess) {
+  // inject injected.js
+  const injectedScript = document.createElement("script");
+  injectedScript.src = chrome.runtime.getURL("js/injected.js");
+  document.body.insertAdjacentElement("afterbegin", injectedScript);
+
+  // inject other scripts
+  for (let js of [
+      {
+        path: "js/qrcode.js",
+        async: false
+      }])
     {
-      path: "js/qrcode.js",
-      async: false
-    }])
-  {
-  let script = document.createElement("script");
-  script.src = chrome.runtime.getURL(js.path);
-  if (js.async) {
-    script.setAttribute("async", "");
+    let script = document.createElement("script");
+    script.src = chrome.runtime.getURL(js.path);
+    if (js.async) {
+      script.setAttribute("async", "");
+    }
+    document.body.insertAdjacentElement("afterbegin", script);
   }
-  document.body.insertAdjacentElement("afterbegin", script);
 }
 
 // handle messages from injected.js
@@ -83,43 +87,45 @@ chrome.runtime.onMessage.addListener((message) => {
   if (Object.prototype.isPrototypeOf(data) && data.request) {
     switch (data.request) {
       case "checkNotificationCount":
-        (async (NextActionValue)=>{
-          let result = {};
-          for (let i of [
-            {
-              name: "notification",
-              url: "https://fiicen.jp/notification",
-              body: "[\"http://localhost:8000/notifications/count\"]"
-            },
-            {
-              name: "message",
-              url: "https://fiicen.jp/message",
-              body: "[\"http://localhost:8000/message/count\"]"
-            },
-          ]) {
-            let res;
-            try {
-              res = await fetch(i.url, {
-                method: "POST",
-                body: i.body,
-                headers: {
-                  "next-action": NextActionValue,
-                  "sec-fetch-dest": "empty",
-                  "sec-fetch-mode": "cors",
-                  "sec-fetch-site": "same-origin"
-                },
-                "mode": "cors",
-                "credentials": "include"
-              });
-              result[i.name] = JSON.parse((await res.text()).match(/1:(.*)/)?.at(1) || "{}").json?.count;
-            } catch {}
-          }
-          chrome.runtime.sendMessage(JSON.stringify({
-            request: "updateNotificationCount",
-            value: JSON.stringify(result)
-          }));
-        })(data.value);
-        return;
+        if (injectSuccess) {
+          (async (NextActionValue)=>{
+            let result = {};
+            for (let i of [
+              {
+                name: "notification",
+                url: "https://fiicen.jp/notification",
+                body: "[\"http://localhost:8000/notifications/count\"]"
+              },
+              {
+                name: "message",
+                url: "https://fiicen.jp/message",
+                body: "[\"http://localhost:8000/message/count\"]"
+              },
+            ]) {
+              let res;
+              try {
+                res = await fetch(i.url, {
+                  method: "POST",
+                  body: i.body,
+                  headers: {
+                    "next-action": NextActionValue,
+                    "sec-fetch-dest": "empty",
+                    "sec-fetch-mode": "cors",
+                    "sec-fetch-site": "same-origin"
+                  },
+                  "mode": "cors",
+                  "credentials": "include"
+                });
+                result[i.name] = JSON.parse((await res.text()).match(/1:(.*)/)?.at(1) || "{}").json?.count;
+              } catch {}
+            }
+            chrome.runtime.sendMessage(JSON.stringify({
+              request: "updateNotificationCount",
+              value: JSON.stringify(result)
+            }));
+          })(data.value);
+        }
+        return injectSuccess;
     }
   }
   let response = new CustomEvent("ext-message", {

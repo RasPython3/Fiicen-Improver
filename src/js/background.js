@@ -38,11 +38,16 @@ async function checkNotificationCounts() {
     });
   }) && NextActionValue) {
 
-    let tabId = (await chrome.tabs.query({url:"https://fiicen.jp/*", status:"complete"})).sort((a,b)=>b.lastAccessed-a.lastAccessed).at(0)?.id;
+    let tabs = (await chrome.tabs.query({url:"https://fiicen.jp/*", status:"complete"})).sort((a,b)=>b.lastAccessed-a.lastAccessed);
 
-    if (tabId) {
+    console.log(tabs);
+
+    for (let tab of tabs) {
       try {
-        chrome.tabs.sendMessage(tabId, JSON.stringify({request: "checkNotificationCount", value: NextActionValue})).catch(()=>{});
+        console.log(tab.id);
+        if (await chrome.tabs.sendMessage(tab.id, JSON.stringify({request: "checkNotificationCount", value: NextActionValue}))) {
+          break;
+        }
       } catch {}
     }
   }
@@ -269,7 +274,7 @@ chrome.runtime.onMessage.addListener((message, sender) => {
         chrome.tabs.query({url:"https://fiicen.jp/*"}).then((tabs)=>{
           tabs.forEach((tab)=>{
             try {
-              chrome.tabs.sendMessage(tab.id, message);
+              chrome.tabs.sendMessage(tab.id, message).catch(()=>{});
             } catch {}
           });
         });
