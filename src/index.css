@@ -283,7 +283,7 @@ svg[name="qrcode"]:where(.dark,.dark *) {
 
 /* setting */
 
-._fiicen_improver_setting section {
+._fiicen_improver_settings section {
     display: flex;
     width: 100%;
     justify-content: space-between;
@@ -296,11 +296,11 @@ svg[name="qrcode"]:where(.dark,.dark *) {
     box-sizing: border-box;
 }
 
-._fiicen_improver_setting section + section {
+._fiicen_improver_settings section + section {
     margin-top: 0.5rem;
 }
 
-._fiicen_improver_setting section > input[type="checkbox"], input.fiicen-improver-checkbox[type="checkbox"] {
+._fiicen_improver_settings section > input[type="checkbox"], input.fiicen-improver-checkbox[type="checkbox"] {
     display: inline-flex;
     appearance: unset;
     width: 3.5em;
@@ -312,11 +312,11 @@ svg[name="qrcode"]:where(.dark,.dark *) {
     box-sizing: border-box;
 }
 
-._fiicen_improver_setting section > input[type="checkbox"]:checked, input.fiicen-improver-checkbox[type="checkbox"]:checked {
+._fiicen_improver_settings section > input[type="checkbox"]:checked, input.fiicen-improver-checkbox[type="checkbox"]:checked {
     background-color: #6666ff;
 }
 
-._fiicen_improver_setting section > input[type="checkbox"]::after, input.fiicen-improver-checkbox[type="checkbox"]::after {
+._fiicen_improver_settings section > input[type="checkbox"]::after, input.fiicen-improver-checkbox[type="checkbox"]::after {
     content: "";
     display: inline-block;
     position: relative;
@@ -336,11 +336,11 @@ svg[name="qrcode"]:where(.dark,.dark *) {
     transition: left 0.15s cubic-bezier(0.67, -0.01, 0.1, 1.5);
 }
 
-._fiicen_improver_setting section > input[type="checkbox"]:checked::after, input.fiicen-improver-checkbox[type="checkbox"]:checked::after {
+._fiicen_improver_settings section > input[type="checkbox"]:checked::after, input.fiicen-improver-checkbox[type="checkbox"]:checked::after {
     left: 42%;
 }
 
-._fiicen_improver_setting section:has(> a) {
+._fiicen_improver_settings section:has(> a) {
     padding: 0;
     > a {
         display: inline-block;
@@ -350,13 +350,13 @@ svg[name="qrcode"]:where(.dark,.dark *) {
     }
 }
 
-._fiicen_improver_setting section:last-child {
+._fiicen_improver_settings section:last-child {
     flex-direction: row-reverse;
     padding-top: 0;
     padding-bottom: 0;
 }
 
-._fiicen_improver_setting section:last-child > span {
+._fiicen_improver_settings section:last-child > span {
     font-size: 0.75em;
     opacity: 50%;
 }

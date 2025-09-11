@@ -838,176 +838,185 @@ function modifySettings() {
     }
 
     let settingList = document.querySelector("main > div > ul");
+    let settingItem;
 
-    if (settingList.lastChild.lastChild.tagName.toUpperCase() == "DIV") {
-        return;
-    }
+    if (settingList.lastChild.lastChild.tagName.toUpperCase() != "DIV") {
+        settingItem = document.createElement("li");
+        let settingPopup = document.createElement("div");
 
-    let settingItem = document.createElement("li");
-    let settingPopup = document.createElement("div");
+        // setting item
 
-    // setting item
+        settingItem.className = "relative false _fiicen_improver_settings";
 
-    settingItem.className = "relative false _fiicen_improver_setting";
-
-    settingItem.append(document.createElement("div"));
-    settingItem.firstChild.append(
-        document.createElement("div"),
-        document.createElementNS("http://www.w3.org/2000/svg","svg")
-    );
-
-    settingItem.firstChild.className = "base-bg-hover flex items-center justify-between p-4";
-
-    settingItem.firstChild.firstChild.appendChild(document.createElement("p"));
-    settingItem.firstChild.firstChild.firstChild.innerText = "Fiicen Improver の設定";
-
-    settingItem.firstChild.lastChild.setAttribute("class", "size-6 shrink-0 opacity-50");
-    settingItem.firstChild.lastChild.setAttribute("fill", "currentColor");
-    settingItem.firstChild.lastChild.setAttribute("viewBox", "0 0 24 24");
-    settingItem.firstChild.lastChild.setAttribute("stroke", "none");
-
-    settingItem.firstChild.lastChild.append(
-        document.createElementNS("http://www.w3.org/2000/svg","path")
-    );
-
-    settingItem.firstChild.lastChild.firstChild.setAttribute("d", "M 3 4 C 3 3.448 3.448 3 4 3 L 19.978 3 C 20.241 2.994 20.506 3.092 20.707 3.293 C 20.908 3.494 21.006 3.759 21 4.022 L 21 20 C 21 20.552 20.552 21 20 21 C 19.448 21 19 20.552 19 20 L 19 6.414 L 4.707 20.707 C 4.317 21.098 3.683 21.098 3.293 20.707 C 2.902 20.317 2.902 19.683 3.293 19.293 L 17.586 5 L 4 5 C 3.448 5 3 4.552 3 4 Z");
-
-    // setting popup
-    settingPopup.className = "fixed bottom-0 left-0 z-10 h-screen w-screen duration-300 pointer-events-none bg-transparent z-20 flex flex-col justify-end p-4 md:justify-center undefined";
-
-    settingPopup.append(
-        document.createElement("div")
-    );
-
-    settingPopup.firstChild.className = "base-bg mx-auto h-2/3 w-full max-w-xl rounded-3xl scale-75 opacity-0 blur overflow-y-auto duration-300 h-auto p-4"
-
-    settingPopup.firstChild.append(
-        document.createElement("div"),
-        document.createElement("div")
-    );
-
-    settingPopup.firstChild.firstChild.className = "mb-2 flex items-center justify-between";
-    settingPopup.firstChild.lastChild.className = "flex flex-col gap-4 text-left";
-
-    settingPopup.firstChild.firstChild.append(
-        document.createElement("h1"),
-        document.createElement("button")
-    );
-
-    settingPopup.firstChild.firstChild.firstChild.className = "text-xl font-bold";
-    settingPopup.firstChild.firstChild.firstChild.innerText = "Fiicen Improver の設定";
-    
-    settingPopup.firstChild.firstChild.lastChild.className = "base-bg-hover rounded-full p-2";
-
-    settingPopup.firstChild.firstChild.lastChild.append(
-        document.createElementNS("http://www.w3.org/2000/svg","svg")
-    );
-
-    settingPopup.firstChild.firstChild.lastChild.firstChild.setAttribute("class", "size-5");
-    settingPopup.firstChild.firstChild.lastChild.firstChild.setAttribute("fill", "none");
-    settingPopup.firstChild.firstChild.lastChild.firstChild.setAttribute("viewBox", "0 0 24 24");
-    settingPopup.firstChild.firstChild.lastChild.firstChild.setAttribute("stroke", "currentColor");
-    settingPopup.firstChild.firstChild.lastChild.firstChild.setAttribute("strokeWidth", "1.5");
-
-    settingPopup.firstChild.firstChild.lastChild.firstChild.append(
-        document.createElementNS("http://www.w3.org/2000/svg","path")
-    );
-
-    settingPopup.firstChild.firstChild.lastChild.firstChild.firstChild.setAttribute("stroke-linecap", "round");
-    settingPopup.firstChild.firstChild.lastChild.firstChild.firstChild.setAttribute("stroke-linejoin", "round");
-    settingPopup.firstChild.firstChild.lastChild.firstChild.firstChild.setAttribute("d", "M6 18 18 6M6 6l12 12");
-
-    settingPopup.firstChild.lastChild.append(
-        document.createElement("div")
-    );
-
-    settingPopup.firstChild.lastChild.firstChild.append(
-        document.createElement("div")
-    );
-
-    let settingBody = settingPopup.firstChild.lastChild.firstChild.firstChild;
-
-    for (let item of [
-        {name: "datasaver", text: "データセーバー"},
-        {name: "asyncNotification", text: "リアルタイム通知"},
-        {name: "debug", text: "デバッグモード"}
-    ]) {
-        settingBody.append(
-            document.createElement("section")
+        settingItem.append(document.createElement("div"));
+        settingItem.firstChild.append(
+            document.createElement("div"),
+            document.createElementNS("http://www.w3.org/2000/svg","svg")
         );
 
-        settingBody.lastChild.append(
-            document.createElement("label"),
-            document.createElement("input")
+        settingItem.firstChild.className = "base-bg-hover flex items-center justify-between p-4";
+
+        settingItem.firstChild.firstChild.appendChild(document.createElement("p"));
+        settingItem.firstChild.firstChild.firstChild.innerText = "Fiicen Improver の設定";
+
+        settingItem.firstChild.lastChild.setAttribute("class", "size-6 shrink-0 opacity-50");
+        settingItem.firstChild.lastChild.setAttribute("fill", "currentColor");
+        settingItem.firstChild.lastChild.setAttribute("viewBox", "0 0 24 24");
+        settingItem.firstChild.lastChild.setAttribute("stroke", "none");
+
+        settingItem.firstChild.lastChild.append(
+            document.createElementNS("http://www.w3.org/2000/svg","path")
         );
 
-        settingBody.lastChild.firstChild.innerText = item.text;
-        settingBody.lastChild.firstChild.setAttribute("for", item.name);
+        settingItem.firstChild.lastChild.firstChild.setAttribute("d", "M 3 4 C 3 3.448 3.448 3 4 3 L 19.978 3 C 20.241 2.994 20.506 3.092 20.707 3.293 C 20.908 3.494 21.006 3.759 21 4.022 L 21 20 C 21 20.552 20.552 21 20 21 C 19.448 21 19 20.552 19 20 L 19 6.414 L 4.707 20.707 C 4.317 21.098 3.683 21.098 3.293 20.707 C 2.902 20.317 2.902 19.683 3.293 19.293 L 17.586 5 L 4 5 C 3.448 5 3 4.552 3 4 Z");
 
-        settingBody.lastChild.lastChild.setAttribute("name", item.name);
-        settingBody.lastChild.lastChild.setAttribute("type", "checkbox");
-    }
+        // setting popup
+        settingPopup.className = "fixed bottom-0 left-0 z-10 h-screen w-screen duration-300 pointer-events-none bg-transparent z-20 flex flex-col justify-end p-4 md:justify-center undefined";
 
-    settingBody.append(document.createElement("section"));
-    settingBody.lastChild.className = "base-bg-hover";
+        settingPopup.append(
+            document.createElement("div")
+        );
 
-    settingBody.lastChild.append(document.createElement("a"));
+        settingPopup.firstChild.className = "base-bg mx-auto h-2/3 w-full max-w-xl rounded-3xl scale-75 opacity-0 blur overflow-y-auto duration-300 h-auto p-4"
 
-    messageExt("extURL", "about.html").then((about_url)=>{
-        settingBody.querySelector("section:nth-last-child(2) > a").href = about_url;
-    });
-    settingBody.lastChild.lastChild.target = "_blank";
-    settingBody.lastChild.lastChild.innerText = "Fiicen Improver について...";
+        settingPopup.firstChild.append(
+            document.createElement("div"),
+            document.createElement("div")
+        );
 
-    settingBody.append(document.createElement("section"));
-    settingBody.lastChild.style.display = "none";
+        settingPopup.firstChild.firstChild.className = "mb-2 flex items-center justify-between";
+        settingPopup.firstChild.lastChild.className = "flex flex-col gap-4 text-left";
 
-    settingBody.lastChild.append(document.createElement("span"));
+        settingPopup.firstChild.firstChild.append(
+            document.createElement("h1"),
+            document.createElement("button")
+        );
 
-    messageExt("version").then((version)=>{
-        settingBody.lastChild.lastChild.innerText = "ver. " + version;
-        settingBody.lastChild.style.display = "";
-    });
+        settingPopup.firstChild.firstChild.firstChild.className = "text-xl font-bold";
+        settingPopup.firstChild.firstChild.firstChild.innerText = "Fiicen Improver の設定";
+        
+        settingPopup.firstChild.firstChild.lastChild.className = "base-bg-hover rounded-full p-2";
 
-    messageExt("getSettings").then((settings)=>{
-        for (let key of Object.keys(settings)) {
-            let item = settingBody.querySelector(`input[name="${key}"]`);
-            if (item == undefined) {
-                continue;
+        settingPopup.firstChild.firstChild.lastChild.append(
+            document.createElementNS("http://www.w3.org/2000/svg","svg")
+        );
+
+        settingPopup.firstChild.firstChild.lastChild.firstChild.setAttribute("class", "size-5");
+        settingPopup.firstChild.firstChild.lastChild.firstChild.setAttribute("fill", "none");
+        settingPopup.firstChild.firstChild.lastChild.firstChild.setAttribute("viewBox", "0 0 24 24");
+        settingPopup.firstChild.firstChild.lastChild.firstChild.setAttribute("stroke", "currentColor");
+        settingPopup.firstChild.firstChild.lastChild.firstChild.setAttribute("strokeWidth", "1.5");
+
+        settingPopup.firstChild.firstChild.lastChild.firstChild.append(
+            document.createElementNS("http://www.w3.org/2000/svg","path")
+        );
+
+        settingPopup.firstChild.firstChild.lastChild.firstChild.firstChild.setAttribute("stroke-linecap", "round");
+        settingPopup.firstChild.firstChild.lastChild.firstChild.firstChild.setAttribute("stroke-linejoin", "round");
+        settingPopup.firstChild.firstChild.lastChild.firstChild.firstChild.setAttribute("d", "M6 18 18 6M6 6l12 12");
+
+        settingPopup.firstChild.lastChild.append(
+            document.createElement("div")
+        );
+
+        settingPopup.firstChild.lastChild.firstChild.append(
+            document.createElement("div")
+        );
+
+        let settingBody = settingPopup.firstChild.lastChild.firstChild.firstChild;
+
+        for (let item of [
+            {name: "datasaver", text: "データセーバー"},
+            {name: "asyncNotification", text: "リアルタイム通知"},
+            {name: "debug", text: "デバッグモード"}
+        ]) {
+            settingBody.append(
+                document.createElement("section")
+            );
+
+            settingBody.lastChild.append(
+                document.createElement("label"),
+                document.createElement("input")
+            );
+
+            settingBody.lastChild.firstChild.innerText = item.text;
+            settingBody.lastChild.firstChild.setAttribute("for", item.name);
+
+            settingBody.lastChild.lastChild.setAttribute("name", item.name);
+            settingBody.lastChild.lastChild.setAttribute("type", "checkbox");
+        }
+
+        settingBody.append(document.createElement("section"));
+        settingBody.lastChild.className = "base-bg-hover";
+
+        settingBody.lastChild.append(document.createElement("a"));
+
+        messageExt("extURL", "about.html").then((about_url)=>{
+            settingBody.querySelector("section:nth-last-child(2) > a").href = about_url;
+        });
+        settingBody.lastChild.lastChild.target = "_blank";
+        settingBody.lastChild.lastChild.innerText = "Fiicen Improver について...";
+
+        settingBody.append(document.createElement("section"));
+        settingBody.lastChild.style.display = "none";
+
+        settingBody.lastChild.append(document.createElement("span"));
+
+        messageExt("version").then((version)=>{
+            settingBody.lastChild.lastChild.innerText = "ver. " + version;
+            settingBody.lastChild.style.display = "";
+        });
+
+        messageExt("getSettings").then((settings)=>{
+            for (let key of Object.keys(settings)) {
+                let item = settingBody.querySelector(`input[name="${key}"]`);
+                if (item == undefined) {
+                    continue;
+                }
+                item.checked = settings[key];
+                item.addEventListener("change", (ev)=>{
+                    let data = {};
+                    data[ev.target.getAttribute("name")] = ev.target.checked;
+                    messageExt("setSettings", data);
+                });
             }
-            item.checked = settings[key];
-            item.addEventListener("change", (ev)=>{
-                let data = {};
-                data[ev.target.getAttribute("name")] = ev.target.checked;
-                messageExt("setSettings", data);
-            });
-        }
-    });
+        });
 
-    settingItem.append(settingPopup);
+        settingItem.append(settingPopup);
 
-    settingList.append(settingItem);
+        settingList.append(settingItem);
 
 
-    settingItem.children[0].addEventListener("click", ()=>{
-        settingItem.children[1].classList.add("bg-black/20");
-        settingItem.children[1].classList.remove("pointer-events-none", "bg-transparent");
-        settingItem.children[1].children[0].classList.remove("blur", "scale-75", "opacity-0");
-    });
+        settingItem.children[0].addEventListener("click", ()=>{
+            if (location.hash != "#fiicen-improver-settings") {
+                location.hash = "#fiicen-improver-settings";
+            }
+            settingItem.children[1].classList.add("bg-black/20");
+            settingItem.children[1].classList.remove("pointer-events-none", "bg-transparent");
+            settingItem.children[1].children[0].classList.remove("blur", "scale-75", "opacity-0");
+        });
 
-    let close = ()=>{
-        settingItem.children[1].classList.remove("bg-black/20");
-        settingItem.children[1].classList.add("pointer-events-none", "bg-transparent");
-        settingItem.children[1].children[0].classList.add("blur", "scale-75", "opacity-0");
-    };
+        let close = ()=>{
+            history.pushState({}, '', location.pathname);
+            settingItem.children[1].classList.remove("bg-black/20");
+            settingItem.children[1].classList.add("pointer-events-none", "bg-transparent");
+            settingItem.children[1].children[0].classList.add("blur", "scale-75", "opacity-0");
+        };
 
-    settingItem.children[1].querySelector("button").addEventListener("click", close);
+        settingItem.children[1].querySelector("button").addEventListener("click", close);
 
-    settingItem.children[1].addEventListener("click", (ev)=>{
-        if (ev.target == settingItem.children[1]) {
-            close();
-        }
-    });
+        settingItem.children[1].addEventListener("click", (ev)=>{
+            if (ev.target == settingItem.children[1]) {
+                close();
+            }
+        });
+    } else {
+        settingItem = settingList.lastChild;
+    }
+
+    if (location.hash == "#fiicen-improver-settings") {
+        settingItem.children[0].click();
+    }
 }
 
 // Improve post form
