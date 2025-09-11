@@ -13,10 +13,12 @@
         width: 100%;
         justify-content: space-between;
         align-items: center;
-        border: solid 1px #444444;
-        padding: 0.5em;
         gap: 2rem;
         box-sizing: border-box;
+      }
+      section:has(> label) {
+        border: solid 1px #444444;
+        padding: 0.5em;
       }
       section + section {
         margin-top: 0.5rem;
@@ -70,6 +72,9 @@
     <section>
       <label for="debug">デバッグモード</label>
       <input name="debug" type="checkbox">
+    </section>
+    <section>
+      <a target="_blank" href="/about.html">この拡張機能について...</a>
     </section>
     <script src="js/popup.js"></script>
   </body>
