@@ -5,7 +5,9 @@ on:
 jobs:
   Release:
     runs-on: ubuntu-latest
-    run: |
+    steps:
+    - name: echo release note
+      run: |
         echo "- github.event.release --------------------------"
         echo ${{ github.event.release }}
         echo "- github.event.release.html_url --------------------------"
