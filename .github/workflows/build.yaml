@@ -20,7 +20,9 @@ jobs:
     steps:
       - name: Get version
         run: |
-          python -c 'import json\nwith open("src/manifest.json", mode="r", encoding="utf-8") as f: print("VERSION=v" + json.load(f)["version"])' >> $GITHUB_ENV
+          python -c 'import json
+          with open("src/manifest.json", mode="r", encoding="utf-8") as f:
+            print("VERSION=v" + json.load(f)["version"])' >> $GITHUB_ENV
 
       - name: Add test prefix
         if: ${{ github.ref == 'refs/heads/release-test' }}
