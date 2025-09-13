@@ -40,6 +40,15 @@ Fiicen Improver は、[Fiicen](https://fiicen.jp/)の「もうちょっとこう
 
 ### Orion
 
+## Build from source
+
+1. Run :
+  ```shell
+  python3 build.py
+  ```
+
+2. Output files are in `build/`
+
 ## Usage
 
 ### 魔改造された見た目
