@@ -19,9 +19,9 @@ jobs:
     needs: setup
     steps:
       - name: Get version
-        working-directory: .
         run: |
-          python -c 'import json
+          python -c 'import os, json
+          print(os.getcwd())
           with open("src/manifest.json", mode="r", encoding="utf-8") as f:
             print("VERSION=v" + json.load(f)["version"])' >> $GITHUB_ENV
 
