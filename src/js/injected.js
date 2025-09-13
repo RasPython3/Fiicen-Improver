@@ -164,19 +164,21 @@ var errorBoxes;
 
 function outputError(e) {
     console.log(e);
-    let trace;
-    if (typeof(e) == "string") {
-        trace = `Error: ${e}`;
-    } else {
-        trace = `File "${e.filename}", line ${e.lineno}, col ${e.colno}\nError: ${e.message}`;
-    }
-    let box = document.createElement("span");
-    box.innerText = trace;
-    errorBoxes.append(box);
-    box.onclick = ()=>{
-        box.remove();
-    }
-    return true;
+    try {
+        let trace;
+        if (typeof(e) == "string") {
+            trace = `Error: ${e}`;
+        } else {
+            trace = `File "${e.filename}", line ${e.lineno}, col ${e.colno}\nError: ${e.message}`;
+        }
+        let box = document.createElement("span");
+        box.innerText = trace;
+        errorBoxes.append(box);
+        box.onclick = ()=>{
+            box.remove();
+        }
+        return true;
+    } catch {}
 }
 
 /* エラー検証 */
