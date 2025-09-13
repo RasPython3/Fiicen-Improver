@@ -1,0 +1,21 @@
+name: Release Chrome Web Store
+on:
+  release:
+    types: [published]
+jobs:
+  Release:
+    runs-on: ubuntu-latest
+    run: |
+        echo "- github.event.release --------------------------"
+        echo ${{ github.event.release }}
+        echo "- github.event.release.html_url --------------------------"
+        echo "${{ github.event.release.html_url }}"
+        echo "- github.event.release.name --------------------------"
+        echo "${{ github.event.release.name }}"
+        echo "- github.event.release.tag_name --------------------------"
+        echo "${{ github.event.release.tag_name }}"
+        echo "- github.event.release.body --------------------------"
+        echo '${{ github.event.release.body }}'
+        echo "---------------------------"
+        echo '${{ github.event.release.releaseAssets.nodes }}'
+        echo "---------------------------"
