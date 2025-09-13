@@ -20,6 +20,7 @@ jobs:
     steps:
       - name: Get version
         run: |
+          ls
           python -c 'import os, json
           print(os.getcwd())
           with open("src/manifest.json", mode="r", encoding="utf-8") as f:
