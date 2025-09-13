@@ -1122,7 +1122,12 @@ window.fetch = async (...args)=>{
             return result;
         }
     } catch {}
-    let result = await window._org_fetch(...args);
+    let result;
+    try {
+        result = await window._org_fetch(...args);
+    } catch (e) {
+        throw e;
+    }
     if (result.ok && args[0].hostname == "fiicen.jp") {
         if (args.length > 1 &&
             args[1].method != undefined &&
