@@ -59,6 +59,6 @@
   },
 
   "host_permissions":[
-        "*://*.fiicen.jp/*"
-    ]
+    "*://*.fiicen.jp/*"
+  ]
 }
