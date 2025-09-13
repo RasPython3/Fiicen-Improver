@@ -312,8 +312,16 @@ svg[name="qrcode"]:where(.dark,.dark *) {
     box-sizing: border-box;
 }
 
+._fiicen_improver_settings section > input[type="checkbox"]:disabled, input.fiicen-improver-checkbox[type="checkbox"]:disabled {
+    background-color: #aaaaaa80;
+}
+
 ._fiicen_improver_settings section > input[type="checkbox"]:checked, input.fiicen-improver-checkbox[type="checkbox"]:checked {
     background-color: #6666ff;
+}
+
+._fiicen_improver_settings section > input[type="checkbox"]:disabled:checked, input.fiicen-improver-checkbox[type="checkbox"]:disabled:checked {
+    background-color: #6666ff80;
 }
 
 ._fiicen_improver_settings section > input[type="checkbox"]::after, input.fiicen-improver-checkbox[type="checkbox"]::after {
@@ -338,6 +346,10 @@ svg[name="qrcode"]:where(.dark,.dark *) {
 
 ._fiicen_improver_settings section > input[type="checkbox"]:checked::after, input.fiicen-improver-checkbox[type="checkbox"]:checked::after {
     left: 42%;
+}
+
+._fiicen_improver_settings section > input[type="checkbox"]:disabled::after, input.fiicen-improver-checkbox[type="checkbox"]:disabled::after {
+    background-color: #ffffff80;
 }
 
 ._fiicen_improver_settings section:has(> a) {

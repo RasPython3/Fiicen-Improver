@@ -4,6 +4,10 @@ var settings = {
   debug: document.querySelector("input[name=\"debug\"]")
 };
 
+if (window.KAGI) {
+  settings.datasaver.disabled = true;
+}
+
 chrome.storage.local.get({datasaver: false, asyncNotification: true, debug: false}, (items)=>{
   document.querySelector("input[name=\"datasaver\"]").checked = items.datasaver;
   document.querySelector("input[name=\"asyncNotification\"]").checked = items.asyncNotification;

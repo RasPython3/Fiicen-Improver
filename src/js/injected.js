@@ -944,6 +944,10 @@ function modifySettings() {
 
             settingBody.lastChild.lastChild.setAttribute("name", item.name);
             settingBody.lastChild.lastChild.setAttribute("type", "checkbox");
+
+            if (window.KAGI && !testers.includes(username) && item.name == "datasaver") {
+                settingBody.lastChild.lastChild.disabled = true;
+            }
         }
 
         settingBody.append(document.createElement("section"));
