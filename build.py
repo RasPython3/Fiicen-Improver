@@ -17,10 +17,10 @@ def zip_files(directory, output):
                 zf.write(f"{directory}/{file}", arcname=file.replace(os.sep, "/"))
         
 
-def build_chrome():
-    shutil.copy("LICENSE", "build/chrome/Fiicen-Improver/LICENSE")
+def build_chromium():
+    shutil.copy("LICENSE", "build/chromium/Fiicen-Improver/LICENSE")
 
-    with open("build/chrome/Fiicen-Improver/about.html", encoding="utf-8", mode="w") as f:
+    with open("build/chromium/Fiicen-Improver/about.html", encoding="utf-8", mode="w") as f:
         f.write(about_html)
 
 def build_firefox():
@@ -124,19 +124,19 @@ def build():
 
     build_about()
 
-    os.makedirs("build/chrome")
+    os.makedirs("build/chromium")
 
-    shutil.copytree("src", "build/chrome/Fiicen-Improver")
-    build_chrome()
-    zip_files("build/chrome", f"build/chrome-{version}.zip")
+    shutil.copytree("src", "build/chromium/Fiicen-Improver")
+    build_chromium()
+    zip_files("build/chromium", f"build/Fiicen-Improver_{version}.chromium.zip")
 
     shutil.copytree("src", "build/firefox")
     build_firefox()
-    zip_files("build/firefox", f"build/firefox-{version}.zip")
+    zip_files("build/firefox", f"build/Fiicen-Improver_{version}.firefox.xpi")
 
     shutil.copytree("src", "build/orion")
     build_orion()
-    zip_files("build/orion", f"build/orion-{version}.zip")
+    zip_files("build/orion", f"build/Fiicen-Improver_{version}.orion.zip")
 
 if __name__ == "__main__":
     build()
