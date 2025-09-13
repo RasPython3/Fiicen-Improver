@@ -19,6 +19,7 @@ jobs:
     needs: setup
     steps:
       - name: Get version
+        working-directory: .
         run: |
           python -c 'import json
           with open("src/manifest.json", mode="r", encoding="utf-8") as f:
