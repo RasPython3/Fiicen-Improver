@@ -33,8 +33,14 @@
         align-items: center;
         box-sizing: border-box;
       }
+      input[type="checkbox"]:disabled {
+        background-color: #aaaaaa80;
+      }
       input[type="checkbox"]:checked {
         background-color: #6666ff;
+      }
+      input[type="checkbox"]:disabled:checked {
+        background-color: #6666ff80;
       }
       input[type="checkbox"]::after {
         content: "";
@@ -57,6 +63,9 @@
       }
       input[type="checkbox"]:checked::after {
         left: 42%;
+      }
+      input[type="checkbox"]:disabled::after {
+        background-color: #ffffff80;
       }
     </style>
   </head>
