@@ -367,6 +367,22 @@ async function onLoaded() { // first load or nextjs's router
                 })();
             }
         }
+        fetch("https://fiicen.jp/field/" + location.pathname.match(/\/field\/([^?\/]+)/)?.at(1), {
+            "method": "HEAD",
+        }).then((res)=>{
+            if (!res.ok && res.status == 403) {
+                let nextSibEl = document.querySelector("div:has(> main:nth-child(3)) > div > div:not(:has(> div:nth-child(3))):not(:has(> div.flex > span.text-danger)) > div.grid");
+                if (nextSibEl) {
+                    let banned = document.createElement("div");
+                    banned.className = "flex justify-center mb-2";
+                    banned.append(document.createElement("span"));
+                    banned.firstChild.className = "opacity-80 rounded-md second-bg text-sm px-2 py-1 text-danger";
+                    banned.firstChild.innerText = "BANされています";
+
+                    nextSibEl.insertAdjacentElement("beforebegin", banned);
+                }
+            }
+        })
     } else if (location.pathname.startsWith("/home") || location.pathname.startsWith("/explore/") || location.pathname.startsWith("/search/") || location.pathname.startsWith("/tag/") || location.pathname.startsWith("/circle/")) {
         if (location.pathname.startsWith("/circle/")) {
             for (let circleElement of document.querySelectorAll(
