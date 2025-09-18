@@ -6,11 +6,11 @@ jobs:
   Release:
     runs-on: ubuntu-latest
     steps:
-      - name: Setup
-        uses: actions/checkout@v5
-        uses: actions/setup-node@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           cache: npm
+      - name: Setup
         run: npm install chrome-webstore-upload-cli@3.4.0
       - name: Get index of asset
         id: get-asset-index
