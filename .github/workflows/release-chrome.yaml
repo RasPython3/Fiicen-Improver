@@ -1,7 +1,9 @@
 name: Release Chrome Web Store
 on:
   release:
-    types: [published]
+    types:
+      - published
+      - edited
 jobs:
   Release:
     runs-on: ubuntu-latest
