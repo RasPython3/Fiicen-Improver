@@ -6,18 +6,39 @@ jobs:
   Release:
     runs-on: ubuntu-latest
     steps:
-    - name: echo release note
-      run: |
-        echo "- github.event.release --------------------------"
-        echo ${{ github.event.release }}
-        echo "- github.event.release.html_url --------------------------"
-        echo "${{ github.event.release.html_url }}"
-        echo "- github.event.release.name --------------------------"
-        echo "${{ github.event.release.name }}"
-        echo "- github.event.release.tag_name --------------------------"
-        echo "${{ github.event.release.tag_name }}"
-        echo "- github.event.release.body --------------------------"
-        echo '${{ github.event.release.body }}'
-        echo "---------------------------"
-        echo '${{ github.event.release.releaseAssets.nodes }}'
-        echo "---------------------------"
+      - name: Setup
+        uses: actions/checkout@v5
+        uses: actions/setup-node@v5
+        with:
+          cache: npm
+        run: npm install chrome-webstore-upload-cli@3.4.0
+      - name: Get index of asset
+        id: get-asset-index
+        run: |
+          index=0
+          for name in ${{ join(github.event.release.releaseAssets.nodes.*.name, " ") }}; do
+            if [[ "$name" == *".chromium."* ]]; then
+              echo "ASSET_INDEX=$index" >> "$GITHUB_OUTPUT"
+              break
+            fi
+            index=$((index + 1))
+          done
+          if [[ "$index" -eq "${{ github.event.release.releaseAssets.totalCount }}" ]]; then
+            echo "Failed to get index of *.chromium.*"
+            exit 1
+          fi
+      - name: Download file from Releases
+        id: download-asset
+        run: |
+          URL=${{ join( github.event.release.releaseAssets.nodes[steps.get-asset-index.outputs.ASSET_INDEX].url }}
+          NAME=${{ join( github.event.release.releaseAssets.nodes[steps.get-asset-index.outputs.ASSET_INDEX].name }}
+          echo "ASSET_NAME=$NAME" >> "$GITHUB_OUTPUT"
+          curl -L -H 'Content-Type: application/octet-stream' $URL -o $
+      - name: Upload to store
+        run: |
+          npx chrome-webstore-upload-cli upload --source ${{ steps.download-asset.outputs.ASSET_NAME }}
+        env:
+          EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+          CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
