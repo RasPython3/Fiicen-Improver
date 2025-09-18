@@ -30,8 +30,8 @@ jobs:
       - name: Download file from Releases
         id: download-asset
         run: |
-          URL=${{ join( github.event.release.releaseAssets.nodes[steps.get-asset-index.outputs.ASSET_INDEX].url }}
-          NAME=${{ join( github.event.release.releaseAssets.nodes[steps.get-asset-index.outputs.ASSET_INDEX].name }}
+          URL=${{ github.event.release.releaseAssets.nodes[steps.get-asset-index.outputs.ASSET_INDEX].url }}
+          NAME=${{ github.event.release.releaseAssets.nodes[steps.get-asset-index.outputs.ASSET_INDEX].name }}
           echo "ASSET_NAME=$NAME" >> "$GITHUB_OUTPUT"
           curl -L -H 'Content-Type: application/octet-stream' $URL -o $
       - name: Upload to store
