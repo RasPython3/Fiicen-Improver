@@ -16,7 +16,7 @@ jobs:
         id: get-asset-index
         run: |
           index=0
-          for name in ${{ join(github.event.release.releaseAssets.nodes.*.name, " ") }}; do
+          for name in ${{ join(github.event.release.releaseAssets.nodes.*.name, ' ') }}; do
             if [[ "$name" == *".chromium."* ]]; then
               echo "ASSET_INDEX=$index" >> "$GITHUB_OUTPUT"
               break
