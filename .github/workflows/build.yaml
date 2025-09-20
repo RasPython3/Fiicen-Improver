@@ -35,5 +35,6 @@ jobs:
         with:
           tag_name: ${{github.ref_name}}
           name: ${{github.ref_name}}
+          target_commitish: ${{env.GITHUB_SHA}}
           generate_release_notes: true
           files: build/*.zip
