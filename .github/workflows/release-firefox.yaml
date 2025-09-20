@@ -10,6 +10,9 @@ jobs:
       - name: Setup
         run: |
           npm install web-ext@8.10.0
+      - name: Generate source code zip
+        run: |
+          git archive HEAD --output=source.zip
       - name: Get index of asset
         id: get-asset-index
         run: |
@@ -32,10 +35,10 @@ jobs:
           curl -L -H 'Accept: application/octet-stream' $URL -o $NAME
       - name: Unzip
         run: |
-          unzip ${{ steps.download-asset.outputs.ASSET_NAME }} -d src
+          unzip ${{ steps.download-asset.outputs.ASSET_NAME }} -d build
       - name: Upload to workshop
         run: |
-          npx web-ext sign --source-dir src
+          npx web-ext sign --source-dir build --upload-source-code source.zip
         env:
           WEB_EXT_API_KEY: ${{ secrets.FIREFOX_API_KEY }}
           WEB_EXT_API_SECRET: ${{ secrets.FIREFOX_API_SECRET }}
