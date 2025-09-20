@@ -1,7 +1,7 @@
 name: Release Firefox Extension Workshop
 on:
   release:
-    types: [published, edited]
+    types: [released, edited]
 jobs:
   release:
     runs-on: ubuntu-latest
