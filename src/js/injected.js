@@ -697,82 +697,92 @@ function modifyEmbed(url) {
 
         // construct quoted
         let quoted = document.createElement("div");
-        quoted.append(circle.children[0].cloneNode(3), document.createElement("div"));
-        quoted.children[1].append(...[...circle.children[1].querySelectorAll("& > div:first-child, & > p:first-child, & > p:first-child + div")].map((el)=>el.cloneNode(2)));
-        quoted.children[1].children[0].querySelectorAll("& > div").forEach((div)=>div.remove());
-        // handle badge
-        let author = quoted.querySelector("div:first-child > div:first-child > div > a").href.split("/").at(-1);
-        if (author == developer_account) {
-            let badge = document.createElement("img");
-            badge.alt = "extension-developer";
-            badge.loading = "lazy";
-            badge.width=16;
-            badge.height=16;
-            badge.async = true;
-            badge.className = "ml-1 size-4 shrink-0";
-            badge.style.color = "transparent";
-            badge.srcset = "/_next/image?url=" + encodeURIComponent(badgeURLs.developer) + "&w=16&q=75 1x, /_next/image?url=" + encodeURIComponent(badgeURLs.developer) + "&w=32&q=75 2x";
-            badge.src="/_next/image?url=" + encodeURIComponent(badgeURLs.developer) + "&w=32&q=75";
-            quoted.querySelector("div:first-child > div:first-child > div > a").append(badge);
-        } else if (testers.includes(author)) {
-            let badge = document.createElement("img");
-            badge.alt = "extension-tester";
-            badge.loading = "lazy";
-            badge.width=16;
-            badge.height=16;
-            badge.async = true;
-            badge.className = "ml-1 size-4 shrink-0";
-            badge.style.color = "transparent";
-            badge.srcset = "/_next/image?url=" + encodeURIComponent(badgeURLs.tester) + "&w=16&q=75 1x, /_next/image?url=" + encodeURIComponent(badgeURLs.tester) + "&w=32&q=75 2x";
-            badge.src="/_next/image?url=" + encodeURIComponent(badgeURLs.tester) + "&w=32&q=75";
-            quoted.querySelector("div:first-child > div:first-child > div > a").append(badge);
-        } else if (author == username) {
-            let badge = document.createElement("img");
-            badge.alt = "extension-user";
-            badge.loading = "lazy";
-            badge.width=16;
-            badge.height=16;
-            badge.async = true;
-            badge.className = "ml-1 size-4 shrink-0";
-            badge.style.color = "transparent";
-            badge.srcset = "/_next/image?url=" + encodeURIComponent(badgeURLs.user) + "&w=16&q=75 1x, /_next/image?url=" + encodeURIComponent(badgeURLs.user) + "&w=32&q=75 2x";
-            badge.src="/_next/image?url=" + encodeURIComponent(badgeURLs.user) + "&w=32&q=75";
-            quoted.querySelector("div:first-child > div:first-child > div > a").append(badge);
+        
+        if (circle) {
+            quoted.append(circle.children[0].cloneNode(3), document.createElement("div"));
+            quoted.children[1].append(...[...circle.children[1].querySelectorAll("& > div:first-child, & > p:first-child, & > p:first-child + div")].map((el)=>el.cloneNode(2)));
+            quoted.children[1].children[0].querySelectorAll("& > div").forEach((div)=>div.remove());
+            // handle badge
+            let author = quoted.querySelector("div:first-child > div:first-child > div > a").href.split("/").at(-1);
+            if (author == developer_account) {
+                let badge = document.createElement("img");
+                badge.alt = "extension-developer";
+                badge.loading = "lazy";
+                badge.width=16;
+                badge.height=16;
+                badge.async = true;
+                badge.className = "ml-1 size-4 shrink-0";
+                badge.style.color = "transparent";
+                badge.srcset = "/_next/image?url=" + encodeURIComponent(badgeURLs.developer) + "&w=16&q=75 1x, /_next/image?url=" + encodeURIComponent(badgeURLs.developer) + "&w=32&q=75 2x";
+                badge.src="/_next/image?url=" + encodeURIComponent(badgeURLs.developer) + "&w=32&q=75";
+                quoted.querySelector("div:first-child > div:first-child > div > a").append(badge);
+            } else if (testers.includes(author)) {
+                let badge = document.createElement("img");
+                badge.alt = "extension-tester";
+                badge.loading = "lazy";
+                badge.width=16;
+                badge.height=16;
+                badge.async = true;
+                badge.className = "ml-1 size-4 shrink-0";
+                badge.style.color = "transparent";
+                badge.srcset = "/_next/image?url=" + encodeURIComponent(badgeURLs.tester) + "&w=16&q=75 1x, /_next/image?url=" + encodeURIComponent(badgeURLs.tester) + "&w=32&q=75 2x";
+                badge.src="/_next/image?url=" + encodeURIComponent(badgeURLs.tester) + "&w=32&q=75";
+                quoted.querySelector("div:first-child > div:first-child > div > a").append(badge);
+            } else if (author == username) {
+                let badge = document.createElement("img");
+                badge.alt = "extension-user";
+                badge.loading = "lazy";
+                badge.width=16;
+                badge.height=16;
+                badge.async = true;
+                badge.className = "ml-1 size-4 shrink-0";
+                badge.style.color = "transparent";
+                badge.srcset = "/_next/image?url=" + encodeURIComponent(badgeURLs.user) + "&w=16&q=75 1x, /_next/image?url=" + encodeURIComponent(badgeURLs.user) + "&w=32&q=75 2x";
+                badge.src="/_next/image?url=" + encodeURIComponent(badgeURLs.user) + "&w=32&q=75";
+                quoted.querySelector("div:first-child > div:first-child > div > a").append(badge);
+            }
+
+            let img = circle.querySelector("div:not(:first-child) > div:has(> img):first-child > img");
+            let bigImg = img ? img.parentElement.nextElementSibling : undefined;
+            let video = circle.querySelector("video");
+            if (img != undefined || video != undefined) {
+                let mediaGroup = document.createElement("div");
+                mediaGroup.className = "media-group base-border";
+                if (img != undefined) {
+                    img = img.cloneNode();
+                    bigImg = bigImg.cloneNode(1);
+                    img.className = "";
+                    img.setAttribute("style", "");
+                    mediaGroup.append(document.createElement("div"));
+                    mediaGroup.lastChild.append(img, bigImg);
+                }
+                if (video != undefined) {
+                    video = video.cloneNode();
+                    video.className = "";
+                    mediaGroup.append(document.createElement("div"));
+                    mediaGroup.lastChild.append(video);
+                    mediaGroup.lastChild.classList.add("base-border");
+                }
+                quoted.append(mediaGroup);
+            }
+        } else {
+            quoted.append(document.createElement("div"));
+            quoted.firstChild.classList.add("text-center", "text-gray-500");
+
+            quoted.firstChild.append(document.createElement("span"));
+            quoted.firstChild.firstChild.innerText = "読み込みに失敗しました";
         }
 
-        let img = circle.querySelector("div:not(:first-child) > div:has(> img):first-child > img");
-        let bigImg = img ? img.parentElement.nextElementSibling : undefined;
-        let video = circle.querySelector("video");
-        if (img != undefined || video != undefined) {
-            let mediaGroup = document.createElement("div");
-            mediaGroup.className = "media-group base-border";
-            if (img != undefined) {
-                img = img.cloneNode();
-                bigImg = bigImg.cloneNode(1);
-                img.className = "";
-                img.setAttribute("style", "");
-                mediaGroup.append(document.createElement("div"));
-                mediaGroup.lastChild.append(img, bigImg);
-            }
-            if (video != undefined) {
-                video = video.cloneNode();
-                video.className = "";
-                mediaGroup.append(document.createElement("div"));
-                mediaGroup.lastChild.append(video);
-                mediaGroup.lastChild.classList.add("base-border");
-            }
-            quoted.append(mediaGroup);
-        }
         let redirector = document.createElement("button");
         quoted.append(redirector);
 
         // change its style
-        quoted.querySelector("div:first-child > div:first-child > div").classList.add("items-center");
+        quoted.querySelector("div:first-child > div:first-child > div")?.classList.add("items-center");
         quoted.children[0].querySelectorAll("a.relative, a.relative > img").forEach((el)=>{
             el.classList.replace("size-10", "size-8");
         });
-        quoted.children[0].querySelector("a.relative + div").classList.replace("flex-col", "flex-row");
-        quoted.children[0].querySelector("a.relative + div").classList.add("gap-2");
+        quoted.children[0].querySelector("a.relative + div")?.classList.replace("flex-col", "flex-row");
+        quoted.children[0].querySelector("a.relative + div")?.classList.add("gap-2");
 
         let embeds = document.querySelectorAll(":where(main:nth-child(3) > div > div > div:first-child, main:not(:nth-child(3))"
             + " > div > div, header + div.flex > div.mt-10 > div:last-child > div.flex)"
