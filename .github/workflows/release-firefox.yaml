@@ -7,12 +7,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - name: Setup
-        run: |
-          npm install web-ext@8.10.0
       - name: Generate source code zip
         run: |
           git archive HEAD --output=source.zip
+      - name: Setup
+        run: |
+          npm install web-ext@8.10.0
       - name: Get index of asset
         id: get-asset-index
         run: |
@@ -38,7 +38,7 @@ jobs:
           unzip ${{ steps.download-asset.outputs.ASSET_NAME }} -d build
       - name: Upload to workshop
         run: |
-          npx web-ext sign --source-dir build --upload-source-code source.zip
+          npx web-ext sign --source-dir build --upload-source-code source.zip --channel listed
         env:
           WEB_EXT_API_KEY: ${{ secrets.FIREFOX_API_KEY }}
           WEB_EXT_API_SECRET: ${{ secrets.FIREFOX_API_SECRET }}
