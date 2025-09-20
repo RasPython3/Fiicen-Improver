@@ -1,0 +1,42 @@
+name: Build
+on:
+  push:
+    branches:
+      #- release
+      - release-test
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Setup Python
+        uses: actions/setup-python@v4
+      - name: Get version
+        run: |
+          python -c 'import os, json
+          with open("src/manifest.json", mode="r", encoding="utf-8") as f:
+            print("VERSION=v" + json.load(f)["version"])' >> $GITHUB_ENV
+
+      - name: Add test prefix
+        if: ${{ github.ref == 'refs/heads/release-test' }}
+        run: |
+          echo "VERSION=test-${{ env.VERSION }}" >> $GITHUB_ENV
+
+      - name: Run build.py
+        run: python build.py
+
+      - name: Create Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ env.VERSION }}
+        uses: softprops/action-gh-release@v2.3.3
+        with:
+          tag_name: ${{github.ref_name}}
+          name: ${{github.ref_name}}
+          target_commitish: ${{github.sha}}
+          generate_release_notes: true
+          files: |
+            build/*.zip
+            build/*.xpi

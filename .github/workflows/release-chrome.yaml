@@ -1,0 +1,43 @@
+name: Release Chrome Web Store
+on:
+  release:
+    types:
+      - released
+      - published
+      - edited
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup
+        run: |
+          npm install chrome-webstore-upload-cli@3.4.0
+      - name: Get index of asset
+        id: get-asset-index
+        run: |
+          index=0
+          for name in ${{ join(github.event.release.assets[*].name, ' ') }}; do
+            if [[ "$name" == *".chromium."* ]]; then
+              echo "ASSET_INDEX=$index" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            index=$((index + 1))
+          done
+          echo "Failed to get index of *.chromium.*"
+          exit 1
+      - name: Download file from Releases
+        id: download-asset
+        run: |
+          URL=${{ github.event.release.assets[steps.get-asset-index.outputs.ASSET_INDEX].url }}
+          NAME=${{ github.event.release.assets[steps.get-asset-index.outputs.ASSET_INDEX].name }}
+          echo "ASSET_NAME=$NAME" >> "$GITHUB_OUTPUT"
+          curl -L -H 'Accept: application/octet-stream' $URL -o $NAME
+      - name: Upload to store
+        run: |
+          npx chrome-webstore-upload-cli upload --source ${{ steps.download-asset.outputs.ASSET_NAME }}
+        env:
+          EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+          CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
