@@ -37,4 +37,6 @@ jobs:
           name: ${{github.ref_name}}
           target_commitish: ${{github.sha}}
           generate_release_notes: true
-          files: build/*.zip
+          files: |
+            build/*.zip
+            build/*.xpi

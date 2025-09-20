@@ -1,0 +1,42 @@
+name: Release Firefox Extension Workshop
+on:
+  release:
+    types: [published, edited]
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup
+        run: |
+          npm install web-ext@8.10.0
+      - name: Get index of asset
+        id: get-asset-index
+        run: |
+          index=0
+          for name in ${{ join(github.event.release.assets[*].name, ' ') }}; do
+            if [[ "$name" == *".firefox."* ]]; then
+              echo "ASSET_INDEX=$index" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            index=$((index + 1))
+          done
+          echo "Failed to get index of *.firefox.*"
+          exit 1
+      - name: Download file from Releases
+        id: download-asset
+        run: |
+          URL=${{ github.event.release.assets[steps.get-asset-index.outputs.ASSET_INDEX].url }}
+          NAME=${{ github.event.release.assets[steps.get-asset-index.outputs.ASSET_INDEX].name }}
+          echo "ASSET_NAME=$NAME" >> "$GITHUB_OUTPUT"
+          curl -L -H 'Content-Type: application/octet-stream' $URL -o $NAME
+      - name: Unzip
+        run: |
+          mkdir src
+          unzip ${{ steps.download-asset.outputs.ASSET_NAME }} -d src
+      - name: Upload to workshop
+        run: |
+          npx web-ext sign --source-dir src
+        env:
+          WEB_EXT_API_KEY: ${{ secrets.FIREFOX_API_KEY }}
+          WEB_EXT_API_SECRET: ${{ secrets.FIREFOX_API_SECRET }}
