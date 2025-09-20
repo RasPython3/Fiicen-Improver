@@ -29,7 +29,7 @@ jobs:
           URL=${{ github.event.release.assets[steps.get-asset-index.outputs.ASSET_INDEX].url }}
           NAME=${{ github.event.release.assets[steps.get-asset-index.outputs.ASSET_INDEX].name }}
           echo "ASSET_NAME=$NAME" >> "$GITHUB_OUTPUT"
-          curl -L -H 'Content-Type: application/octet-stream' $URL -o $NAME
+          curl -L -H 'Accept: application/octet-stream' $URL -o $NAME
       - name: Unzip
         run: |
           unzip ${{ steps.download-asset.outputs.ASSET_NAME }} -d src
