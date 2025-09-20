@@ -17,14 +17,12 @@ jobs:
           for name in ${{ join(github.event.release.assets[*].name, ' ') }}; do
             if [[ "$name" == *".chromium."* ]]; then
               echo "ASSET_INDEX=$index" >> "$GITHUB_OUTPUT"
-              break
+              exit 0
             fi
             index=$((index + 1))
           done
-          if [[ "$index" -eq "${{ github.event.release.assets.totalCount }}" ]]; then
-            echo "Failed to get index of *.chromium.*"
-            exit 1
-          fi
+          echo "Failed to get index of *.chromium.*"
+          exit 1
       - name: Download file from Releases
         id: download-asset
         run: |
