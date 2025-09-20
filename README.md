@@ -79,7 +79,7 @@ Fiicen Improver は、[Fiicen](https://fiicen.jp/)の「もうちょっとこう
 
 ### Orion
 
-1. (最新のRelease)[https://github.com/RasPython3/Fiicen-Improver/releases/latest] から `Fiicen-Improver_*.orion.zip`をダウンロードする
+1. [最新のRelease](https://github.com/RasPython3/Fiicen-Improver/releases/latest) から `Fiicen-Improver_*.orion.zip`をダウンロードする
 2. Orionを開き、「設定」→「詳細設定」から「Firefox Extensions」を有効にする
 3. 「拡張機能」→「+」→「ファイルからインストール」で、手順1でダウンロードしたファイルをインストール
 
