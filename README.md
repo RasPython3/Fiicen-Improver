@@ -26,19 +26,62 @@ Fiicen Improver は、[Fiicen](https://fiicen.jp/)の「もうちょっとこう
 
 ### Chrome
 
+- ベンダーストアの場合
+  1. [Chrome Web Store](https://chromewebstore.google.com/detail/miggmkpomngegffmkmmkmggiogkpjbbc) からインストールする
+
+- GitHub Releasesの場合
+  (準備中)
+
 ### Edge
 
+- ベンダーストアの場合
+  1. [Chrome Web Store](https://chromewebstore.google.com/detail/miggmkpomngegffmkmmkmggiogkpjbbc) からインストールする
+
+- GitHub Releasesの場合
+  (準備中)
+
 ### Opera
+
+- ベンダーストアの場合
+  (準備中)
+
+- Chrome Web Storeを利用する場合
+  1. [Chrome Web Store](https://chromewebstore.google.com/detail/miggmkpomngegffmkmmkmggiogkpjbbc) からインストールする
+
+- GitHub Releasesの場合
+  (準備中)
 
 ### Firefox
 
 * PCの場合
 
+  - ベンダーストアの場合
+    1. [Firefox Extension Workshop](https://addons.mozilla.org/ja/firefox/addon/fiicen-improver/) からインストールする
+
+  - GitHub Releasesの場合
+    (準備中)
+
 * Androidの場合
+
+  - ベンダーストアの場合
+    1. [Firefox Extension Workshop](https://addons.mozilla.org/ja/firefox/addon/fiicen-improver/) からインストールする
+
+  - GitHub Releasesの場合
+    (準備中)
 
 ### Kiwi
 
+- Chrome Web Storeを利用する場合
+  1. [Chrome Web Store](https://chromewebstore.google.com/detail/miggmkpomngegffmkmmkmggiogkpjbbc) からインストールする
+
+- GitHub Releasesの場合
+  (準備中)
+
 ### Orion
+
+1. (最新のRelease)[https://github.com/RasPython3/Fiicen-Improver/releases/latest] から `Fiicen-Improver_*.orion.zip`をダウンロードする
+2. Orionを開き、「設定」→「詳細設定」から「Firefox Extensions」を有効にする
+3. 「拡張機能」→「+」→「ファイルからインストール」で、手順1でダウンロードしたファイルをインストール
 
 ## Build from source
 
