@@ -3,7 +3,7 @@
   "name": "Fiicen Improver",
   "version": "0.2.8",
 
-  "description": "This extension improves Fiicen",
+  "description": "Fiicenを使いやすくしてくれる非公式拡張機能",
 
   "permissions": ["storage", "declarativeNetRequest", "notifications"],
 
