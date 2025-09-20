@@ -7,7 +7,7 @@ Fiicen Improver は、[Fiicen](https://fiicen.jp/)の「もうちょっとこう
 
 ***
 
-* [インストール](#インストール)
+* [インストール](#install)
   * PC
     * [Chrome](#chrome)
     * [Edge](#edge)
