@@ -14,22 +14,22 @@ jobs:
         id: get-asset-index
         run: |
           index=0
-          for name in ${{ join(github.event.release.releaseAssets.nodes.*.name, ' ') }}; do
+          for name in ${{ join(github.event.release.assets[*].name, ' ') }}; do
             if [[ "$name" == *".chromium."* ]]; then
               echo "ASSET_INDEX=$index" >> "$GITHUB_OUTPUT"
               break
             fi
             index=$((index + 1))
           done
-          if [[ "$index" -eq "${{ github.event.release.releaseAssets.totalCount }}" ]]; then
+          if [[ "$index" -eq "${{ github.event.release.assets.totalCount }}" ]]; then
             echo "Failed to get index of *.chromium.*"
             exit 1
           fi
       - name: Download file from Releases
         id: download-asset
         run: |
-          URL=${{ github.event.release.releaseAssets.nodes[steps.get-asset-index.outputs.ASSET_INDEX].url }}
-          NAME=${{ github.event.release.releaseAssets.nodes[steps.get-asset-index.outputs.ASSET_INDEX].name }}
+          URL=${{ github.event.release.assets[steps.get-asset-index.outputs.ASSET_INDEX].url }}
+          NAME=${{ github.event.release.assets[steps.get-asset-index.outputs.ASSET_INDEX].name }}
           echo "ASSET_NAME=$NAME" >> "$GITHUB_OUTPUT"
           curl -L -H 'Content-Type: application/octet-stream' $URL -o $
       - name: Upload to store
