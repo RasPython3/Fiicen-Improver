@@ -20,17 +20,17 @@ def zip_files(directory, output):
 def build_chromium():
     shutil.copy("LICENSE", "build/chromium/Fiicen-Improver/LICENSE")
 
-    with open("build/chromium/Fiicen-Improver/about.html", encoding="utf-8", mode="w") as f:
+    with open("build/chromium/Fiicen-Improver/about.html", mode="w", encoding="utf-8") as f:
         f.write(about_html)
 
 def build_firefox():
     shutil.copy("LICENSE", "build/firefox/LICENSE")
 
-    with open("build/firefox/about.html", encoding="utf-8", mode="w") as f:
+    with open("build/firefox/about.html", mode="w", encoding="utf-8") as f:
         f.write(about_html)
 
     manifest = ""
-    with open("build/firefox/manifest.json", mode="r") as f:
+    with open("build/firefox/manifest.json", mode="r", encoding="utf-8") as f:
         manifest = json.load(f)
 
     manifest["background"] = {
@@ -44,17 +44,17 @@ def build_firefox():
         }
     }
 
-    with open("build/firefox/manifest.json", mode="w") as f:
+    with open("build/firefox/manifest.json", mode="w", encoding="utf-8") as f:
         manifest = json.dump(manifest, f)
 
 def build_orion():
     shutil.copy("LICENSE", "build/orion/LICENSE")
 
-    with open("build/orion/about.html", encoding="utf-8", mode="w") as f:
+    with open("build/orion/about.html", mode="w", encoding="utf-8") as f:
         f.write(about_html)
 
     manifest = ""
-    with open("build/orion/manifest.json", mode="r") as f:
+    with open("build/orion/manifest.json", mode="r", encoding="utf-8") as f:
         manifest = json.load(f)
 
     manifest["permissions"] = ["storage", "webRequest", "webRequestBlocking"]
@@ -63,7 +63,7 @@ def build_orion():
     # startup.js is not working well on Orion
     manifest["content_scripts"].pop(0)
 
-    with open("build/orion/manifest.json", mode="w") as f:
+    with open("build/orion/manifest.json", mode="w", encoding="utf-8") as f:
         manifest = json.dump(manifest, f)
 
     with open("build/orion/js/background.js", mode="r", encoding="utf-8") as f:
@@ -119,7 +119,7 @@ def build():
     except:
         pass
 
-    with open("src/manifest.json", mode="r") as f:
+    with open("src/manifest.json", mode="r", encoding="utf-8") as f:
         version = json.load(f)["version"]
 
     build_about()
