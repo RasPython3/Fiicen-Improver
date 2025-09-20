@@ -32,7 +32,6 @@ jobs:
           curl -L -H 'Content-Type: application/octet-stream' $URL -o $NAME
       - name: Unzip
         run: |
-          mkdir src
           unzip ${{ steps.download-asset.outputs.ASSET_NAME }} -d src
       - name: Upload to workshop
         run: |
