@@ -236,7 +236,7 @@ function modifyUser(userData) {
 var __timer_id;
 
 function redrawCircles() {
-    let circleParent = document.querySelector(":where(main:nth-child(3) > div > div > div:first-child, main:not(:nth-child(3)) > div > div, header + div.flex > div.mt-10 > div:last-child > div.flex):has(> div.relative)");
+    let circleParent = document.querySelector(":where(main:nth-child(3) > div > div > div:first-child, main:not(:nth-child(3)) > div > div, header + div.flex > div.mt-10 > div:last-child > div.flex):has(> div.relative):not(:has(> div.aspect-square))");
     if (circleParent) {
         let updater = circleParent[Object.keys(circleParent).filter(key=>key.startsWith("__reactProps"))[0]].children.props.value;
         updater(null);
@@ -417,7 +417,7 @@ async function onLoaded() { // first load or nextjs's router
         }
         clearInterval(__timer_id);
         __timer_id = setInterval(()=>{
-            let circles = document.querySelectorAll(":where(main:nth-child(3) > div > div > div:first-child, main:not(:nth-child(3)) > div > div, header + div.flex > div.mt-10 > div:last-child > div.flex) > div.relative");
+            let circles = document.querySelectorAll(":where(main:nth-child(3) > div > div > div:first-child, main:not(:nth-child(3)) > div > div, header + div.flex > div.mt-10 > div:last-child > div.flex) > div.relative:not(.aspect-square)");
             if (circles.length == 0) {
                 return;
             } else {
@@ -1269,14 +1269,26 @@ function datasaverClickListener(e) {
         bigImg.src = (bigImg.src || bigImg.getAttribute("_src") || "").replace("image?url=", "image?_&url=");
         let mediaElement = e.target.parentElement.parentElement.parentElement;
         if (mediaElement.classList.contains("relative")) {
-            try {
-                let props = mediaElement[Object.keys(mediaElement).filter(key=>key.startsWith("__reactProps"))[0]].children[0].props;
-                if (props.asset.url.includes("?")) {
-                    props.asset.url += "&_=_";
-                } else {
-                    props.asset.url += "?_=_";
-                }
-            } catch {}
+            if (!mediaElement.classList.contains("aspect-square")) {
+                try {
+                    let props = mediaElement[Object.keys(mediaElement).filter(key=>key.startsWith("__reactProps"))[0]].children[0].props;
+                    if (props.asset.url.includes("?")) {
+                        props.asset.url += "&_=_";
+                    } else {
+                        props.asset.url += "?_=_";
+                    }
+                } catch {}
+            } else {
+                try {
+                    let props = mediaElement[Object.keys(mediaElement).filter(key=>key.startsWith("__reactProps"))[0]].children.props;
+                    if (props.src.includes("?")) {
+                        props.src += "&_=_";
+                    } else {
+                        props.src += "?_=_";
+                    }
+                    props.children.props.src = props.src;
+                } catch {}
+            }
         }
     }
 }

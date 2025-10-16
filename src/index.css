@@ -107,6 +107,12 @@ header.sticky.left-0 > div:first-child > div {
 }
 
 
+/* media page */
+:where(main > div:first-child > div:first-child, header + main.flex > div) > div.grid:first-child > div.relative.aspect-square > div > div.absolute > img {
+    --imprv-saved: 1;
+}
+
+
 /* message page */
 
 main > div > header + div:has(> h1:first-child) + div:has(> ul:first-child) {
