@@ -23,6 +23,16 @@ def build_chromium():
     with open("build/chromium/Fiicen-Improver/about.html", mode="w", encoding="utf-8") as f:
         f.write(about_html)
 
+    manifest = ""
+    with open("build/chromium/Fiicen-Improver/manifest.json", mode="r", encoding="utf-8") as f:
+        manifest = json.load(f)
+
+    with open("chrome-publickey.pem", mode="r", encoding="utf-8") as f:
+        manifest["key"] = re.match(r"^-----BEGIN PUBLIC KEY-----\n((?:\s|\S)*)-----END PUBLIC KEY-----\n*$", f.read(), flags=re.MULTILINE).groups()[0].replace("\n", "")
+
+    with open("build/chromium/Fiicen-Improver/manifest.json", mode="w", encoding="utf-8") as f:
+        manifest = json.dump(manifest, f)
+
 def build_firefox():
     shutil.copy("LICENSE", "build/firefox/LICENSE")
 
