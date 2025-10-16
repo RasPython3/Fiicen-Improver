@@ -27,6 +27,7 @@ jobs:
         run: python build.py
 
       - name: Create Release
+        if: ${{ github.ref == 'refs/heads/release' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_TAG: ${{ env.VERSION }}
