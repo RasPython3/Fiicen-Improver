@@ -650,6 +650,7 @@ function addQuoteButton(circle, data) {
                             circleTextArea.style.height = `${circleTextArea.nextElementSibling.clientHeight}px`;
                             circleTextArea.selectionStart = circleTextArea.selectionEnd = 0;
                             circleTextArea.focus();
+                            circleTextArea[Object.keys(circleTextArea).filter(key=>key.startsWith("__reactProps"))[0]].onChange({target: circleTextArea});
                         }
                     }, 10);
                 }
