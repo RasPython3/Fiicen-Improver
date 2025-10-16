@@ -115,6 +115,15 @@ header.sticky.left-0 > div:first-child > div {
 
 /* message page */
 
+@media (min-width: 768px) {
+    .md\:grid-cols-\[1fr_1\.618fr\] {
+        grid-template-columns: max(24rem, calc(100% / 2.618)) 1fr ! important;
+    }
+    .md\:grid-cols-\[1fr_1\.618fr\] .md\:max-w-sm {
+        max-width: unset;
+    }
+}
+
 main > div > header + div:has(> h1:first-child) + div:has(> ul:first-child) {
     max-height: calc(100vh - 4.5rem - 2px);
     overflow-y: scroll;
