@@ -236,9 +236,11 @@ function modifyUser(userData) {
 var __timer_id;
 
 function redrawCircles() {
-    let circleParent = document.querySelector(":where(main:nth-child(3) > div > div > div:first-child, main:not(:nth-child(3)) > div > div, header + div.flex > div.mt-10 > div:last-child > div.flex)");
-    let updater = circleParent[Object.keys(circleParent).filter(key=>key.startsWith("__reactProps"))[0]].children.props.value;
-    updater(null);
+    let circleParent = document.querySelector(":where(main:nth-child(3) > div > div > div:first-child, main:not(:nth-child(3)) > div > div, header + div.flex > div.mt-10 > div:last-child > div.flex):has(> div.relative)");
+    if (circleParent) {
+        let updater = circleParent[Object.keys(circleParent).filter(key=>key.startsWith("__reactProps"))[0]].children.props.value;
+        updater(null);
+    }
 }
 
 var _loadedCalled = false;
@@ -611,9 +613,13 @@ async function modifyFieldLayout(data) {
     return data;
 }
 
-function modifyDynamicCircle(circle, data) {
-    if (circle.querySelector("& > div:last-child > div:last-child button.quote") == undefined) {
-        if (data && data.id) {
+function addQuoteButton(circle, data) {
+    if (data && data.id) {
+        let detailButton = circle.querySelector("& > div.border-t:last-child > div:last-child > div:last-child > button");
+        let popupWindow = detailButton && detailButton[Object.keys(detailButton).filter(key=>key.startsWith("__reactFiber"))[0]]
+            .sibling?.child?.child?.child?.child?.stateNode
+            || document.querySelector("body > div.fixed:has(> div > a[href^=\"/report?circlle=" + data.id + "\"])");
+        if (popupWindow && popupWindow.querySelector("& > div:first-child > button.quote") == undefined) {
             let shareBtn = document.createElement("button");
             shareBtn.className = "quote base-bg-hover flex w-full gap-4 px-4 py-3";
             shareBtn.append(document.createElement("img"));
@@ -632,8 +638,8 @@ function modifyDynamicCircle(circle, data) {
             })(data);
             shareBtn.addEventListener("click", ()=>{
                 let createCircleBtn = document.querySelector("nav > button");
-                let circleTextArea = document.querySelector("nav > button + div textarea");
-                circle.lastChild.lastChild.lastChild.lastChild.lastChild.lastChild.lastChild.click();
+                let circleTextArea = document.querySelector("body > div > div > form:has(input[name=\"media_attachments\"]) textarea");
+                popupWindow[Object.keys(popupWindow).filter(key=>key.startsWith("__reactProps"))[0]].onClick();
                 createCircleBtn.click();
                 if (circleTextArea) { // if not, not logined
                     let timer = setInterval(()=>{
@@ -648,8 +654,23 @@ function modifyDynamicCircle(circle, data) {
                     }, 10);
                 }
             });
-            circle.lastChild.lastChild.lastChild.lastChild.lastChild.lastChild.insertAdjacentElement("beforebegin", shareBtn);
+            popupWindow.firstChild.lastChild.insertAdjacentElement("beforebegin", shareBtn);
+            return true;
         }
+    }
+    return false;
+}
+
+function modifyDynamicCircle(circle, data) {
+    try {
+        if (!addQuoteButton(circle, data)) {
+            let detailButton = circle.querySelector("& > div.border-t:last-child > div:last-child > div:last-child > button");
+            if (detailButton) {
+                detailButton.addEventListener("click", ()=>addQuoteButton(circle, data), {once: true});
+            }
+        }
+    } catch(e) {
+        console.error(e);
     }
 }
 
@@ -685,7 +706,9 @@ function modifyEmbed(url) {
         + " > div > div, header + div.flex > div.mt-10 > div:last-child > div.flex)"
         + " > div.relative > div:nth-last-child(2) > div:not(:first-child)"
         + " div.relative:has(> a[href=\"" + url + "\"]),"
-        + " div.min-h-screen.border-x > div:first-child > div:first-child div.relative:has(> a[href=\"" + url + "\"])");
+        + " div.min-h-screen.border-x > div:first-child > div:first-child div.relative:has(> a[href=\"" + url + "\"]),"
+        + " body > div.fixed.inset-0 > div.base-bg.absolute > div.base-bg-float.sticky + div:not(.p-4) > div:first-child > div > div:nth-child(2)"
+        + " div.relative:has(> a[href=\"" + url + "\"])");
     for (let embed of embeds) {
         // release embed from being under next.js
         embed.outerHTML = "<!-- -->" + embed.outerHTML;
@@ -742,27 +765,25 @@ function modifyEmbed(url) {
                 quoted.querySelector("div:first-child > div:first-child > div > a").append(badge);
             }
 
-            let img = circle.querySelector("div:not(:first-child) > div:has(> img):first-child > img");
-            let bigImg = img ? img.parentElement.nextElementSibling : undefined;
-            let video = circle.querySelector("video");
-            if (img != undefined || video != undefined) {
+            let imgs = Array.from(circle.querySelectorAll("div.grid > div.relative > div > div:has(> img):first-child > img"));
+            let videos = circle.querySelectorAll("video");
+            if (imgs.length + videos.length > 0) {
                 let mediaGroup = document.createElement("div");
                 mediaGroup.className = "media-group base-border";
-                if (img != undefined) {
-                    img = img.cloneNode();
-                    bigImg = bigImg.cloneNode(1);
+                imgs.forEach((el)=>{
+                    let img = el.cloneNode();
+                    let bigImg = el.parentElement.nextElementSibling.cloneNode(1);
                     img.className = "";
                     img.setAttribute("style", "");
                     mediaGroup.append(document.createElement("div"));
                     mediaGroup.lastChild.append(img, bigImg);
-                }
-                if (video != undefined) {
-                    video = video.cloneNode();
+                });
+                videos.forEach((el)=>{
+                    let video = el.cloneNode();
                     video.className = "";
                     mediaGroup.append(document.createElement("div"));
                     mediaGroup.lastChild.append(video);
-                    mediaGroup.lastChild.classList.add("base-border");
-                }
+                });
                 quoted.append(mediaGroup);
             }
         } else {
@@ -788,16 +809,18 @@ function modifyEmbed(url) {
             + " > div > div, header + div.flex > div.mt-10 > div:last-child > div.flex)"
             + " > div.relative > div:nth-last-child(2) > div:not(:first-child)"
             + " div.relative:has(> a[href=\"" + url + "\"]),"
-            + " div.min-h-screen.border-x > div:first-child > div:first-child div.relative:has(> a[href=\"" + url + "\"])");
+            + " div.min-h-screen.border-x > div:first-child > div:first-child div.relative:has(> a[href=\"" + url + "\"]),"
+            + " body > div.fixed.inset-0 > div.base-bg.absolute > div.base-bg-float.sticky + div:not(.p-4) > div:first-child > div > div:nth-child(2)"
+            + " div.relative:has(> a[href=\"" + url + "\"])");
         for (let embed of embeds) {
             embed.classList.add("quoted-circle");
             embed.classList.remove("relative", "group", "items-center", "second-bg-hover");
             embed.replaceChildren(document.createElement("button"), document.createElement("div"));
             embed.lastChild.append(...quoted.cloneNode(5).children);
             embed.lastChild.lastChild.remove();
-            let img = embed.querySelector(".media-group > div > img");
-            let bigImg = img ? img.nextElementSibling : undefined;
-            if (img != undefined) {
+            let imgs = Array.from(embed.querySelectorAll(".media-group > div > img"));
+            imgs.forEach((img)=>{
+                let bigImg = img.nextElementSibling;
                 img.addEventListener("click", ()=>{
                     bigImg.classList.remove("pointer-events-none", "bg-transparent");
                     bigImg.classList.add("bg-black/20", "backdrop-blur");
@@ -808,10 +831,10 @@ function modifyEmbed(url) {
                     bigImg.classList.remove("bg-black/20", "backdrop-blur");
                     bigImg.firstChild.classList.add("pointer-events-none", "scale-90", "opacity-0");
                 });
-            }
+            });
             /* FIXME: following may not work well */
-            let video = embed.querySelector(".media-group > div > video");
-            if (video != undefined) {
+            let videos = Array.from(embed.querySelectorAll(".media-group > div > video"));
+            videos.forEach((video)=>{
                 video.addEventListener("click", ()=>{
                     if (video.paused) {
                         video.play();
@@ -819,7 +842,7 @@ function modifyEmbed(url) {
                         video.pause();
                     }
                 });
-            }
+            });
             embed.firstChild.addEventListener("click", ()=>{
                 try {
                     next.router.push(url);
@@ -1053,49 +1076,36 @@ function modifySettings() {
 
 // Improve post form
 
-document.addEventListener("paste", async (e)=>{
-    if (!e.target.form || !e.target.form.elements["circle-form-image"] || !e.target.form.elements["circle-form-video"]) {
+document.addEventListener("paste", (e)=>{
+    if (!e.target.form || !e.target.form.elements["media_attachments"]) {
         return;
     }
-    let form = e.target.form;
+    let mediaInput = e.target.form.elements["media_attachments"];
     if (e.clipboardData.files.length > 0) {
-        let file = e.clipboardData.files[0];
-        if (file.type.startsWith("image/")) {
-            file.arrayBuffer().then((buffer)=>{
-                let imageInput = form.elements["circle-form-image"];
-                imageInput[Object.keys(imageInput).filter(key=>key.startsWith("__reactProps"))[0]].onChange({
-                    target: {
-                        id: "circle-form-image",
-                        files: [new File([buffer,], file.name, {
-                            type: file.type,
-                            lastModified: file.lastModified
-                        }),]
-                    }
-                });
-            });
-        } else if (file.type.startsWith("video/")) {
-            file.arrayBuffer().then((buffer)=>{
-                let videoInput = form.elements["circle-form-video"];
-                videoInput[Object.keys(videoInput).filter(key=>key.startsWith("__reactProps"))[0]].onChange({
-                    target: {
-                        id: "circle-form-video",
-                        files: [new File([buffer,], file.name, {
-                            type: file.type,
-                            lastModified: file.lastModified
-                        }),]
-                    }
-                });
+        let promises = [];
+        for (let file of e.clipboardData.files) {
+            if (file.type.startsWith("image/") || file.type.startsWith("video/")) {
+                promises.push(
+                    file.arrayBuffer().then((buffer)=>{
+                        return new File([buffer,], file.name,
+                            {
+                                type: file.type,
+                                lastModified: file.lastModified
+                            }
+                        );
+                    }).catch(()=>{})
+                );
+            }
+            Promise.all(promises).then((files)=>{
+                if (mediaInput) {
+                    mediaInput[Object.keys(mediaInput).filter(key=>key.startsWith("__reactProps"))[0]].onChange({
+                        target: {
+                            files: files
+                        }
+                    });
+                }
             });
         }
-        form.onformdata = (e)=>{
-            let data = e.formData;
-            if (data.get("image") != null) {
-                data.set("image", form[Object.keys(form).filter(key=>key.startsWith("__reactProps"))[0]].children[2].props.media.image);
-            }
-            if (data.get("video") != null) {
-                data.set("video", form[Object.keys(form).filter(key=>key.startsWith("__reactProps"))[0]].children[2].props.media.video);
-            }
-        };
     }
 });
 
@@ -1249,7 +1259,7 @@ window.fetch = async (...args)=>{
 };
 
 // data saver
-document.addEventListener("click", (e)=>{
+function datasaverClickListener(e) {
     if (e.target.computedStyleMap && e.target.computedStyleMap().get("--imprv-saved") || window.getComputedStyle && window.getComputedStyle(e.target).getPropertyValue("--imprv-saved")) {
         // it is data-saved image
         let bigImg = e.target.parentElement.parentElement.classList.contains("media-group") ? e.target.nextElementSibling.children[0] : e.target.parentElement.nextElementSibling.children[0];
@@ -1257,17 +1267,29 @@ document.addEventListener("click", (e)=>{
         e.target.src = (e.target.src || e.target.getAttribute("_src") || "").replace("image?url=", "image?_&url=");
         bigImg.srcset = (bigImg.srcset || bigImg.getAttribute("_srcset") || "").replaceAll("image?url=", "image?_&url=");
         bigImg.src = (bigImg.src || bigImg.getAttribute("_src") || "").replace("image?url=", "image?_&url=");
-        let circle = e.target.parentElement.parentElement.parentElement.parentElement.parentElement;
-        if (circle.classList.contains("relative")) {
+        let mediaElement = e.target.parentElement.parentElement.parentElement;
+        if (mediaElement.classList.contains("relative")) {
             try {
-                let props = circle[Object.keys(circle).filter(key=>key.startsWith("__reactProps"))[0]].children[2].props;
-                if (props.image.includes("?")) {
-                    props.image += "&_=_";
+                let props = mediaElement[Object.keys(mediaElement).filter(key=>key.startsWith("__reactProps"))[0]].children[0].props;
+                if (props.asset.url.includes("?")) {
+                    props.asset.url += "&_=_";
                 } else {
-                    props.image += "?_=_";
+                    props.asset.url += "?_=_";
                 }
             } catch {}
         }
+    }
+}
+
+document.addEventListener("click", datasaverClickListener);
+
+// hack Event.prototype.stopPropagation to catch all events
+Event.prototype._stopPropagation = Event.prototype._stopPropagation || Event.prototype.stopPropagation;
+
+Event.prototype.stopPropagation = (function() {
+    this._stopPropagation();
+    if (this.type == "click") {
+        datasaverClickListener(this);
     }
 });
 
@@ -1280,6 +1302,7 @@ var observer = new MutationObserver((...args)=>{
             let circles = circleParent.children;
             let circleDatas = circleParent[Object.keys(circleParent).filter((key)=>key.startsWith("__reactProps"))[0]].children.props.children;
             if (_circleAmount < circles.length) {
+                circleParent._circleAmount = circles.length;
                 for (let i = _circleAmount; i < circles.length; i++) {
                     modifyDynamicCircle(
                         circles[i], 
