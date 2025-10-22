@@ -339,8 +339,7 @@ svg[name="qrcode"]:where(.dark,.dark *) {
     justify-content: center;
     align-items: center;
     width: 100%;
-    height: fit-content;
-    max-height: 100%;
+    height: 100%;
     overflow: hidden;
     box-sizing: content-box;
     border-color: inherit;
@@ -356,9 +355,10 @@ svg[name="qrcode"]:where(.dark,.dark *) {
     border-top-width: 1px;
 }
 
-.quoted-circle > div > .media-group :where(img, video) {
+.quoted-circle > div > .media-group > div > :where(img, video) {
     width: 100%;
-    height: auto;
+    height: 100%;
+    object-fit: cover;
     cursor: pointer;
     z-index: 9;
 }
