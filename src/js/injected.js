@@ -1261,7 +1261,7 @@ window.fetch = async (...args)=>{
 
 // data saver
 function datasaverClickListener(e) {
-    if (e.target.computedStyleMap && e.target.computedStyleMap().get("--imprv-saved") || window.getComputedStyle && window.getComputedStyle(e.target).getPropertyValue("--imprv-saved")) {
+    if (e.target.tagName == "IMG" && (e.target.computedStyleMap && e.target.computedStyleMap().get("--imprv-saved") || window.getComputedStyle && window.getComputedStyle(e.target).getPropertyValue("--imprv-saved"))) {
         // it is data-saved image
         let bigImg = e.target.parentElement.parentElement.classList.contains("media-group") ? e.target.nextElementSibling.children[0] : e.target.parentElement.nextElementSibling.children[0];
         e.target.srcset = (e.target.srcset || e.target.getAttribute("_srcset") || "").replaceAll("image?url=", "image?_&url=");
