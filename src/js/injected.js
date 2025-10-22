@@ -833,10 +833,10 @@ function modifyEmbed(url) {
                     bigImg.firstChild.classList.add("pointer-events-none", "scale-90", "opacity-0");
                 });
             });
-            /* FIXME: following may not work well */
             let videos = Array.from(embed.querySelectorAll(".media-group > div > video"));
             videos.forEach((video)=>{
-                video.addEventListener("click", ()=>{
+                video.addEventListener("click", (e)=>{
+                    e.preventDefault();
                     if (video.paused) {
                         video.play();
                     } else {
