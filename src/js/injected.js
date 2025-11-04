@@ -725,7 +725,15 @@ function modifyEmbed(url) {
         if (circle) {
             quoted.append(circle.children[0].cloneNode(3), document.createElement("div"));
             quoted.children[1].append(...[...circle.children[1].querySelectorAll("& > div:first-child, & > p:first-child, & > p:first-child + div")].map((el)=>el.cloneNode(2)));
-            quoted.children[1].children[0].querySelectorAll("& > div").forEach((div)=>div.remove());
+            quoted.children[1].children[0].querySelectorAll("& > div").forEach((div)=>{
+                for (let anchor of div.querySelectorAll("a")) {
+                    anchor.style.display = "inline-block";
+                    anchor.className = "relative z-[1] text-sub hover:underline w-full truncate";
+                    anchor.innerText = anchor.href || "";
+                    div.insertAdjacentElement("beforebegin", anchor);
+                }
+                div.remove();
+            });
             // handle badge
             let author = quoted.querySelector("div:first-child > div:first-child > div > a").href.split("/").at(-1);
             if (author == developer_account) {
