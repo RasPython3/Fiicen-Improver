@@ -363,6 +363,14 @@ svg[name="qrcode"]:where(.dark,.dark *) {
     z-index: 9;
 }
 
+/* file drag */
+
+.drag-in {
+    outline: orange dashed 1px;
+    outline-offset: -0.25rem;
+    border-radius: inherit;
+}
+
 /* setting */
 
 ._fiicen_improver_settings section {

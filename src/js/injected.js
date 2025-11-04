@@ -1082,30 +1082,72 @@ document.addEventListener("paste", (e)=>{
         return;
     }
     let mediaInput = e.target.form.elements["media_attachments"];
-    if (e.clipboardData.files.length > 0) {
-        let promises = [];
-        for (let file of e.clipboardData.files) {
-            if (file.type.startsWith("image/") || file.type.startsWith("video/")) {
-                promises.push(
-                    file.arrayBuffer().then((buffer)=>{
-                        return new File([buffer,], file.name,
-                            {
-                                type: file.type,
-                                lastModified: file.lastModified
-                            }
-                        );
-                    }).catch(()=>{})
-                );
-            }
-            Promise.all(promises).then((files)=>{
-                if (mediaInput) {
-                    mediaInput[Object.keys(mediaInput).filter(key=>key.startsWith("__reactProps"))[0]].onChange({
-                        target: {
-                            files: files
+    addMediaFiles(mediaInput, e.clipboardData.files);
+}); 
+
+function addMediaFiles(targetInput, files) {
+    let promises = [];
+    for (let file of files) {
+        if (file.type.startsWith("image/") || file.type.startsWith("video/")) {
+            promises.push(
+                file.arrayBuffer().then((buffer)=>{
+                    return new File([buffer,], file.name,
+                        {
+                            type: file.type,
+                            lastModified: file.lastModified
                         }
-                    });
+                    );
+                }).catch(()=>{})
+            );
+        }
+        Promise.all(promises).then((files)=>{
+            if (targetInput) {
+                targetInput[Object.keys(targetInput).filter(key=>key.startsWith("__reactProps"))[0]].onChange({
+                    target: {
+                        files: files
+                    }
+                });
+            }
+        });
+    }
+}
+
+window.addEventListener("dragenter", (e)=>{
+    if (e.target.matches("form:has(textarea), form:has(textarea) *")) {
+        let f = e.target;
+        while (f.tagName != "FORM") {
+            f = f.parentElement;
+        }
+
+        if (!f.classList.contains("drag-in")) {
+            f.classList.add("drag-in");
+
+            let ondragleave = (e)=>{
+                if (f.contains(e.target) && (e.relatedTarget == null || !f.contains(e.relatedTarget))) {
+                    console.log(e);
+                    f.classList.remove("drag-in");
+                    f.removeEventListener("dragleave", ondragleave);
+                    f.removeEventListener("dragover", ondragover);
+                    f.removeEventListener("drop", ondrop);
                 }
-            });
+            };
+
+            let ondragover = (e)=>{
+                e.preventDefault();
+            };
+
+            let ondrop = (e)=>{
+                e.preventDefault();
+                f.removeEventListener("dragleave", ondragleave);
+                f.removeEventListener("dragover", ondragover);
+                f.classList.remove("drag-in");
+                let mediaInput = f.elements["media_attachments"];
+                addMediaFiles(mediaInput, e.dataTransfer.files || []);
+            };
+
+            f.addEventListener("dragleave", ondragleave);
+            f.addEventListener("dragover", ondragover);
+            f.addEventListener("drop", ondrop, {once: true});
         }
     }
 });
