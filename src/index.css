@@ -34,13 +34,18 @@ body > div.fixed.inset-0 > div.base-bg.absolute > div.base-bg-float.sticky + div
                 }
                 > div.relative {
                     display: inline-block;
-                    > div > div:first-child.absolute {
-                        position: relative;
-                        > img {
-                            position: relative ! important;
-                            height: unset ! important;
-                            max-height: 32rem;
-                            --imprv-saved: 1;
+                    > div:has(> div:first-child.absolute > img) {
+                        width: 100%;
+                        height: 100%;
+                        > div:first-child.absolute {
+                            position: relative;
+                            width: 100%;
+                            height: 100%;
+                            > img {
+                                position: relative ! important;
+                                max-height: 32rem;
+                                --imprv-saved: 1;
+                            }
                         }
                     }
                 }
