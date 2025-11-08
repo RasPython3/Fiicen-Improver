@@ -13,7 +13,7 @@ body > div.fixed.inset-0 > div.base-bg.absolute > div.base-bg-float.sticky + div
         > div:first-child > div > p {
             font-size: 0.8em;
         }
-        > div:nth-child(2) {
+        > div:nth-child(2):not(.w-0) {
             padding-left: 2.25rem;
             padding-right: 1.625rem;
             > div:not(.mt-1.whitespace-pre-wrap.break-all):has(> a), > video {
