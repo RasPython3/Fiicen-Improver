@@ -1119,7 +1119,7 @@ window.addEventListener("dragenter", (e)=>{
             f = f.parentElement;
         }
 
-        if (!f.classList.contains("drag-in")) {
+        if (f.elements["media_attachments"] && !f.classList.contains("drag-in")) {
             f.classList.add("drag-in");
 
             let ondragleave = (e)=>{
