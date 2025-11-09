@@ -57,6 +57,7 @@ body > div.fixed.inset-0 > div.base-bg.absolute > div.base-bg-float.sticky + div
                 overflow-wrap: anywhere;
             }
             > div.mt-1.whitespace-pre-wrap.break-all > :where(iframe, div) {
+                width: calc(100% + 0.625rem);
                 margin-top: 0.5rem;
                 margin-left: -0.625rem;
                 margin-right: 0;
