@@ -1,5 +1,5 @@
-:where(main:nth-child(3) > div > div > div:first-child > div.relative,
-main:not(:nth-child(3)) > div > div > div.relative,
+:where(div:where(:has(> div:first-child), :has(> div:first-child + div > button)):has(> div + header + main:last-child) > main > div > div > div:first-child > div.relative,
+main:not(div:where(:has(> div:first-child), :has(> div:first-child + div > button)):has(> div + header + main:last-child) > main) > div > div > div.relative,
 div.flex.flex-col.gap-4 > div.relative.flex,
 div.min-h-screen.border-x > div:first-child > div:first-child,
 body > div.fixed.inset-0 > div.base-bg.absolute > div.base-bg-float.sticky + div:not(.p-4) > div:first-child) {
@@ -34,13 +34,18 @@ body > div.fixed.inset-0 > div.base-bg.absolute > div.base-bg-float.sticky + div
                 }
                 > div.relative {
                     display: inline-block;
-                    > div > div:first-child.absolute {
-                        position: relative;
-                        > img {
-                            position: relative ! important;
-                            height: unset ! important;
-                            max-height: 32rem;
-                            --imprv-saved: 1;
+                    > div:has(> div:first-child.absolute > img) {
+                        width: 100%;
+                        height: 100%;
+                        > div:first-child.absolute {
+                            position: relative;
+                            width: 100%;
+                            height: 100%;
+                            > img {
+                                position: relative ! important;
+                                max-height: 32rem;
+                                --imprv-saved: 1;
+                            }
                         }
                     }
                 }
@@ -87,7 +92,7 @@ body > div > nav.z-10 {
     z-index: 11;
 }
 
-div:has(div > main:nth-child(3)) > div:first-child > header.pt-2 {
+div:where(:has(> div:first-child), :has(> div:first-child + div > button)):has(> div + header + main:last-child) > div:first-child > header.pt-2:not(.relative) {
     margin-inline: calc(50% - 50vw);
     padding-inline: calc(50vw - 50%);
     box-sizing: content-box;
@@ -155,53 +160,58 @@ button.text-left:has(> img:first-child) > span.inline-flex.text-white:last-child
     background: white;
 }
 
-
-div:has(> main:nth-child(3)) > div > div:not(:has(> div:nth-child(3))) > div:first-child > div.flex {
+div:where(:has(> div:first-child), :has(> div:first-child + div > button)):has(> div + header + main:last-child) {
     align-items: center;
-}
 
-div:has(> main:nth-child(3)) > div > div {
-    gap: 0.25rem;
-}
+     > div:first-child {
+        > div:not(:has(> div:nth-child(3))) > div:first-child > div.flex {
+            align-items: center;
+        }
 
-div:has(> main:nth-child(3)) > div > div > div:first-child div:not(.fixed) > img {
-    --imprv-saved: 1;
-}
+        > div {
+            gap: 0.25rem;
+        }
 
-div:has(> main:nth-child(3)) > div > div > div:last-child:has(> p) {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #ffffff2f;
-    padding: 0.75rem;
-    border-radius: 0.75rem;
-}
+        > div > div:first-child div:not(.fixed) > img {
+            --imprv-saved: 1;
+        }
 
-div:has(> main:nth-child(3)) {
-    align-items: center;
+        > div > div:last-child:has(> p) {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #ffffff2f;
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+        }
+    }
 }
 
 main.p-4:has(div.text-center > h1.font-bold) {
     padding: 0;
 }
 
-main:not(.p-4):not(.w-screen), header:has(+ main:not(.p-4):not(.w-screen)) {
+div:has(> main:not(.p-4):not(.w-screen):first-child:last-child) {
+    display: flex;
+}
+
+main:not(.p-4):not(.w-screen):not(.w-full), header:has(+ main:not(.p-4):not(.w-screen)) {
     width: 36rem;
     max-width: calc(100vw - 2rem);
 }
 
-div:has(> main:nth-child(3)) > div:first-child {
+div:where(:has(> div:first-child), :has(> div:first-child + div > button)):has(> div + header + main:last-child) > div:first-child {
     width: 150%;
     max-width: calc(100vw - 2rem);
 }
 
 @media (min-width: 768px) {
-    div:has(> main:nth-child(3)) > div:first-child {
+    div:where(:has(> div:first-child), :has(> div:first-child + div > button)):has(> div + header + main:last-child) > div:first-child {
         max-width: calc(100vw - 6rem);
     }
 }
 
-div:has(> div.min-h-screen.border-x) {
+div:has(> div.min-h-screen.border-x):not(.w-full) {
     max-width: 42rem;
 }
 div.min-h-screen.border-x {
@@ -209,39 +219,51 @@ div.min-h-screen.border-x {
 }
 
 @media (min-width: 38.5rem) {
-    div:has(> main:nth-child(3)) > div:first-child > div {
-        position: relative;
-        display: flex;
-        padding-right: calc(50% + 1rem);
-        flex-direction: column;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
+    div:where(:has(> div:first-child), :has(> div:first-child + div > button)):has(> div + header + main:last-child) > div:first-child {
+        > div {
+            position: relative;
+            display: flex;
+            padding-right: calc(50% + 1rem);
+            flex-direction: column;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
 
-    div:has(> main:nth-child(3)) > div:first-child > div:not(:has(> div:last-child)) {
-        padding-left: 20%;
-        padding-right: 20%;
-    }
+        > div:not(:has(> div:last-child)) {
+            padding-left: 20%;
+            padding-right: 20%;
+        }
 
-    div:has(> main:nth-child(3)) > div:first-child > div > * {
-        max-width: calc(100vw - 4.5rem);
-    }
+        > div > * {
+            max-width: calc(100vw - 4.5rem);
+        }
 
-    div:has(> main:nth-child(3)) > div:first-child > div > div:last-child {
-        position: absolute;
-        top: 1rem;
-        right: 1rem;
-        width: calc(50% - 1rem);
-        height: calc(100% - 2rem);
+        > div > div:last-child {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: calc(50% - 1rem);
+            height: calc(100% - 2rem);
+        }
     }
 }
 
-div:has(> main:nth-child(3)) > div:first-child > div > div:last-child > p {
+div:where(:has(> div:first-child), :has(> div:first-child + div > button)):has(> div + header + main:last-child) > div:first-child > div > div:last-child > p {
     overflow-wrap: anywhere;
     white-space: break-spaces;
 }
 
 /* QR button */
+
+div:where(:has(> div:first-child), :has(> div:first-child + div > button)):has(> div + header + main:last-child) > div:first-child > div > div.flex.gap-4 > button:has(> img) {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    > img {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+}
+
 svg[name="qrcode"] {
     fill: rgb(0 0 0/var(--tw-bg-opacity));
     stroke: rgb(0 0 0/var(--tw-bg-opacity));
