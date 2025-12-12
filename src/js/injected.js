@@ -245,6 +245,222 @@ function redrawCircles() {
 
 var _loadedCalled = false;
 
+function convertQRCodeSVG(svg) {
+    let size = svg.viewBox.baseVal.width;
+    let ar = new Int8Array(size*size);
+
+    let quietOffset = 2;
+
+    ds = [[1, 0], [0, 1], [-1, 0], [0, -1]];
+    grs = [];
+    exs = [];
+
+    svg.querySelectorAll("use").forEach((el)=>{
+        ar[el.x.baseVal.value + el.y.baseVal.value * size] = 1;
+    });
+
+    for (let k = 0; k < ar.length; k++) {
+        if (ar[k] == 1) {
+            let x = k % size, y = (k - x) / size;
+
+            if (x > 0 && ar[k-1] > 1 || y > 0 && ar[k-size] > 1) {
+                ar[k] = 2;
+            } else {
+                let d = 0;
+                let gr = [];
+
+                if (x > 0) {
+                    ar[k-1] = -1;
+                }
+                if (y > 0) {
+                    ar[k-size] = -1;
+                }
+                grs.push(gr);
+                while (true) {
+                    gr.push([x,y]);
+                    ar[x+y*size] = 2;
+                    let td;
+                    for (td = d-1; td < d+3; td++) {
+                        let [dx, dy] = ds.at((td+4)%4);
+                        if (x+dx < 0 || x+dx >= size || y+dy < 0 || y+dy >= size) {
+                            continue;
+                        }
+                        if (ar[x+dx+(y+dy)*size] > 0) {
+                            if (x+y*size == k && ar[x+dx+(y+dy)*size] == 2) {
+                                td = d+3;
+                                break;
+                            }
+                            d = (td + 4) % 4;
+                            x += dx;
+                            y += dy;
+                            break;
+                        } else {
+                            ar[x+dx+(y+dy)*size] = -1;
+                        }
+                    }
+                    if ((d - td + 4) % 4 > 0) {
+                        if (gr.length == 1) {
+                            gr.push([...gr[0]]);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        if (k / size < size - 1 && ar[k] > 0 && (k % size < size - 1 && ar[k+1] > 0 && ar[k+size+1] == 0 || ar[k+size] == 0)) {
+            let x = k % size, y = (k - x) / size;
+            let d = ar[k+size] == 0 ? 0 : 3;
+            let ex = [];
+            exs.push(ex);
+            while (true) {
+                ex.push([x,y]);
+                ar[x+y*size] = 3;
+                let td;
+                for (td = d+1; td > d-3; td--) {
+                    let [dx, dy] = ds.at((td+4)%4);
+                    if (x+dx < 0 || x+dx >= size || y+dy < 0 || y+dy >= size) {
+                        continue;
+                    }
+                    if (ar[x+dx+(y+dy)*size] > 0) {
+                        if (x+y*size == k && ar[x+dx+(y+dy)*size] == 3) {
+                            td = d-3;
+                            break;
+                        }
+                        d = (td + 4) % 4;
+                        x += dx;
+                        y += dy;
+                        break;
+                    } else {
+                        ar[x+dx+(y+dy)*size] = -1;
+                    }
+                }
+                if ((d - td + 4) % 4 > 0) {
+                    if (ex.length == 1) {
+                        ex.push([...ex[0]]);
+                    }
+                    break;
+                }
+            }
+            ex.forEach((point)=>{
+                ar[point[0]+point[1]*size] = 2;
+            });
+        }
+    }
+
+    svg.replaceChildren(svg.firstChild, document.createElementNS("http://www.w3.org/2000/svg", "path"));
+
+    svg.lastChild.style.fill = "black";
+
+    svg.lastChild.setAttribute("d", (grs.map((ps)=>
+        ps.reduce((acc, _cur, _index, _arr)=>{
+            let cur = _arr.at(_index - _arr.length);
+            if (acc.length < 2) { acc.push(cur); }
+            else {
+                if ((acc.at(-1)[0] - acc.at(-2)[0]) * (cur[0] - acc.at(-1)[0]) + (acc.at(-1)[1] - acc.at(-2)[1]) * (cur[1] - acc.at(-1)[1]) <= 0) {
+                    acc.push(cur);
+                } else {
+                    acc.splice(-1, 1, cur);
+                }
+            }
+            return acc;
+        }, []).reduce((acc, cur, index, arr)=>{
+            let next = arr.at(index % (arr.length - 1) - arr.length + 1);
+            let prev = arr.at(index - 1);
+            let dp = [cur[0] - prev[0], cur[1] - prev[1]];
+            let dn = [next[0] - cur[0], next[1] - cur[1]];
+            let res;
+            if (index == 0) {
+                if (dn[1] == 0) {
+                    if (dn[0] != 0) {
+                        res = `M ${quietOffset+cur[0]+1} ${quietOffset+cur[1]}`;
+                    } else {
+                        res = `M ${quietOffset+cur[0]+0.5} ${quietOffset+cur[1]}`;
+                    }
+                } else {
+                    res = `M ${quietOffset+cur[0]+1} ${quietOffset+cur[1]+1}`;
+                }
+            } else {
+                let s = dp[1] < 0 ? -1 : (dp[1] > 0 ? 1 : 0), c = dp[0] < 0 ? -1 : (dp[0] > 0 ? 1 : 0);
+                let ds = dp[0] * dn[1] - dp[1] * dn[0], dc = dp[0] * dn[0] + dp[1] * dn[1];
+                ds = ds < 0 ? -1 : (ds > 0 ? 1 : 0);
+                dc = dc < 0 ? -1 : (dc > 0 ? 1 : 0);
+                if (ds >= 0) {
+                    res = acc + ` l ${dp[0] - 0.5 * c} ${dp[1] - 0.5 * s}`;
+                    if (ds > 0 || dc < 0) {
+                        res += ` a 0.5 0.5 0 ${s == 0 && c == 0 ? 1 : 0} 1 `;
+                        if (ds > 0) {
+                            res += `${0.5*(c-s)} ${0.5*(s+c)}`;
+                        } else {
+                            res += `${-s} ${c}`;
+                        }
+                    } else if (s == 0 && c == 0) {
+                        res += ` a 0.5 0.5 0 0 1 0 1 a 0.5 0.5 0 0 1 0 -1`;
+                    }
+                    res += ` l ${0.5 * (c*dc - s*ds)} ${0.5 * (s*dc + c*ds)}`;
+                } else {
+                    res = acc + ` l ${dp[0] - c} ${dp[1] - s}`;
+                }
+            }
+            return res;
+        }, "") + " Z"
+    ).concat(exs.map((ps)=>
+        ps.reduce((acc, _cur, _index, _arr)=>{
+            let cur = _arr.at(_index - _arr.length);
+            if (acc.length < 2) { acc.push(cur); }
+            else {
+                if ((acc.at(-1)[0] - acc.at(-2)[0]) * (cur[0] - acc.at(-1)[0]) + (acc.at(-1)[1] - acc.at(-2)[1]) * (cur[1] - acc.at(-1)[1]) <= 0) {
+                    acc.push(cur);
+                } else {
+                    acc.splice(-1, 1, cur);
+                }
+            }
+            return acc;
+        }, []).reverse().reduce((acc, cur, index, arr)=>{
+            let next = arr.at(index % (arr.length - 1) - arr.length + 1);
+            let prev = arr.at(index - 1);
+            let dp = [cur[0] - prev[0], cur[1] - prev[1]];
+            let dn = [next[0] - cur[0], next[1] - cur[1]];
+            let res;
+            if (index == 0) {
+                if (dn[1] == 0) {
+                    if (dn[0] != 0) {
+                        res = `M ${quietOffset+cur[0]+1} ${quietOffset+cur[1]}`;
+                    } else {
+                        res = `M ${quietOffset+cur[0]+0.5} ${quietOffset+cur[1]}`;
+                    }
+                } else {
+                    res = `M ${quietOffset+cur[0]+1} ${quietOffset+cur[1]+1}`;
+                }
+            } else {
+                let s = dp[1] < 0 ? -1 : (dp[1] > 0 ? 1 : 0), c = dp[0] < 0 ? -1 : (dp[0] > 0 ? 1 : 0);
+                let ds = dp[0] * dn[1] - dp[1] * dn[0], dc = dp[0] * dn[0] + dp[1] * dn[1];
+                ds = ds < 0 ? -1 : (ds > 0 ? 1 : 0);
+                dc = dc < 0 ? -1 : (dc > 0 ? 1 : 0);
+                if (ds >= 0) {
+                    res = acc + ` l ${dp[0] - 0.5 * c} ${dp[1] - 0.5 * s}`;
+                    if (ds > 0 || dc < 0) {
+                        res += ` a 0.5 0.5 0 ${s == 0 && c == 0 ? 1 : 0} 1 `;
+                        if (ds > 0) {
+                            res += `${0.5*(c-s)} ${0.5*(s+c)}`;
+                        } else {
+                            res += `${-s} ${c}`;
+                        }
+                    } else if (s == 0 && c == 0) {
+                        res += ` a 0.5 0.5 0 0 1 0 1 a 0.5 0.5 0 0 1 0 -1`;
+                    }
+                    res += ` l ${0.5 * (c*dc - s*ds)} ${0.5 * (s*dc + c*ds)}`;
+                } else {
+                    res = acc + ` l ${dp[0] - c} ${dp[1] - s}`;
+                }
+            }
+            return res;
+        }, "") + " Z"
+    ))).join(" "));
+
+    svg.viewBox.baseVal.width += quietOffset * 2;
+    svg.viewBox.baseVal.height += quietOffset * 2;
+}
+
 async function onLoaded() { // first load or nextjs's router
     // re-arrange field header
     console.log("onLoaded called");
@@ -267,57 +483,145 @@ async function onLoaded() { // first load or nextjs's router
         window.dispatchEvent(error);
     }
     if (location.pathname.startsWith("/field/")) {
-        if (location.pathname.match("\\/field\\/"+username+"(?:[?/].*)?$") && !document.querySelector("button > svg[name=\"qrcode\"]")) {
+        let qrPopup = document.querySelector("div:has(> h3 + img[src^=\"data:\"] + p:nth-child(3))");
+        if (location.pathname.match("\\/field\\/"+username+"(?:[?/].*)?$") && qrPopup != undefined) {
             (async ()=>{
                 try {
-                    // create QR code button
-                    if (errorBoxes) {
-                        outputError("qr 1");
-                    }
-                    let url = await messageExt("extURL", "qr-button.html");
-                    if (errorBoxes) {
-                        outputError("qr 2");
-                    }
-                    let text = await (await fetch(url)).text();
-                    if (errorBoxes) {
-                        outputError("qr 3");
-                    }
-                    let btn = document.createElement("div");
-                    btn.innerHTML = text;
-                    btn.querySelector("div[title=\"field\"]").outerHTML = new QRCode(document.createElement("div"), {text: location.href, useSVG: true})._el.innerHTML;
-                    btn.querySelector("div._qrcode svg").style.border = "solid 2rem white";
-                    btn.querySelector("div._qrcode svg").style.borderRadius = "1.5rem";
-                    btn.children[0].addEventListener("click", ()=>{
-                        btn.children[1].classList.add("bg-black/20");
-                        btn.children[1].classList.remove("pointer-events-none", "bg-transparent");
-                        btn.children[1].children[0].classList.remove("blur", "scale-75", "opacity-0");
+                    // create QR code
+                    let images = {};
+
+                    let qrdiv = document.createElement("div");
+                    let qrcode = new QRCode(qrdiv, {
+                        text: location.href,
+                        correctLevel: QRCode.CorrectLevel.M,
+                        useSVG: true
                     });
-                    let close = ()=>{
-                        btn.children[1].classList.remove("bg-black/20");
-                        btn.children[1].classList.add("pointer-events-none", "bg-transparent");
-                        btn.children[1].children[0].classList.add("blur", "scale-75", "opacity-0");
-                    };
-                    btn.children[1].addEventListener("click", (ev)=>{
-                        if (ev.target == btn.children[1]) {
-                            close();
+
+                    let qrSVG = qrdiv.firstElementChild;
+
+                    qrSVG.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns", "http://www.w3.org/2000/svg");
+
+                    convertQRCodeSVG(qrSVG);
+
+                    let qrImg = new Image(qrSVG.viewBox.baseVal.width * 16, qrSVG.viewBox.baseVal.height * 16);
+                    qrSVG.setAttribute("width", qrImg.width + "px");
+                    qrSVG.setAttribute("height", qrImg.height + "px");
+                    console.log(qrSVG);
+
+                    let btns = document.createElement("div");
+                    btns.className = "relative inline-flex w-1/2 flex-col items-stretch gap-2 my-4";
+                    btns.style.float = "right";
+
+                    let urlEntry = document.createElement("input");
+                    urlEntry.type = "text";
+                    urlEntry.value = location.href; //"https://fiicen.jp/field/" + username;
+                    urlEntry.className = "w-full rounded-full border p-4 focus:border-sky-500";
+                    urlEntry.style.paddingRight = "4.5rem";
+                    btns.appendChild(urlEntry);
+
+                    urlEntry.addEventListener("focus", (e)=>{
+                        urlEntry.select();
+                        navigator.clipboard.writeText(urlEntry.value)
+                            .then(()=>alertMoment("リンクをコピーしました"))
+                            .catch(()=>alertMoment("リンクのコピーに失敗しました"));
+                    })
+
+                    for (let item of [{
+                        text: "copy",
+                        className: "absolute top-2 right-2 accent-bg accent-bg-hover w-full rounded-full px-2 py-2 font-bold",
+                        style: {
+                            "width": "4rem",
+                        },
+                        callback: (e)=>{
+                            urlEntry.select();
                         }
+                    }, {
+                        text: ".pngをダウンロード",
+                        className: "accent-bg accent-bg-hover w-full rounded-full px-6 py-2 font-bold",
+                        callback: (e)=>{
+                            if (images.png != undefined) {
+                                images.png.then((url)=>{
+                                    let anchor = document.createElement("a");
+                                    anchor.style.display = "none";
+                                    anchor.href = url;
+                                    anchor.setAttribute("download", "qrcode.png");
+                                    document.body.append(anchor);
+                                    anchor.click();
+                                    anchor.remove();
+                                });
+                            }
+                        }
+                    }, {
+                        text: ".svgをダウンロード",
+                        className: "accent-bg accent-bg-hover w-full rounded-full px-6 py-2 font-bold",
+                        callback: (e)=>{
+                            if (images.svg != undefined) {
+                                console.log("svg...");
+                                images.svg.then((url)=>{
+                                    console.log("svg");
+                                    let anchor = document.createElement("a");
+                                    anchor.style.display = "none";
+                                    anchor.href = url;
+                                    anchor.setAttribute("download", "qrcode.svg");
+                                    document.body.append(anchor);
+                                    anchor.click();
+                                    anchor.remove();
+                                });
+                            }
+                        }
+                    }]) {
+                        let btn = document.createElement("button");
+                        btn.innerText = item.text;
+                        btn.className = item.className || "";
+                        if (item.style) {
+                            for (let [key, value] of Object.entries(item.style)) {
+                                btn.style[key] = value;
+                            }
+                        }
+                        btns.appendChild(btn);
+                        btn.addEventListener("click", item.callback);
+                    }
+
+                    let qrImgEl = qrPopup.querySelector("img");
+                    qrImgEl.insertAdjacentElement("afterend", qrImgEl.cloneNode());
+                    qrImgEl.style.display = "none";
+                    qrImgEl = qrImgEl.nextElementSibling;
+
+                    let svgDataUrl = "data:image/svg+xml;base64,"+btoa(Array.from((new TextEncoder()).encode(qrSVG.outerHTML), (i)=>String.fromCodePoint(i)).join(""));
+
+                    qrImgEl.src = svgDataUrl;
+
+                    images.svg = new Promise((resolve, reject)=>{
+                        resolve(qrImgEl.src);
                     });
-                    btn.children[1].querySelector("button").addEventListener("click", close);
-                    await _ext_ready;
-                    let _inject_button = setInterval(()=>{
-                        if (errorBoxes) {
-                            outputError("qr 4");
-                        }
-                        let buttons = document.querySelector("div:has(> main:nth-child(3)) > div > div:not(:has(> div:nth-child(3))) > div.flex:has(div)");
-                        if (buttons == undefined) {
-                            return;
-                        }
-                        clearInterval(_inject_button);
-                        if (errorBoxes) {
-                            outputError("qr 5");
-                        }
-                        buttons.append(btn);
-                    }, 10);
+
+                    images.png = new Promise((resolve, reject)=>{
+                        qrImg.addEventListener("load", (e)=>{
+                            let canvas = new OffscreenCanvas(qrImg.width, qrImg.height);
+                            let ctx = canvas.getContext("2d");
+                            ctx.fillStyle = "#ffffff";
+                            ctx.fillRect(0, 0, canvas.width, canvas.height);
+                            ctx.drawImage(qrImg, 0, 0, qrImg.width, qrImg.height);
+
+                            canvas.convertToBlob({type: "image/png"}).then((blob)=>{
+                                let objUrl = URL.createObjectURL(blob);
+                                resolve(objUrl);
+                                qrImgEl.src = objUrl;
+                            }).catch(reject);
+                        });
+                        qrImg.src = qrImgEl.src;
+                    });
+
+                    qrPopup.style.display = "inline-block";
+                    qrPopup.style.width = "100%";
+
+                    qrImgEl.style.margin = "auto";
+                    qrImgEl.style.marginTop = "1rem";
+                    qrImgEl.nextElementSibling.style.width = "50%";
+                    qrImgEl.nextElementSibling.style.marginTop = "0.5rem";
+                    qrImgEl.nextElementSibling.style.marginBottom = "1rem";
+
+                    qrImgEl.insertAdjacentElement("beforebegin", btns);
                 } catch (e) {
                     outputError(e);
                 }
