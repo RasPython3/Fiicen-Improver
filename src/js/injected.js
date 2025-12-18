@@ -934,11 +934,11 @@ function addQuoteButton(circle, data) {
             shareBtn.firstChild.style.color = "transparent";
             shareBtn.append(document.createElement("p"));
             shareBtn.lastChild.innerText = "サークルを引用";
-            let circleURL = "https://fiicen.jp/circle/" + ((data)=>{
+            let [circleId, circleAuthor] = ((data)=>{
                 while (data.refly_from) {
                     data = data.refly_from;
                 }
-                return data.id;
+                return [data.id, data.author.account_name];
             })(data);
             shareBtn.addEventListener("click", ()=>{
                 let createCircleBtn = document.querySelector("nav > button");
@@ -949,7 +949,7 @@ function addQuoteButton(circle, data) {
                     let timer = setInterval(()=>{
                         if (!circleTextArea.disabled) {
                             clearInterval(timer);
-                            circleTextArea.value = `\n${circleURL}`;
+                            circleTextArea.value = `\n@${circleAuthor} https://fiicen.jp/circle/${circleId}`;
                             circleTextArea.nextElementSibling.textContent = `${circleTextArea.value}\u200b`;
                             circleTextArea.style.height = `${circleTextArea.nextElementSibling.clientHeight}px`;
                             circleTextArea.selectionStart = circleTextArea.selectionEnd = 0;
