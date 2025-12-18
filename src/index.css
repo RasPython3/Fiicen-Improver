@@ -1,3 +1,5 @@
+/* XXX: Fiicen uses div in span, which is illegal */
+
 :where(div:where(:has(> div:first-child), :has(> div:first-child + div > button)):has(> div + header + main:last-child) > main > div > div > div:first-child > div.relative,
 main:not(div:where(:has(> div:first-child), :has(> div:first-child + div > button)):has(> div + header + main:last-child) > main) > div > div > div.relative,
 div.flex.flex-col.gap-4 > div.relative.flex,
@@ -10,7 +12,7 @@ body > div.fixed.inset-0 > div.base-bg.absolute > div.base-bg-float.sticky + div
     > div.relative:not(:last-child) > div,
     > div.relative:not(:last-child) + div:last-child:not(.relative),
     > div:first-child:last-child:not(.relative) {
-        > div:first-child > div > p {
+        > div:first-child > div > p, > div:first-child > div.min-w-0:first-child p {
             font-size: 0.8em;
         }
         > div:nth-child(2) {
@@ -56,14 +58,10 @@ body > div.fixed.inset-0 > div.base-bg.absolute > div.base-bg-float.sticky + div
             > div.mt-1.whitespace-pre-wrap.break-all {
                 overflow-wrap: anywhere;
             }
-            > div.mt-1.whitespace-pre-wrap.break-all > :where(iframe, div) {
+            > div.mt-1.whitespace-pre-wrap.break-all > span > :where(iframe, div) {
                 margin-top: 0.5rem;
                 margin-left: -0.625rem;
                 margin-right: 0;
-            }
-            > div.mt-1.whitespace-pre-wrap.break-all > video {
-                margin-left: -1rem;
-                margin-top: 0.5rem;
             }
             @media (max-width: 768px) {
                 > div:not(.mt-1.whitespace-pre-wrap.break-all):has(> a), > video {
@@ -73,7 +71,7 @@ body > div.fixed.inset-0 > div.base-bg.absolute > div.base-bg-float.sticky + div
                     width: calc(100% + 2.375rem);
                 }
                 > div:not(.mt-1.whitespace-pre-wrap.break-all):not(:has(> a)),
-                > div.mt-1.whitespace-pre-wrap.break-all > :where(iframe, div) {
+                > div.mt-1.whitespace-pre-wrap.break-all > span > :where(iframe, div) {
                     margin-left: -1.5rem;
                     margin-right: -0.875rem;
                     width: calc(100% + 2.375rem);
@@ -255,12 +253,12 @@ div:where(:has(> div:first-child), :has(> div:first-child + div > button)):has(>
 
 /* QR button */
 
-div:where(:has(> div:first-child), :has(> div:first-child + div > button)):has(> div + header + main:last-child) > div:first-child > div > div.flex.gap-4 > button:has(> img) {
+div:where(:has(> div:first-child), :has(> div:first-child + div > button)):has(> div + header + main:last-child) > div:first-child > div > div.flex.gap-2 > button:has(> img) {
     padding-left: 0.5rem;
     padding-right: 0.5rem;
     > img {
-        width: 1.5rem;
-        height: 1.5rem;
+        width: 1.25rem;
+        height: 1.25rem;
     }
 }
 
