@@ -1575,7 +1575,7 @@ window.fetch = async (...args)=>{
 function datasaverClickListener(e) {
     if (e.target.tagName == "IMG" && (e.target.computedStyleMap && e.target.computedStyleMap().get("--imprv-saved") || window.getComputedStyle && window.getComputedStyle(e.target).getPropertyValue("--imprv-saved"))) {
         // it is data-saved image
-        let bigImg = e.target.parentElement.parentElement.classList.contains("media-group") ? e.target.nextElementSibling.children[0] : e.target.parentElement.nextElementSibling.children[0];
+        let bigImg = (e.target.parentElement.parentElement.classList.contains("media-group") ? e.target.nextElementSibling : e.target.parentElement.nextElementSibling).querySelector("img");
         e.target.srcset = (e.target.srcset || e.target.getAttribute("_srcset") || "").replaceAll("image?url=", "image?_&url=");
         e.target.src = (e.target.src || e.target.getAttribute("_src") || "").replace("image?url=", "image?_&url=");
         bigImg.srcset = (bigImg.srcset || bigImg.getAttribute("_srcset") || "").replaceAll("image?url=", "image?_&url=");
