@@ -730,6 +730,9 @@ async function onLoaded() { // first load or nextjs's router
             for (let circleIndex = 0; circleIndex < circles.length; circleIndex++) {
                 let circle = circles[circleIndex];
                 clearInterval(circle.__timer_id);
+                if (circle.matches(":has(> a)")) {
+                    continue;
+                }
                 circle.__timer_id = setInterval((circle)=>{
                     let props;
                     try {
