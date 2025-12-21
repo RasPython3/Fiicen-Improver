@@ -281,9 +281,15 @@ div:has(> main:not(.p-4):not(.w-screen):first-child:last-child) {
     display: flex;
 }
 
-main:not(.p-4):not(.w-screen):not(.w-full), header:not(.w-full):has(+ main:not(.p-4):not(.w-screen)) {
+main:not(.p-4):not(.w-screen):not(.w-full), div:not(.w-full) > header:has(+ main:not(.p-4):not(.w-screen)) {
     width: 36rem;
     max-width: calc(100vw - 2rem);
+}
+
+div:not(.w-full) > header:where(.sticky, .md\:sticky):has(+ main:not(.p-4):not(.w-screen)) {
+    width: 38rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
 }
 
 div:where(:has(> div:first-child), :has(> div:first-child + div > button)):has(> div + header + main:last-child) > div:first-child {
