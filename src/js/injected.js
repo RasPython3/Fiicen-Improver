@@ -62,6 +62,8 @@ const testers = [
 
 var circleAmount = 0;
 
+var circleCache = new Map()
+
 function messageExt(request, value=undefined) {
     let id = 0;
     while (_msgIds.includes(id)) {
@@ -207,6 +209,18 @@ function alertMoment(text) {
     document.body.append(alertPopup);
 }
 
+function createBigImg(img) {
+    let popup = document.createElement("div");
+    popup.className = "pointer-events-none bg-transparent fixed inset-0 z-40 min-h-[100dvh] w-screen duration-300 z-20";
+
+    let bigImg = img.cloneNode();
+    bigImg.className = "pointer-events-none scale-90 opacity-0 object-contain duration-300";
+
+    popup.appendChild(bigImg);
+
+    return popup;
+}
+
 function modifyUser(userData) {
     console.log(userData);
     if (Object.prototype.isPrototypeOf(userData)) {
@@ -236,7 +250,7 @@ function modifyUser(userData) {
 var __timer_id;
 
 function redrawCircles() {
-    let circleParent = document.querySelector(":where(main:nth-child(3) > div > div > div:first-child, main:not(:nth-child(3)) > div > div, header + div.flex > div.mt-10 > div:last-child > div.flex):has(> div.relative):not(:has(> div.aspect-square))");
+    let circleParent = document.querySelector(":where(div:where(div:first-child, div:first-child + div) + header + main > div > div > div:first-child, main:not(:nth-child(3)) > div > div, header + div.flex > div.mt-10 > div:last-child > div.flex):has(> div.relative):not(:has(> div.aspect-square))");
     if (circleParent) {
         let updater = circleParent[Object.keys(circleParent).filter(key=>key.startsWith("__reactProps"))[0]].children.props.value;
         updater(null);
@@ -244,6 +258,222 @@ function redrawCircles() {
 }
 
 var _loadedCalled = false;
+
+function convertQRCodeSVG(svg) {
+    let size = svg.viewBox.baseVal.width;
+    let ar = new Int8Array(size*size);
+
+    let quietOffset = 2;
+
+    ds = [[1, 0], [0, 1], [-1, 0], [0, -1]];
+    grs = [];
+    exs = [];
+
+    svg.querySelectorAll("use").forEach((el)=>{
+        ar[el.x.baseVal.value + el.y.baseVal.value * size] = 1;
+    });
+
+    for (let k = 0; k < ar.length; k++) {
+        if (ar[k] == 1) {
+            let x = k % size, y = (k - x) / size;
+
+            if (x > 0 && ar[k-1] > 1 || y > 0 && ar[k-size] > 1) {
+                ar[k] = 2;
+            } else {
+                let d = 0;
+                let gr = [];
+
+                if (x > 0) {
+                    ar[k-1] = -1;
+                }
+                if (y > 0) {
+                    ar[k-size] = -1;
+                }
+                grs.push(gr);
+                while (true) {
+                    gr.push([x,y]);
+                    ar[x+y*size] = 2;
+                    let td;
+                    for (td = d-1; td < d+3; td++) {
+                        let [dx, dy] = ds.at((td+4)%4);
+                        if (x+dx < 0 || x+dx >= size || y+dy < 0 || y+dy >= size) {
+                            continue;
+                        }
+                        if (ar[x+dx+(y+dy)*size] > 0) {
+                            if (x+y*size == k && ar[x+dx+(y+dy)*size] == 2) {
+                                td = d+3;
+                                break;
+                            }
+                            d = (td + 4) % 4;
+                            x += dx;
+                            y += dy;
+                            break;
+                        } else {
+                            ar[x+dx+(y+dy)*size] = -1;
+                        }
+                    }
+                    if ((d - td + 4) % 4 > 0) {
+                        if (gr.length == 1) {
+                            gr.push([...gr[0]]);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        if (k / size < size - 1 && ar[k] > 0 && (k % size < size - 1 && ar[k+1] > 0 && ar[k+size+1] == 0 || ar[k+size] == 0)) {
+            let x = k % size, y = (k - x) / size;
+            let d = ar[k+size] == 0 ? 0 : 3;
+            let ex = [];
+            exs.push(ex);
+            while (true) {
+                ex.push([x,y]);
+                ar[x+y*size] = 3;
+                let td;
+                for (td = d+1; td > d-3; td--) {
+                    let [dx, dy] = ds.at((td+4)%4);
+                    if (x+dx < 0 || x+dx >= size || y+dy < 0 || y+dy >= size) {
+                        continue;
+                    }
+                    if (ar[x+dx+(y+dy)*size] > 0) {
+                        if (x+y*size == k && ar[x+dx+(y+dy)*size] == 3) {
+                            td = d-3;
+                            break;
+                        }
+                        d = (td + 4) % 4;
+                        x += dx;
+                        y += dy;
+                        break;
+                    } else {
+                        ar[x+dx+(y+dy)*size] = -1;
+                    }
+                }
+                if ((d - td + 4) % 4 > 0) {
+                    if (ex.length == 1) {
+                        ex.push([...ex[0]]);
+                    }
+                    break;
+                }
+            }
+            ex.forEach((point)=>{
+                ar[point[0]+point[1]*size] = 2;
+            });
+        }
+    }
+
+    svg.replaceChildren(svg.firstChild, document.createElementNS("http://www.w3.org/2000/svg", "path"));
+
+    svg.lastChild.style.fill = "black";
+
+    svg.lastChild.setAttribute("d", (grs.map((ps)=>
+        ps.reduce((acc, _cur, _index, _arr)=>{
+            let cur = _arr.at(_index - _arr.length);
+            if (acc.length < 2) { acc.push(cur); }
+            else {
+                if ((acc.at(-1)[0] - acc.at(-2)[0]) * (cur[0] - acc.at(-1)[0]) + (acc.at(-1)[1] - acc.at(-2)[1]) * (cur[1] - acc.at(-1)[1]) <= 0) {
+                    acc.push(cur);
+                } else {
+                    acc.splice(-1, 1, cur);
+                }
+            }
+            return acc;
+        }, []).reduce((acc, cur, index, arr)=>{
+            let next = arr.at(index % (arr.length - 1) - arr.length + 1);
+            let prev = arr.at(index - 1);
+            let dp = [cur[0] - prev[0], cur[1] - prev[1]];
+            let dn = [next[0] - cur[0], next[1] - cur[1]];
+            let res;
+            if (index == 0) {
+                if (dn[1] == 0) {
+                    if (dn[0] != 0) {
+                        res = `M ${quietOffset+cur[0]+1} ${quietOffset+cur[1]}`;
+                    } else {
+                        res = `M ${quietOffset+cur[0]+0.5} ${quietOffset+cur[1]}`;
+                    }
+                } else {
+                    res = `M ${quietOffset+cur[0]+1} ${quietOffset+cur[1]+1}`;
+                }
+            } else {
+                let s = dp[1] < 0 ? -1 : (dp[1] > 0 ? 1 : 0), c = dp[0] < 0 ? -1 : (dp[0] > 0 ? 1 : 0);
+                let ds = dp[0] * dn[1] - dp[1] * dn[0], dc = dp[0] * dn[0] + dp[1] * dn[1];
+                ds = ds < 0 ? -1 : (ds > 0 ? 1 : 0);
+                dc = dc < 0 ? -1 : (dc > 0 ? 1 : 0);
+                if (ds >= 0) {
+                    res = acc + ` l ${dp[0] - 0.5 * c} ${dp[1] - 0.5 * s}`;
+                    if (ds > 0 || dc < 0) {
+                        res += ` a 0.5 0.5 0 ${s == 0 && c == 0 ? 1 : 0} 1 `;
+                        if (ds > 0) {
+                            res += `${0.5*(c-s)} ${0.5*(s+c)}`;
+                        } else {
+                            res += `${-s} ${c}`;
+                        }
+                    } else if (s == 0 && c == 0) {
+                        res += ` a 0.5 0.5 0 0 1 0 1 a 0.5 0.5 0 0 1 0 -1`;
+                    }
+                    res += ` l ${0.5 * (c*dc - s*ds)} ${0.5 * (s*dc + c*ds)}`;
+                } else {
+                    res = acc + ` l ${dp[0] - c} ${dp[1] - s}`;
+                }
+            }
+            return res;
+        }, "") + " Z"
+    ).concat(exs.map((ps)=>
+        ps.reduce((acc, _cur, _index, _arr)=>{
+            let cur = _arr.at(_index - _arr.length);
+            if (acc.length < 2) { acc.push(cur); }
+            else {
+                if ((acc.at(-1)[0] - acc.at(-2)[0]) * (cur[0] - acc.at(-1)[0]) + (acc.at(-1)[1] - acc.at(-2)[1]) * (cur[1] - acc.at(-1)[1]) <= 0) {
+                    acc.push(cur);
+                } else {
+                    acc.splice(-1, 1, cur);
+                }
+            }
+            return acc;
+        }, []).reverse().reduce((acc, cur, index, arr)=>{
+            let next = arr.at(index % (arr.length - 1) - arr.length + 1);
+            let prev = arr.at(index - 1);
+            let dp = [cur[0] - prev[0], cur[1] - prev[1]];
+            let dn = [next[0] - cur[0], next[1] - cur[1]];
+            let res;
+            if (index == 0) {
+                if (dn[1] == 0) {
+                    if (dn[0] != 0) {
+                        res = `M ${quietOffset+cur[0]+1} ${quietOffset+cur[1]}`;
+                    } else {
+                        res = `M ${quietOffset+cur[0]+0.5} ${quietOffset+cur[1]}`;
+                    }
+                } else {
+                    res = `M ${quietOffset+cur[0]+1} ${quietOffset+cur[1]+1}`;
+                }
+            } else {
+                let s = dp[1] < 0 ? -1 : (dp[1] > 0 ? 1 : 0), c = dp[0] < 0 ? -1 : (dp[0] > 0 ? 1 : 0);
+                let ds = dp[0] * dn[1] - dp[1] * dn[0], dc = dp[0] * dn[0] + dp[1] * dn[1];
+                ds = ds < 0 ? -1 : (ds > 0 ? 1 : 0);
+                dc = dc < 0 ? -1 : (dc > 0 ? 1 : 0);
+                if (ds >= 0) {
+                    res = acc + ` l ${dp[0] - 0.5 * c} ${dp[1] - 0.5 * s}`;
+                    if (ds > 0 || dc < 0) {
+                        res += ` a 0.5 0.5 0 ${s == 0 && c == 0 ? 1 : 0} 1 `;
+                        if (ds > 0) {
+                            res += `${0.5*(c-s)} ${0.5*(s+c)}`;
+                        } else {
+                            res += `${-s} ${c}`;
+                        }
+                    } else if (s == 0 && c == 0) {
+                        res += ` a 0.5 0.5 0 0 1 0 1 a 0.5 0.5 0 0 1 0 -1`;
+                    }
+                    res += ` l ${0.5 * (c*dc - s*ds)} ${0.5 * (s*dc + c*ds)}`;
+                } else {
+                    res = acc + ` l ${dp[0] - c} ${dp[1] - s}`;
+                }
+            }
+            return res;
+        }, "") + " Z"
+    ))).join(" "));
+
+    svg.viewBox.baseVal.width += quietOffset * 2;
+    svg.viewBox.baseVal.height += quietOffset * 2;
+}
 
 async function onLoaded() { // first load or nextjs's router
     // re-arrange field header
@@ -267,63 +497,144 @@ async function onLoaded() { // first load or nextjs's router
         window.dispatchEvent(error);
     }
     if (location.pathname.startsWith("/field/")) {
-        if (location.pathname.match("\\/field\\/"+username+"(?:[?/].*)?$") && !document.querySelector("button > svg[name=\"qrcode\"]")) {
+        let qrPopup = document.querySelector("div:has(> h3 + img[src^=\"data:\"] + p:nth-child(3))");
+        if (location.pathname.match("\\/field\\/"+username+"(?:[?/].*)?$") && qrPopup != undefined) {
             (async ()=>{
                 try {
-                    // create QR code button
-                    if (errorBoxes) {
-                        outputError("qr 1");
-                    }
-                    let url = await messageExt("extURL", "qr-button.html");
-                    if (errorBoxes) {
-                        outputError("qr 2");
-                    }
-                    let text = await (await fetch(url)).text();
-                    if (errorBoxes) {
-                        outputError("qr 3");
-                    }
-                    let btn = document.createElement("div");
-                    btn.innerHTML = text;
-                    btn.querySelector("div[title=\"field\"]").outerHTML = new QRCode(document.createElement("div"), {text: location.href, useSVG: true})._el.innerHTML;
-                    btn.querySelector("div._qrcode svg").style.border = "solid 2rem white";
-                    btn.querySelector("div._qrcode svg").style.borderRadius = "1.5rem";
-                    btn.children[0].addEventListener("click", ()=>{
-                        btn.children[1].classList.add("bg-black/20");
-                        btn.children[1].classList.remove("pointer-events-none", "bg-transparent");
-                        btn.children[1].children[0].classList.remove("blur", "scale-75", "opacity-0");
+                    // create QR code
+                    let images = {};
+
+                    let qrdiv = document.createElement("div");
+                    let qrcode = new QRCode(qrdiv, {
+                        text: location.href,
+                        correctLevel: QRCode.CorrectLevel.M,
+                        useSVG: true
                     });
-                    let close = ()=>{
-                        btn.children[1].classList.remove("bg-black/20");
-                        btn.children[1].classList.add("pointer-events-none", "bg-transparent");
-                        btn.children[1].children[0].classList.add("blur", "scale-75", "opacity-0");
-                    };
-                    btn.children[1].addEventListener("click", (ev)=>{
-                        if (ev.target == btn.children[1]) {
-                            close();
+
+                    let qrSVG = qrdiv.firstElementChild;
+
+                    qrSVG.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns", "http://www.w3.org/2000/svg");
+
+                    convertQRCodeSVG(qrSVG);
+
+                    let qrImg = new Image(qrSVG.viewBox.baseVal.width * 16, qrSVG.viewBox.baseVal.height * 16);
+                    qrSVG.setAttribute("width", qrImg.width + "px");
+                    qrSVG.setAttribute("height", qrImg.height + "px");
+                    console.log(qrSVG);
+
+                    let btns = document.createElement("div");
+                    btns.className = "relative w-full inline-flex flex-col items-stretch gap-2";
+
+                    let urlEntry = document.createElement("input");
+                    urlEntry.type = "text";
+                    urlEntry.value = location.href; //"https://fiicen.jp/field/" + username;
+                    urlEntry.className = "w-full rounded-full border p-4 focus:border-sky-500";
+                    urlEntry.style.paddingRight = "4.5rem";
+                    btns.appendChild(urlEntry);
+
+                    urlEntry.addEventListener("focus", (e)=>{
+                        urlEntry.select();
+                        navigator.clipboard.writeText(urlEntry.value)
+                            .then(()=>alertMoment("リンクをコピーしました"))
+                            .catch(()=>alertMoment("リンクのコピーに失敗しました"));
+                    })
+
+                    for (let item of [{
+                        text: "copy",
+                        className: "absolute top-2 right-2 accent-bg accent-bg-hover w-full rounded-full px-2 py-2 font-bold",
+                        style: {
+                            "width": "4rem",
+                        },
+                        callback: (e)=>{
+                            urlEntry.select();
                         }
+                    }, {
+                        text: ".pngをダウンロード",
+                        className: "accent-bg accent-bg-hover w-full rounded-full px-6 py-2 font-bold",
+                        callback: (e)=>{
+                            if (images.png != undefined) {
+                                images.png.then((url)=>{
+                                    let anchor = document.createElement("a");
+                                    anchor.style.display = "none";
+                                    anchor.href = url;
+                                    anchor.setAttribute("download", "qrcode.png");
+                                    document.body.append(anchor);
+                                    anchor.click();
+                                    anchor.remove();
+                                });
+                            }
+                        }
+                    }, {
+                        text: ".svgをダウンロード",
+                        className: "accent-bg accent-bg-hover w-full rounded-full px-6 py-2 font-bold",
+                        callback: (e)=>{
+                            if (images.svg != undefined) {
+                                console.log("svg...");
+                                images.svg.then((url)=>{
+                                    console.log("svg");
+                                    let anchor = document.createElement("a");
+                                    anchor.style.display = "none";
+                                    anchor.href = url;
+                                    anchor.setAttribute("download", "qrcode.svg");
+                                    document.body.append(anchor);
+                                    anchor.click();
+                                    anchor.remove();
+                                });
+                            }
+                        }
+                    }]) {
+                        let btn = document.createElement("button");
+                        btn.innerText = item.text;
+                        btn.className = item.className || "";
+                        if (item.style) {
+                            for (let [key, value] of Object.entries(item.style)) {
+                                btn.style[key] = value;
+                            }
+                        }
+                        btns.appendChild(btn);
+                        btn.addEventListener("click", item.callback);
+                    }
+
+                    let qrImgEl = qrPopup.querySelector("img");
+                    qrImgEl.insertAdjacentElement("afterend", qrImgEl.cloneNode());
+                    qrImgEl.style.display = "none";
+                    qrImgEl.classList.add("hidden");
+                    qrImgEl = qrImgEl.nextElementSibling;
+
+                    let svgDataUrl = "data:image/svg+xml;base64,"+btoa(Array.from((new TextEncoder()).encode(qrSVG.outerHTML), (i)=>String.fromCodePoint(i)).join(""));
+
+                    qrImgEl.src = svgDataUrl;
+
+                    images.svg = new Promise((resolve, reject)=>{
+                        resolve(qrImgEl.src);
                     });
-                    btn.children[1].querySelector("button").addEventListener("click", close);
-                    await _ext_ready;
-                    let _inject_button = setInterval(()=>{
-                        if (errorBoxes) {
-                            outputError("qr 4");
-                        }
-                        let buttons = document.querySelector("div:has(> main:nth-child(3)) > div > div:not(:has(> div:nth-child(3))) > div.flex:has(div)");
-                        if (buttons == undefined) {
-                            return;
-                        }
-                        clearInterval(_inject_button);
-                        if (errorBoxes) {
-                            outputError("qr 5");
-                        }
-                        buttons.append(btn);
-                    }, 10);
+
+                    images.png = new Promise((resolve, reject)=>{
+                        qrImg.addEventListener("load", (e)=>{
+                            let canvas = new OffscreenCanvas(qrImg.width, qrImg.height);
+                            let ctx = canvas.getContext("2d");
+                            ctx.fillStyle = "#ffffff";
+                            ctx.fillRect(0, 0, canvas.width, canvas.height);
+                            ctx.drawImage(qrImg, 0, 0, qrImg.width, qrImg.height);
+
+                            canvas.convertToBlob({type: "image/png"}).then((blob)=>{
+                                let objUrl = URL.createObjectURL(blob);
+                                resolve(objUrl);
+                                qrImgEl.src = objUrl;
+                            }).catch(reject);
+                        });
+                        qrImg.src = qrImgEl.src;
+                    });
+
+                    qrPopup.classList.add("qrcode-popup");
+
+                    qrPopup.lastChild.insertAdjacentElement("beforebegin", btns);
                 } catch (e) {
                     outputError(e);
                 }
             })();
         }
-        if (!document.querySelector("div:has(> main:nth-child(3)) > div > div:not(:has(> div:nth-child(3))) > p:nth-child(2) > img")) {
+        if (!document.querySelector("div:has(> div:where(div:first-child, div:first-child + div) + header + main) > div:first-child > div:not(:has(> div:nth-child(3))) > p:nth-child(2) > img")) {
             let badgeData;
             if (location.pathname.match("/field/" + developer_account + "(?:[?/].*)?$")) {
                 badgeData = {
@@ -355,10 +666,10 @@ async function onLoaded() { // first load or nextjs's router
                     badge.srcset = "/_next/image?url=" + encodedBadgeURI + "&w=16&q=75 1x, /_next/image?url=" + encodedBadgeURI + "&w=32&q=75 2x";
                     badge.src="/_next/image?url=" + encodedBadgeURI + "&w=32&q=75";
                     await _ext_ready;
-                    if (document.querySelector("div:has(> main:nth-child(3))")) {
+                    if (document.querySelector("div:has(> div:where(div:first-child, div:first-child + div) + header + main)")) {
                         // user seems to exist
                         let _inject_badge = setInterval(()=>{
-                            let displayNameP = document.querySelector("div:has(> main:nth-child(3)) > div > div:not(:has(> div:nth-child(3))) > p:nth-child(2)");
+                            let displayNameP = document.querySelector("div:has(> div:where(div:first-child, div:first-child + div) + header + main) > div:first-child > div:not(:has(> div:nth-child(3))) > p:nth-child(2)");
                             if (displayNameP == undefined) {
                                 return;
                             }
@@ -373,7 +684,7 @@ async function onLoaded() { // first load or nextjs's router
             "method": "HEAD",
         }).then((res)=>{
             if (!res.ok && res.status == 403) {
-                let nextSibEl = document.querySelector("div:has(> main:nth-child(3)) > div > div:not(:has(> div:nth-child(3))):not(:has(> div.flex > span.text-danger)) > div.grid");
+                let nextSibEl = document.querySelector("div:has(> div:where(div:first-child, div:first-child + div) + header + main) > div:first-child > div:not(:has(> div:nth-child(3))):not(:has(> div.flex > span.text-danger)) > div.grid");
                 if (nextSibEl) {
                     let banned = document.createElement("div");
                     banned.className = "flex justify-center mb-2";
@@ -417,7 +728,7 @@ async function onLoaded() { // first load or nextjs's router
         }
         clearInterval(__timer_id);
         __timer_id = setInterval(()=>{
-            let circles = document.querySelectorAll(":where(main:nth-child(3) > div > div > div:first-child, main:not(:nth-child(3)) > div > div, header + div.flex > div.mt-10 > div:last-child > div.flex) > div.relative:not(.aspect-square)");
+            let circles = document.querySelectorAll(":where(div:where(div:first-child, div:first-child + div) + header + main > div > div > div:first-child, main:not(div:where(div:first-child, div:first-child + div) + header + main) > div:first-child > div, header + div.flex > div.mt-10 > div:last-child > div.flex) > div.relative:not(.aspect-square)");
             if (circles.length == 0) {
                 return;
             } else {
@@ -426,6 +737,9 @@ async function onLoaded() { // first load or nextjs's router
             for (let circleIndex = 0; circleIndex < circles.length; circleIndex++) {
                 let circle = circles[circleIndex];
                 clearInterval(circle.__timer_id);
+                if (circle.matches(":has(> a)")) {
+                    continue;
+                }
                 circle.__timer_id = setInterval((circle)=>{
                     let props;
                     try {
@@ -435,10 +749,7 @@ async function onLoaded() { // first load or nextjs's router
                     }
                     clearInterval(circle.__timer_id);
                     modifyDynamicCircle(circle, props);
-                    let _props = props;
-                    do {
-                        _props.author = modifyUser(_props.author);
-                    } while (_props = _props == props && props.refly_from ? props.refly_from : _props.reply_to);
+                    modifyCircle(props);
                     redrawCircles();
                     let embededAnchors = circle.querySelectorAll("& > div:nth-last-child(2) > div:nth-last-child(2) > div.mt-1.whitespace-pre-wrap.break-all > div:not(.quoted-circle):has(> a) > a");
                     let embeddedUrls = [];
@@ -613,62 +924,53 @@ async function modifyFieldLayout(data) {
     return data;
 }
 
-function addQuoteButton(circle, data) {
-    if (data && data.id) {
-        let detailButton = circle.querySelector("& > div.border-t:last-child > div:last-child > div:last-child > button");
-        let popupWindow = detailButton && detailButton[Object.keys(detailButton).filter(key=>key.startsWith("__reactFiber"))[0]]
-            .sibling?.child?.child?.child?.child?.stateNode
-            || document.querySelector("body > div.fixed:has(> div > a[href^=\"/report?circlle=" + data.id + "\"])");
-        if (popupWindow && popupWindow.querySelector("& > div:first-child > button.quote") == undefined) {
-            let shareBtn = document.createElement("button");
-            shareBtn.className = "quote base-bg-hover flex w-full gap-4 px-4 py-3";
-            shareBtn.append(document.createElement("img"));
-            assets["quote"].then((url)=>{
-                shareBtn.firstChild.src = url;
-            });
-            shareBtn.firstChild.className = "size-5";
-            shareBtn.firstChild.style.color = "transparent";
-            shareBtn.append(document.createElement("p"));
-            shareBtn.lastChild.innerText = "サークルを引用";
-            let circleURL = "https://fiicen.jp/circle/" + ((data)=>{
-                while (data.refly_from) {
-                    data = data.refly_from;
-                }
-                return data.id;
-            })(data);
-            shareBtn.addEventListener("click", ()=>{
-                let createCircleBtn = document.querySelector("nav > button");
-                let circleTextArea = document.querySelector("body > div > div > form:has(input[name=\"media_attachments\"]) textarea");
-                popupWindow[Object.keys(popupWindow).filter(key=>key.startsWith("__reactProps"))[0]].onClick();
-                createCircleBtn.click();
-                if (circleTextArea) { // if not, not logined
-                    let timer = setInterval(()=>{
-                        if (!circleTextArea.disabled) {
-                            clearInterval(timer);
-                            circleTextArea.value = `\n${circleURL}`;
-                            circleTextArea.nextElementSibling.textContent = `${circleTextArea.value}\u200b`;
-                            circleTextArea.style.height = `${circleTextArea.nextElementSibling.clientHeight}px`;
-                            circleTextArea.selectionStart = circleTextArea.selectionEnd = 0;
-                            circleTextArea.focus();
-                            circleTextArea[Object.keys(circleTextArea).filter(key=>key.startsWith("__reactProps"))[0]].onChange({target: circleTextArea});
-                        }
-                    }, 10);
-                }
-            });
-            popupWindow.firstChild.lastChild.insertAdjacentElement("beforebegin", shareBtn);
-            return true;
-        }
+function addQuoteButton(popupWindow, data) {
+    if (popupWindow && data && popupWindow.querySelector("& > div:first-child > button.quote") == undefined) {
+        let shareBtn = document.createElement("button");
+        shareBtn.className = "quote base-bg-hover flex w-full gap-4 px-4 py-3";
+        shareBtn.append(document.createElement("img"));
+        assets["quote"].then((url)=>{
+            shareBtn.firstChild.src = url;
+        });
+        shareBtn.firstChild.className = "size-5";
+        shareBtn.firstChild.style.color = "transparent";
+        shareBtn.append(document.createElement("p"));
+        shareBtn.lastChild.innerText = "サークルを疑似引用";
+        let [circleId, circleAuthor] = ((data)=>{
+            while (data.refly_from) {
+                data = data.refly_from;
+            }
+            return [data.id, data.author.account_name];
+        })(data);
+        shareBtn.addEventListener("click", ()=>{
+            let createCircleBtn = document.querySelector("nav > button");
+            let circleTextArea = document.querySelector("body > div > div > form:has(input[name=\"media_attachments\"]) textarea");
+            popupWindow.click();
+            createCircleBtn.click();
+            if (circleTextArea) { // if not, not logined
+                let timer = setInterval(()=>{
+                    if (!circleTextArea.disabled) {
+                        clearInterval(timer);
+                        circleTextArea.value = `\n@${circleAuthor} https://fiicen.jp/circle/${circleId}`;
+                        circleTextArea.nextElementSibling.textContent = `${circleTextArea.value}\u200b`;
+                        circleTextArea.style.height = `${circleTextArea.nextElementSibling.clientHeight}px`;
+                        circleTextArea.selectionStart = circleTextArea.selectionEnd = 0;
+                        circleTextArea.focus();
+                        circleTextArea[Object.keys(circleTextArea).filter(key=>key.startsWith("__reactProps"))[0]].onChange({target: circleTextArea});
+                    }
+                }, 10);
+            }
+        });
+        popupWindow.firstChild.lastChild.insertAdjacentElement("beforebegin", shareBtn);
+        return true;
     }
     return false;
 }
 
 function modifyDynamicCircle(circle, data) {
     try {
-        if (!addQuoteButton(circle, data)) {
-            let detailButton = circle.querySelector("& > div.border-t:last-child > div:last-child > div:last-child > button");
-            if (detailButton) {
-                detailButton.addEventListener("click", ()=>addQuoteButton(circle, data), {once: true});
-            }
+        if (data && data.id) {
+            circleCache.set(data.id, data);
         }
     } catch(e) {
         console.error(e);
@@ -678,6 +980,7 @@ function modifyDynamicCircle(circle, data) {
 function modifyCircle(circleData) {
     console.log(circleData);
     if (Object.prototype.isPrototypeOf(circleData)) {
+        circleCache.set(circleData.id, circleData);
         if (circleData.reply_to) {
             modifyCircle(circleData.reply_to);
         }
@@ -703,7 +1006,7 @@ function modifyMessage(messageData) {
 }
 
 function modifyEmbed(url) {
-    let embeds = document.querySelectorAll(":where(main:nth-child(3) > div > div > div:first-child, main:not(:nth-child(3))"
+    let embeds = document.querySelectorAll(":where(div:where(div:first-child, div:first-child + div) + header + main > div > div > div:first-child, main:not(:nth-child(3))"
         + " > div > div, header + div.flex > div.mt-10 > div:last-child > div.flex)"
         + " > div.relative > div:nth-last-child(2) > div:not(:first-child)"
         + " div.relative:has(> a[href=\"" + url + "\"]),"
@@ -723,9 +1026,17 @@ function modifyEmbed(url) {
         let quoted = document.createElement("div");
         
         if (circle) {
-            quoted.append(circle.children[0].cloneNode(3), document.createElement("div"));
+            quoted.append(circle.children[0].querySelector("& > div.min-w-0:first-child > div").cloneNode(3), document.createElement("div"));
             quoted.children[1].append(...[...circle.children[1].querySelectorAll("& > div:first-child, & > p:first-child, & > p:first-child + div")].map((el)=>el.cloneNode(2)));
-            quoted.children[1].children[0].querySelectorAll("& > div").forEach((div)=>div.remove());
+            quoted.children[1].children[0].querySelectorAll("& > div, & > span > div").forEach((div)=>{
+                let anchor =  div.querySelector("& > a:not(:first-child)");
+                if (anchor) {
+                    anchor.className = "relative z-[1] text-sub hover:underline";
+                    anchor.innerText = div.querySelector(".text-sub")?.innerText || anchor.href;
+                    div.insertAdjacentElement("beforebegin", anchor);
+                }
+                div.remove();
+            });
             // handle badge
             let author = quoted.querySelector("div:first-child > div:first-child > div > a").href.split("/").at(-1);
             if (author == developer_account) {
@@ -773,7 +1084,7 @@ function modifyEmbed(url) {
                 mediaGroup.className = "media-group base-border";
                 imgs.forEach((el)=>{
                     let img = el.cloneNode();
-                    let bigImg = el.parentElement.nextElementSibling.cloneNode(1);
+                    let bigImg = createBigImg(img);
                     img.className = "";
                     img.setAttribute("style", "");
                     mediaGroup.append(document.createElement("div"));
@@ -806,7 +1117,7 @@ function modifyEmbed(url) {
         quoted.children[0].querySelector("a.relative + div")?.classList.replace("flex-col", "flex-row");
         quoted.children[0].querySelector("a.relative + div")?.classList.add("gap-2");
 
-        let embeds = document.querySelectorAll(":where(main:nth-child(3) > div > div > div:first-child, main:not(:nth-child(3))"
+        let embeds = document.querySelectorAll(":where(div:where(div:first-child, div:first-child + div) + header + main > div > div > div:first-child, main:not(:nth-child(3))"
             + " > div > div, header + div.flex > div.mt-10 > div:last-child > div.flex)"
             + " > div.relative > div:nth-last-child(2) > div:not(:first-child)"
             + " div.relative:has(> a[href=\"" + url + "\"]),"
@@ -1263,11 +1574,13 @@ window.fetch = async (...args)=>{
 function datasaverClickListener(e) {
     if (e.target.tagName == "IMG" && (e.target.computedStyleMap && e.target.computedStyleMap().get("--imprv-saved") || window.getComputedStyle && window.getComputedStyle(e.target).getPropertyValue("--imprv-saved"))) {
         // it is data-saved image
-        let bigImg = e.target.parentElement.parentElement.classList.contains("media-group") ? e.target.nextElementSibling.children[0] : e.target.parentElement.nextElementSibling.children[0];
+        let bigImg = (e.target.parentElement.parentElement.classList.contains("media-group") ? e.target.nextElementSibling : e.target.parentElement.nextElementSibling)?.querySelector("img");
         e.target.srcset = (e.target.srcset || e.target.getAttribute("_srcset") || "").replaceAll("image?url=", "image?_&url=");
         e.target.src = (e.target.src || e.target.getAttribute("_src") || "").replace("image?url=", "image?_&url=");
-        bigImg.srcset = (bigImg.srcset || bigImg.getAttribute("_srcset") || "").replaceAll("image?url=", "image?_&url=");
-        bigImg.src = (bigImg.src || bigImg.getAttribute("_src") || "").replace("image?url=", "image?_&url=");
+        if (bigImg) {
+            bigImg.srcset = (bigImg.srcset || bigImg.getAttribute("_srcset") || "").replaceAll("image?url=", "image?_&url=");
+            bigImg.src = (bigImg.src || bigImg.getAttribute("_src") || "").replace("image?url=", "image?_&url=");
+        }
         let mediaElement = e.target.parentElement.parentElement.parentElement;
         if (mediaElement.classList.contains("relative")) {
             if (!mediaElement.classList.contains("aspect-square")) {
@@ -1306,10 +1619,30 @@ Event.prototype.stopPropagation = (function() {
     }
 });
 
-var observer = new MutationObserver((...args)=>{
+var observer = new MutationObserver((records, obs)=>{
+    for (let record of records) {
+        for (let node of record.addedNodes) {
+            if (node.parentElement == document.body && node.classList.contains("fixed")) {
+                // node would be popup
+                if (node.matches("div.fixed:has(> div.base-bg.absolute:first-child:last-child > div.p-4:not(:first-child):last-child > button.w-full.rounded-full):has(> div.base-bg.absolute:first-child:last-child > .base-bg-hover)")) {
+                    try {
+                        let circle_id = node[Object.keys(node).filter((key)=>key.startsWith("__reactProps"))[0]].children.props.children.find((child)=>child && child.props && child.props.id != undefined).props.id;
+                        addQuoteButton(node, circleCache.get(circle_id));
+                    } catch (e) {console.error(e);}
+                } else if (node.matches("div.fixed:has(> img, div.w-full.h-full img.rounded-full)")) {
+                    // zoomed image
+                    let bigImg = node.querySelector("img");
+                    try {
+                        bigImg.srcset = (bigImg.srcset || bigImg.getAttribute("_srcset") || "").replaceAll("image?url=", "image?_&url=");
+                        bigImg.src = (bigImg.src || bigImg.getAttribute("_src") || "").replace("image?url=", "image?_&url=");
+                    } catch (e) {console.error(e);}
+                }
+            }
+        }
+    }
     try {
         circleAmount = 0;
-        let circleParents = document.querySelectorAll(":where(main:nth-child(3) > div > div > div:first-child, main:not(:nth-child(3)) > div > div:first-child, div.flex.flex-col.gap-4:has( > div.relative.flex))");
+        let circleParents = document.querySelectorAll(":where(div:where(div:first-child, div:first-child + div) + header + main > div > div > div:first-child, main:not(div:where(div:first-child, div:first-child + div) + header + main) > div:first-child > div:first-child, div.flex.flex-col.gap-4:has( > div.relative.flex))");
         for (let circleParent of circleParents) {
             let _circleAmount = circleParent._circleAmount || 0;
             let circles = circleParent.children;
