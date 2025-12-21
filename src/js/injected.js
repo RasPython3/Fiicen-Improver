@@ -1577,11 +1577,13 @@ window.fetch = async (...args)=>{
 function datasaverClickListener(e) {
     if (e.target.tagName == "IMG" && (e.target.computedStyleMap && e.target.computedStyleMap().get("--imprv-saved") || window.getComputedStyle && window.getComputedStyle(e.target).getPropertyValue("--imprv-saved"))) {
         // it is data-saved image
-        let bigImg = (e.target.parentElement.parentElement.classList.contains("media-group") ? e.target.nextElementSibling : e.target.parentElement.nextElementSibling).querySelector("img");
+        let bigImg = (e.target.parentElement.parentElement.classList.contains("media-group") ? e.target.nextElementSibling : e.target.parentElement.nextElementSibling)?.querySelector("img");
         e.target.srcset = (e.target.srcset || e.target.getAttribute("_srcset") || "").replaceAll("image?url=", "image?_&url=");
         e.target.src = (e.target.src || e.target.getAttribute("_src") || "").replace("image?url=", "image?_&url=");
-        bigImg.srcset = (bigImg.srcset || bigImg.getAttribute("_srcset") || "").replaceAll("image?url=", "image?_&url=");
-        bigImg.src = (bigImg.src || bigImg.getAttribute("_src") || "").replace("image?url=", "image?_&url=");
+        if (bigImg) {
+            bigImg.srcset = (bigImg.srcset || bigImg.getAttribute("_srcset") || "").replaceAll("image?url=", "image?_&url=");
+            bigImg.src = (bigImg.src || bigImg.getAttribute("_src") || "").replace("image?url=", "image?_&url=");
+        }
         let mediaElement = e.target.parentElement.parentElement.parentElement;
         if (mediaElement.classList.contains("relative")) {
             if (!mediaElement.classList.contains("aspect-square")) {
@@ -1629,6 +1631,13 @@ var observer = new MutationObserver((records, obs)=>{
                     try {
                         let circle_id = node[Object.keys(node).filter((key)=>key.startsWith("__reactProps"))[0]].children.props.children.find((child)=>child && child.props && child.props.id != undefined).props.id;
                         addQuoteButton(node, circleCache.get(circle_id));
+                    } catch (e) {console.error(e);}
+                } else if (node.matches("div.fixed:has(> img, div.w-full.h-full img.rounded-full)")) {
+                    // zoomed image
+                    let bigImg = node.querySelector("img");
+                    try {
+                        bigImg.srcset = (bigImg.srcset || bigImg.getAttribute("_srcset") || "").replaceAll("image?url=", "image?_&url=");
+                        bigImg.src = (bigImg.src || bigImg.getAttribute("_src") || "").replace("image?url=", "image?_&url=");
                     } catch (e) {console.error(e);}
                 }
             }
