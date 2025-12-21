@@ -62,6 +62,8 @@ const testers = [
 
 var circleAmount = 0;
 
+var circleCache = new Map()
+
 function messageExt(request, value=undefined) {
     let id = 0;
     while (_msgIds.includes(id)) {
@@ -925,62 +927,53 @@ async function modifyFieldLayout(data) {
     return data;
 }
 
-function addQuoteButton(circle, data) {
-    if (data && data.id) {
-        let detailButton = circle.querySelector("& > div.border-t:last-child > div:last-child > div:last-child > button");
-        let popupWindow = detailButton && detailButton[Object.keys(detailButton).filter(key=>key.startsWith("__reactFiber"))[0]]
-            .sibling?.child?.child?.child?.child?.stateNode
-            || document.querySelector("body > div.fixed:has(> div > a[href^=\"/report?circlle=" + data.id + "\"])");
-        if (popupWindow && popupWindow.querySelector("& > div:first-child > button.quote") == undefined) {
-            let shareBtn = document.createElement("button");
-            shareBtn.className = "quote base-bg-hover flex w-full gap-4 px-4 py-3";
-            shareBtn.append(document.createElement("img"));
-            assets["quote"].then((url)=>{
-                shareBtn.firstChild.src = url;
-            });
-            shareBtn.firstChild.className = "size-5";
-            shareBtn.firstChild.style.color = "transparent";
-            shareBtn.append(document.createElement("p"));
-            shareBtn.lastChild.innerText = "サークルを引用";
-            let [circleId, circleAuthor] = ((data)=>{
-                while (data.refly_from) {
-                    data = data.refly_from;
-                }
-                return [data.id, data.author.account_name];
-            })(data);
-            shareBtn.addEventListener("click", ()=>{
-                let createCircleBtn = document.querySelector("nav > button");
-                let circleTextArea = document.querySelector("body > div > div > form:has(input[name=\"media_attachments\"]) textarea");
-                popupWindow[Object.keys(popupWindow).filter(key=>key.startsWith("__reactProps"))[0]].onClick();
-                createCircleBtn.click();
-                if (circleTextArea) { // if not, not logined
-                    let timer = setInterval(()=>{
-                        if (!circleTextArea.disabled) {
-                            clearInterval(timer);
-                            circleTextArea.value = `\n@${circleAuthor} https://fiicen.jp/circle/${circleId}`;
-                            circleTextArea.nextElementSibling.textContent = `${circleTextArea.value}\u200b`;
-                            circleTextArea.style.height = `${circleTextArea.nextElementSibling.clientHeight}px`;
-                            circleTextArea.selectionStart = circleTextArea.selectionEnd = 0;
-                            circleTextArea.focus();
-                            circleTextArea[Object.keys(circleTextArea).filter(key=>key.startsWith("__reactProps"))[0]].onChange({target: circleTextArea});
-                        }
-                    }, 10);
-                }
-            });
-            popupWindow.firstChild.lastChild.insertAdjacentElement("beforebegin", shareBtn);
-            return true;
-        }
+function addQuoteButton(popupWindow, data) {
+    if (popupWindow && data && popupWindow.querySelector("& > div:first-child > button.quote") == undefined) {
+        let shareBtn = document.createElement("button");
+        shareBtn.className = "quote base-bg-hover flex w-full gap-4 px-4 py-3";
+        shareBtn.append(document.createElement("img"));
+        assets["quote"].then((url)=>{
+            shareBtn.firstChild.src = url;
+        });
+        shareBtn.firstChild.className = "size-5";
+        shareBtn.firstChild.style.color = "transparent";
+        shareBtn.append(document.createElement("p"));
+        shareBtn.lastChild.innerText = "サークルを疑似引用";
+        let [circleId, circleAuthor] = ((data)=>{
+            while (data.refly_from) {
+                data = data.refly_from;
+            }
+            return [data.id, data.author.account_name];
+        })(data);
+        shareBtn.addEventListener("click", ()=>{
+            let createCircleBtn = document.querySelector("nav > button");
+            let circleTextArea = document.querySelector("body > div > div > form:has(input[name=\"media_attachments\"]) textarea");
+            popupWindow.click();
+            createCircleBtn.click();
+            if (circleTextArea) { // if not, not logined
+                let timer = setInterval(()=>{
+                    if (!circleTextArea.disabled) {
+                        clearInterval(timer);
+                        circleTextArea.value = `\n@${circleAuthor} https://fiicen.jp/circle/${circleId}`;
+                        circleTextArea.nextElementSibling.textContent = `${circleTextArea.value}\u200b`;
+                        circleTextArea.style.height = `${circleTextArea.nextElementSibling.clientHeight}px`;
+                        circleTextArea.selectionStart = circleTextArea.selectionEnd = 0;
+                        circleTextArea.focus();
+                        circleTextArea[Object.keys(circleTextArea).filter(key=>key.startsWith("__reactProps"))[0]].onChange({target: circleTextArea});
+                    }
+                }, 10);
+            }
+        });
+        popupWindow.firstChild.lastChild.insertAdjacentElement("beforebegin", shareBtn);
+        return true;
     }
     return false;
 }
 
 function modifyDynamicCircle(circle, data) {
     try {
-        if (!addQuoteButton(circle, data)) {
-            let detailButton = circle.querySelector("& > div.border-t:last-child > div:last-child > div:last-child > button");
-            if (detailButton) {
-                detailButton.addEventListener("click", ()=>addQuoteButton(circle, data), {once: true});
-            }
+        if (data && data.id) {
+            circleCache.set(data.id, data);
         }
     } catch(e) {
         console.error(e);
@@ -990,6 +983,7 @@ function modifyDynamicCircle(circle, data) {
 function modifyCircle(circleData) {
     console.log(circleData);
     if (Object.prototype.isPrototypeOf(circleData)) {
+        circleCache.set(circleData.id, circleData);
         if (circleData.reply_to) {
             modifyCircle(circleData.reply_to);
         }
@@ -1626,7 +1620,20 @@ Event.prototype.stopPropagation = (function() {
     }
 });
 
-var observer = new MutationObserver((...args)=>{
+var observer = new MutationObserver((records, obs)=>{
+    for (let record of records) {
+        for (let node of record.addedNodes) {
+            if (node.parentElement == document.body && node.classList.contains("fixed")) {
+                // node would be popup
+                if (node.matches("div.fixed:has(> div.base-bg.absolute:first-child:last-child > div.p-4:not(:first-child):last-child > button.w-full.rounded-full):has(> div.base-bg.absolute:first-child:last-child > .base-bg-hover)")) {
+                    try {
+                        let circle_id = node[Object.keys(node).filter((key)=>key.startsWith("__reactProps"))[0]].children.props.children.find((child)=>child && child.props && child.props.id != undefined).props.id;
+                        addQuoteButton(node, circleCache.get(circle_id));
+                    } catch (e) {console.error(e);}
+                }
+            }
+        }
+    }
     try {
         circleAmount = 0;
         let circleParents = document.querySelectorAll(":where(div:where(div:first-child, div:first-child + div) + header + main > div > div > div:first-child, main:not(div:where(div:first-child, div:first-child + div) + header + main) > div:first-child > div:first-child, div.flex.flex-col.gap-4:has( > div.relative.flex))");
