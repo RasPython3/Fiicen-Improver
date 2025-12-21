@@ -509,8 +509,7 @@ async function onLoaded() { // first load or nextjs's router
                     console.log(qrSVG);
 
                     let btns = document.createElement("div");
-                    btns.className = "relative inline-flex w-1/2 flex-col items-stretch gap-2 my-4";
-                    btns.style.float = "right";
+                    btns.className = "relative w-full inline-flex flex-col items-stretch gap-2";
 
                     let urlEntry = document.createElement("input");
                     urlEntry.type = "text";
@@ -585,6 +584,7 @@ async function onLoaded() { // first load or nextjs's router
                     let qrImgEl = qrPopup.querySelector("img");
                     qrImgEl.insertAdjacentElement("afterend", qrImgEl.cloneNode());
                     qrImgEl.style.display = "none";
+                    qrImgEl.classList.add("hidden");
                     qrImgEl = qrImgEl.nextElementSibling;
 
                     let svgDataUrl = "data:image/svg+xml;base64,"+btoa(Array.from((new TextEncoder()).encode(qrSVG.outerHTML), (i)=>String.fromCodePoint(i)).join(""));
@@ -612,16 +612,9 @@ async function onLoaded() { // first load or nextjs's router
                         qrImg.src = qrImgEl.src;
                     });
 
-                    qrPopup.style.display = "inline-block";
-                    qrPopup.style.width = "100%";
+                    qrPopup.classList.add("qrcode-popup");
 
-                    qrImgEl.style.margin = "auto";
-                    qrImgEl.style.marginTop = "1rem";
-                    qrImgEl.nextElementSibling.style.width = "50%";
-                    qrImgEl.nextElementSibling.style.marginTop = "0.5rem";
-                    qrImgEl.nextElementSibling.style.marginBottom = "1rem";
-
-                    qrImgEl.insertAdjacentElement("beforebegin", btns);
+                    qrPopup.lastChild.insertAdjacentElement("beforebegin", btns);
                 } catch (e) {
                     outputError(e);
                 }

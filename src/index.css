@@ -262,14 +262,34 @@ div:where(:has(> div:first-child), :has(> div:first-child + div > button)):has(>
     }
 }
 
-svg[name="qrcode"] {
-    fill: rgb(0 0 0/var(--tw-bg-opacity));
-    stroke: rgb(0 0 0/var(--tw-bg-opacity));
-}
+@media (min-width: 38.5rem) {
+    .qrcode-popup {
+        position: relative;
+        display: inline-block ! important;
+        width: 100% ! important;
+        padding-right: calc(50% + 0.5rem) ! important;
 
-svg[name="qrcode"]:where(.dark,.dark *) {
-    fill: rgb(255 255 255/var(--tw-bg-opacity));
-    stroke: rgb(255 255 255/var(--tw-bg-opacity));
+        > :where(h3, button) {
+            width: calc(200% + 1rem) ! important;
+            margin-right: calc(-100% - 1rem) ! important;
+        }
+
+        > img:not(.hidden) {
+            margin: auto;
+            margin-top: 1rem;
+        }
+        > p {
+            margin-top: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        > div:has(+ button) {
+            position: absolute ! important;
+            top: 4.25rem;
+            right: 1.5rem;
+            width: calc(50% - 2rem) ! important;
+            max-height: calc(100% - 1lh - 7.75rem);
+        }
+    }
 }
 
 /* quoted circle */
