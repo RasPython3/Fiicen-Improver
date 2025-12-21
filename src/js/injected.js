@@ -207,6 +207,18 @@ function alertMoment(text) {
     document.body.append(alertPopup);
 }
 
+function createBigImg(img) {
+    let popup = document.createElement("div");
+    popup.className = "pointer-events-none bg-transparent fixed inset-0 z-40 min-h-[100dvh] w-screen duration-300 z-20";
+
+    let bigImg = img.cloneNode();
+    bigImg.className = "pointer-events-none scale-90 opacity-0 object-contain duration-300";
+
+    popup.appendChild(bigImg);
+
+    return popup;
+}
+
 function modifyUser(userData) {
     console.log(userData);
     if (Object.prototype.isPrototypeOf(userData)) {
@@ -1081,7 +1093,7 @@ function modifyEmbed(url) {
                 mediaGroup.className = "media-group base-border";
                 imgs.forEach((el)=>{
                     let img = el.cloneNode();
-                    let bigImg = el.parentElement.nextElementSibling.cloneNode(1);
+                    let bigImg = createBigImg(img);
                     img.className = "";
                     img.setAttribute("style", "");
                     mediaGroup.append(document.createElement("div"));
