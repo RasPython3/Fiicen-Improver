@@ -248,7 +248,7 @@ function modifyUser(userData) {
 var __timer_id;
 
 function redrawCircles() {
-    let circleParent = document.querySelector(":where(main:nth-child(3) > div > div > div:first-child, main:not(:nth-child(3)) > div > div, header + div.flex > div.mt-10 > div:last-child > div.flex):has(> div.relative):not(:has(> div.aspect-square))");
+    let circleParent = document.querySelector(":where(div:where(div:first-child, div:first-child + div) + header + main > div > div > div:first-child, main:not(:nth-child(3)) > div > div, header + div.flex > div.mt-10 > div:last-child > div.flex):has(> div.relative):not(:has(> div.aspect-square))");
     if (circleParent) {
         let updater = circleParent[Object.keys(circleParent).filter(key=>key.startsWith("__reactProps"))[0]].children.props.value;
         updater(null);
@@ -632,7 +632,7 @@ async function onLoaded() { // first load or nextjs's router
                 }
             })();
         }
-        if (!document.querySelector("div:has(> main:nth-child(3)) > div > div:not(:has(> div:nth-child(3))) > p:nth-child(2) > img")) {
+        if (!document.querySelector("div:has(> div:where(div:first-child, div:first-child + div) + header + main) > div:first-child > div:not(:has(> div:nth-child(3))) > p:nth-child(2) > img")) {
             let badgeData;
             if (location.pathname.match("/field/" + developer_account + "(?:[?/].*)?$")) {
                 badgeData = {
@@ -664,10 +664,10 @@ async function onLoaded() { // first load or nextjs's router
                     badge.srcset = "/_next/image?url=" + encodedBadgeURI + "&w=16&q=75 1x, /_next/image?url=" + encodedBadgeURI + "&w=32&q=75 2x";
                     badge.src="/_next/image?url=" + encodedBadgeURI + "&w=32&q=75";
                     await _ext_ready;
-                    if (document.querySelector("div:has(> main:nth-child(3))")) {
+                    if (document.querySelector("div:has(> div:where(div:first-child, div:first-child + div) + header + main)")) {
                         // user seems to exist
                         let _inject_badge = setInterval(()=>{
-                            let displayNameP = document.querySelector("div:has(> main:nth-child(3)) > div > div:not(:has(> div:nth-child(3))) > p:nth-child(2)");
+                            let displayNameP = document.querySelector("div:has(> div:where(div:first-child, div:first-child + div) + header + main) > div:first-child > div:not(:has(> div:nth-child(3))) > p:nth-child(2)");
                             if (displayNameP == undefined) {
                                 return;
                             }
@@ -682,7 +682,7 @@ async function onLoaded() { // first load or nextjs's router
             "method": "HEAD",
         }).then((res)=>{
             if (!res.ok && res.status == 403) {
-                let nextSibEl = document.querySelector("div:has(> main:nth-child(3)) > div > div:not(:has(> div:nth-child(3))):not(:has(> div.flex > span.text-danger)) > div.grid");
+                let nextSibEl = document.querySelector("div:has(> div:where(div:first-child, div:first-child + div) + header + main) > div:first-child > div:not(:has(> div:nth-child(3))):not(:has(> div.flex > span.text-danger)) > div.grid");
                 if (nextSibEl) {
                     let banned = document.createElement("div");
                     banned.className = "flex justify-center mb-2";
@@ -726,7 +726,7 @@ async function onLoaded() { // first load or nextjs's router
         }
         clearInterval(__timer_id);
         __timer_id = setInterval(()=>{
-            let circles = document.querySelectorAll(":where(main:nth-child(3) > div > div > div:first-child, main:not(:nth-child(3)) > div > div, header + div.flex > div.mt-10 > div:last-child > div.flex) > div.relative:not(.aspect-square)");
+            let circles = document.querySelectorAll(":where(div:where(div:first-child, div:first-child + div) + header + main > div > div > div:first-child, main:not(div:where(div:first-child, div:first-child + div) + header + main) > div:first-child > div, header + div.flex > div.mt-10 > div:last-child > div.flex) > div.relative:not(.aspect-square)");
             if (circles.length == 0) {
                 return;
             } else {
@@ -1015,7 +1015,7 @@ function modifyMessage(messageData) {
 }
 
 function modifyEmbed(url) {
-    let embeds = document.querySelectorAll(":where(main:nth-child(3) > div > div > div:first-child, main:not(:nth-child(3))"
+    let embeds = document.querySelectorAll(":where(div:where(div:first-child, div:first-child + div) + header + main > div > div > div:first-child, main:not(:nth-child(3))"
         + " > div > div, header + div.flex > div.mt-10 > div:last-child > div.flex)"
         + " > div.relative > div:nth-last-child(2) > div:not(:first-child)"
         + " div.relative:has(> a[href=\"" + url + "\"]),"
@@ -1126,7 +1126,7 @@ function modifyEmbed(url) {
         quoted.children[0].querySelector("a.relative + div")?.classList.replace("flex-col", "flex-row");
         quoted.children[0].querySelector("a.relative + div")?.classList.add("gap-2");
 
-        let embeds = document.querySelectorAll(":where(main:nth-child(3) > div > div > div:first-child, main:not(:nth-child(3))"
+        let embeds = document.querySelectorAll(":where(div:where(div:first-child, div:first-child + div) + header + main > div > div > div:first-child, main:not(:nth-child(3))"
             + " > div > div, header + div.flex > div.mt-10 > div:last-child > div.flex)"
             + " > div.relative > div:nth-last-child(2) > div:not(:first-child)"
             + " div.relative:has(> a[href=\"" + url + "\"]),"
@@ -1629,7 +1629,7 @@ Event.prototype.stopPropagation = (function() {
 var observer = new MutationObserver((...args)=>{
     try {
         circleAmount = 0;
-        let circleParents = document.querySelectorAll(":where(main:nth-child(3) > div > div > div:first-child, main:not(:nth-child(3)) > div > div:first-child, div.flex.flex-col.gap-4:has( > div.relative.flex))");
+        let circleParents = document.querySelectorAll(":where(div:where(div:first-child, div:first-child + div) + header + main > div > div > div:first-child, main:not(div:where(div:first-child, div:first-child + div) + header + main) > div:first-child > div:first-child, div.flex.flex-col.gap-4:has( > div.relative.flex))");
         for (let circleParent of circleParents) {
             let _circleAmount = circleParent._circleAmount || 0;
             let circles = circleParent.children;
