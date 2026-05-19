@@ -1124,7 +1124,6 @@ window.addEventListener("dragenter", (e)=>{
 
             let ondragleave = (e)=>{
                 if (f.contains(e.target) && (e.relatedTarget == null || !f.contains(e.relatedTarget))) {
-                    console.log(e);
                     f.classList.remove("drag-in");
                     f.removeEventListener("dragleave", ondragleave);
                     f.removeEventListener("dragover", ondragover);
