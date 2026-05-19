@@ -1505,6 +1505,28 @@ window.fetch = async (...args)=>{
                                 }
                             }
                         });
+                    } else if (results[0].unread_messages_count != undefined) {
+                        results.forEach((entry)=>{
+                            if (entry.direct_user != null && entry.badge == null) {
+                                let user = entry.direct_user;
+                                if (user.account_name == developer_account) {
+                                    entry.badge = {
+                                        type: "extension-developer",
+                                        image: badgeURLs.developer
+                                    };
+                                } else if (testers.includes(user.account_name)) {
+                                    entry.badge = {
+                                        type: "extension-tester",
+                                        image: badgeURLs.tester
+                                    };
+                                } else if (user.account_name == username) {
+                                    entry.badge = {
+                                        type: "extension-user",
+                                        image: badgeURLs.user
+                                    };
+                                }
+                            }
+                        });
                     } else if (results[0].conversation_type != undefined) {
                         results.forEach(modifyMessage);
                     } else if (results[0].author != undefined) {
