@@ -525,9 +525,6 @@ div:where(:has(> div:first-child), :has(> div:first-child + div > button)):has(>
         padding-bottom: 0;
     }
 }
-    outline-offset: -0.25rem;
-    border-radius: inherit;
-}
 
 /* setting */
 
