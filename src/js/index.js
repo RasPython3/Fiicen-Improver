@@ -125,3 +125,15 @@ chrome.runtime.onMessage.addListener((message) => {
   });
   window.dispatchEvent(response);
 });
+
+
+chrome.storage.onChanged.addListener((changes, namespace) => {
+  if (namespace == "local") {
+    window.dispatchEvent(new CustomEvent("ext-message", {
+      detail: JSON.stringify({
+        request: "updateSettings",
+        value: JSON.stringify(changes)
+      })
+    }));
+  }
+});

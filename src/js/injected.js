@@ -60,6 +60,8 @@ const testers = [
     "878"
 ];
 
+var defaultHome = "/home";
+
 var circleAmount = 0;
 
 var circleCache = new Map()
@@ -95,6 +97,12 @@ window.addEventListener("ext-message", (e)=>{
     } catch {}
     if (data && data.request) {
         switch (data.request) {
+            case "updateSettings":
+                let changes = JSON.parse(data.value);
+                if (changes.defaultHome) {
+                    defaultHome = changes.defaultHome.newValue || "/home";
+                }
+                break;
             case "updateNotificationCount":
                 let counts = JSON.parse(data.value);
                 let notificationItem = document.querySelector("nav a[href=\"/notification\"]");
@@ -135,6 +143,7 @@ window.addEventListener("ext-message", (e)=>{
                         continue;
                     }
                 }
+                break;
             default:
                 return;
         }
@@ -475,6 +484,13 @@ function convertQRCodeSVG(svg) {
     svg.viewBox.baseVal.height += quietOffset * 2;
 }
 
+function onHomeClicked(e) {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    next.router.prefetch(defaultHome);
+    next.router.push(defaultHome);
+}
+
 async function onLoaded() { // first load or nextjs's router
     // re-arrange field header
     console.log("onLoaded called");
@@ -495,6 +511,15 @@ async function onLoaded() { // first load or nextjs's router
             filename: _injectedjs_url
         });
         window.dispatchEvent(error);
+    }
+    // Overwrite home button behavior
+    let homebutton = document.querySelector("a[href=\"/home\"]:has(> img)");
+    if (homebutton && !homebutton._overwritten) {
+        homebutton.addEventListener("click", onHomeClicked, {capture: true});
+        homebutton._overwritten = true;
+        messageExt("getSettings").then((settings)=>{
+            defaultHome = settings.defaultHome || "/home";
+        });
     }
     if (location.pathname.startsWith("/field/")) {
         let qrPopup = document.querySelector("div:has(> h3 + img[src^=\"data:\"] + p:nth-child(3))");
@@ -1327,6 +1352,7 @@ function modifySettings() {
         for (let item of [
             {name: "datasaver", text: "データセーバー"},
             {name: "asyncNotification", text: "リアルタイム通知"},
+            {name: "defaultHome", text: "デフォルトホーム"},
             {name: "debug", text: "デバッグモード"}
         ]) {
             settingBody.append(
@@ -1335,14 +1361,28 @@ function modifySettings() {
 
             settingBody.lastChild.append(
                 document.createElement("label"),
-                document.createElement("input")
+                document.createElement(item.name != "defaultHome" ? "input" : "select")
             );
 
             settingBody.lastChild.firstChild.innerText = item.text;
             settingBody.lastChild.firstChild.setAttribute("for", item.name);
 
             settingBody.lastChild.lastChild.setAttribute("name", item.name);
-            settingBody.lastChild.lastChild.setAttribute("type", "checkbox");
+
+            if (item.name != "defaultHome") {
+                settingBody.lastChild.lastChild.setAttribute("type", "checkbox");
+            } else {
+                for (let entry of [
+                    {name: "おすすめ", value: "/home"},
+                    {name: "フォロー中", value: "/home/following"},
+                ]) {
+                    settingBody.lastChild.lastChild.append(
+                        document.createElement("option")
+                    );
+                    settingBody.lastChild.lastChild.lastChild.innerText = entry.name;
+                    settingBody.lastChild.lastChild.lastChild.setAttribute("value", entry.value);
+                }
+            }
 
             if (window.KAGI && !testers.includes(username) && item.name == "datasaver") {
                 settingBody.lastChild.lastChild.disabled = true;
@@ -1372,16 +1412,25 @@ function modifySettings() {
 
         messageExt("getSettings").then((settings)=>{
             for (let key of Object.keys(settings)) {
-                let item = settingBody.querySelector(`input[name="${key}"]`);
+                let item = settingBody.querySelector(`input[name="${key}"], select[name="${key}"]`);
                 if (item == undefined) {
                     continue;
                 }
-                item.checked = settings[key];
-                item.addEventListener("change", (ev)=>{
-                    let data = {};
-                    data[ev.target.getAttribute("name")] = ev.target.checked;
-                    messageExt("setSettings", data);
-                });
+                if (item.tagName == "INPUT" && item.type == "checkbox") {
+                    item.checked = settings[key];
+                    item.addEventListener("change", (ev)=>{
+                        let data = {};
+                        data[ev.target.getAttribute("name")] = ev.target.checked;
+                        messageExt("setSettings", data);
+                    });
+                } else {
+                    item.value = settings[key];
+                    item.addEventListener("change", (ev)=>{
+                        let data = {};
+                        data[ev.target.getAttribute("name")] = ev.target.value;
+                        messageExt("setSettings", data);
+                    });
+                }
             }
         });
 
