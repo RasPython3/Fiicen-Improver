@@ -768,6 +768,42 @@ async function onLoaded() { // first load or nextjs's router
         }, 50);
     } else if (location.pathname.startsWith("/settings")) {
         modifySettings();
+    } else if (location.pathname.startsWith("/message")) {
+        {
+            let entries = document.querySelectorAll("main > div > div > div + ul > li");
+
+            for (let entryIndex = 0; entryIndex < entries.length; entryIndex++ ) {
+                let entry = entries[entryIndex];
+                entry.__timer_id = setInterval((entry)=>{
+                    let props;
+                    try {
+                        props = entry.parentElement[Object.keys(entry.parentElement).filter((key)=>key.startsWith("__reactProps"))[0]].children[entryIndex].props;
+                    } catch (e) {
+                        return;
+                    }
+                    clearInterval(entry.__timer_id);
+                    
+                    if (props.badge == null && props.direct_user != null && entry.firstChild.firstChild.lastChild.firstChild.querySelector("img") == undefined) {
+                        modifyUser(props.direct_user);
+                        props.badge = props.direct_user.badge;
+                        if (props.badge != null) {
+                            let badge = document.createElement("img");
+                            let encodedBadgeURI = encodeURIComponent(props.badge.image);
+                            badge.alt = props.badge.type;
+                            badge.loading = "lazy";
+                            badge.width = 16;
+                            badge.height = 16;
+                            badge.async = true;
+                            badge.className = "ml-1 size-4 shrink-0";
+                            badge.style.color = "transparent";
+                            badge.srcset = "/_next/image?url=" + encodedBadgeURI + "&w=16&q=75 1x, /_next/image?url=" + encodedBadgeURI + "&w=32&q=75 2x";
+                            badge.src="/_next/image?url=" + encodedBadgeURI + "&w=32&q=75";
+                            entry.firstChild.firstChild.lastChild.firstChild.lastChild.insertAdjacentElement("beforebegin", badge);
+                        }
+                    }
+                }, 20, entry);
+            }
+        }
     }
     if (location.pathname.startsWith("/notification") || location.pathname.startsWith("/message")) {
         let countBadge = document.querySelector("nav a > p.font-bold + div");
