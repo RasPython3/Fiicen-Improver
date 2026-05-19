@@ -211,6 +211,11 @@ chrome.runtime.onMessage.addListener((message, sender) => {
             asyncNotification: settings.asyncNotification
           }, ()=>{});
         }
+        if (settings.hasOwnProperty("defaultHome")) {
+          chrome.storage.local.set({
+            defaultHome: settings.defaultHome == "/home/following" ? "/home/following" : "/home"
+          }, ()=>{});
+        }
         if (settings.hasOwnProperty("debug")) {
           chrome.storage.local.set({
             debug: settings.debug
@@ -226,6 +231,7 @@ chrome.runtime.onMessage.addListener((message, sender) => {
         datasaver: false,
         systemTheme: false,
         asyncNotification: true,
+        defaultHome: "/home",
         debug: false,
       }, (items)=>{
         responseData = {
