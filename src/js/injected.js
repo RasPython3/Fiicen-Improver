@@ -1248,21 +1248,41 @@ function modifySettings() {
 
         systemThemeButton.lastChild.innerText = "可能であればシステムのテーマを優先する(このデバイスのみ)";
 
+        let compactModeButton = document.createElement("label");
+        compactModeButton.className = "flex items-center gap-4 p-4 dark-bg-base";
+
+        compactModeButton.append(
+            document.createElement("input"),
+            document.createElement("p")
+        );
+
+        compactModeButton.firstChild.type = "checkbox";
+        compactModeButton.firstChild.name = "use-compact-mode";
+        compactModeButton.firstChild.className = "fiicen-improver-checkbox";
+        compactModeButton.firstChild.disabled = true;
+
+        compactModeButton.lastChild.innerText = "コンパクトに表示";
+
         settingForm.querySelector("label:last-child").insertAdjacentElement("afterend", systemThemeButton);
+        systemThemeButton.insertAdjacentElement("afterend", compactModeButton);
 
         messageExt("getSettings").then((settings)=>{
-            if (settings.systemTheme != undefined) {
+            if (settings.systemTheme !== undefined) {
                 systemThemeButton.firstChild.checked = settings.systemTheme;
                 systemThemeButton.firstChild.disabled = false;
                 settingForm.addEventListener("submit", ()=>{
                     messageExt("setSettings", {systemTheme: systemThemeButton.firstChild.checked});
                 });
             }
+            if (settings.customStyle !== undefined) {
+                compactModeButton.firstChild.checked = settings.customStyle == "compact";
+                compactModeButton.firstChild.disabled = false;
+                settingForm.addEventListener("submit", ()=>{
+                    messageExt("setSettings", {customStyle: compactModeButton.firstChild.checked ? "compact" : null});
+                });
+            }
         });
     }
-
-    let settingList = document.querySelector("main > div > ul");
-    let settingItem;
 
     if (settingList.lastChild.lastChild.tagName.toUpperCase() != "DIV") {
         settingItem = document.createElement("li");

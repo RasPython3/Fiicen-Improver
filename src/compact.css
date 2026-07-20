@@ -1,0 +1,9 @@
+/* compact mode css */
+.__custom_style__compact:root :where(div:where(:has(> div:first-child), :has(> div:first-child + div > button)):has(> div + header + main:last-child) > main:not(.grid) > div > div > div:first-child > div.relative, main:not(.grid):not(div:where(:has(> div:first-child), :has(> div:first-child + div > button)):has(> div + header + main:last-child) > main) > div > div, :where(div.p-4, div.px-4.pt-2, main > div) > div > div.flex.flex-col.gap-4:first-child, div.min-h-screen.border-x > div:first-child, body > div.fixed.inset-0 > div.base-bg.absolute > div.base-bg-float.sticky + div:not(.p-4)) {
+  gap: 0.2rem ! important;
+
+  > div:not(.base-border):not(.rounded-3xl) {
+    border-radius: 0.5rem ! important;
+    padding: 0.25rem ! important;
+  }
+}
