@@ -1,0 +1,40 @@
+div.__muted.relative {
+}
+
+div.__muted.relative > div:not(.base-border) {
+  gap: 0;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: center;
+}
+
+div.__muted.relative > div:not(.base-border)::before {
+  content: "ミュートされた単語を含むサークル";
+  opacity: 0.8;
+  margin: 0.5rem 0.25rem 0.5rem 0;
+}
+
+div.__muted.relative > div:last-child, .__muted > div:not(.base-border) > div:not(:has(> button.absolute.inset-0)) {
+  display: none;
+}
+
+div.__muted.relative > div:not(.base-border) > div > button.absolute.inset-0 {
+  position: static;
+  display: block;
+  margin: 0.5rem 0 0.5rem 0.25rem;
+}
+
+div.__muted.relative > div:not(.base-border) > div > button.absolute.inset-0::before {
+  content: "表示する...";
+  opacity: 0.5;
+}
+
+div.__muted.relative > div:not(.base-border) > div > button.absolute.inset-0:hover::before {
+  text-decoration: underline;
+}
+
+::highlight(muted-words) {
+  background-color: #ff0066;
+  color: white;
+}

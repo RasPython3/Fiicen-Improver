@@ -28,7 +28,7 @@
     {
       "matches": ["https://fiicen.jp/*"],
       "run_at": "document_end",
-      "css": ["index.css", "compact.css"],
+      "css": ["index.css", "compact.css", "mute.css"],
       "js": ["js/qrcode.js", "js/index.js"]
     }
   ],
