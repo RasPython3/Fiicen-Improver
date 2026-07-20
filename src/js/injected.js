@@ -771,6 +771,8 @@ async function onLoaded() { // first load or nextjs's router
                         circleElement.lastChild.querySelector("div:first-child > div > a.group").append(badge);
                     }
                 }
+                circleElement.querySelectorAll("&> div:not(.relative) > div:not(.flex):nth-child(2) > div.mt-1.whitespace-pre-wrap.break-all > span > a, &> div.relative > div > div.base-border > div.mt-1.whitespace-pre-wrap.break-all > span > a")
+                    .forEach(handleEmbedAnchor);
             }
         }
         clearInterval(__timer_id);
@@ -798,7 +800,7 @@ async function onLoaded() { // first load or nextjs's router
                     modifyDynamicCircle(circle, props);
                     modifyCircle(props);
                     redrawCircles();
-                    let embededAnchors = circle.querySelectorAll("& > div:nth-last-child(2) > div:nth-last-child(2) > div.mt-1.whitespace-pre-wrap.break-all > div:not(.quoted-circle):has(> a) > a");
+                    let embededAnchors = circle.querySelectorAll("& > div:nth-last-child(2) > div:nth-last-child(2) > div.mt-1.whitespace-pre-wrap.break-all > span:not(.quoted-circle):has(> a) > a");
                     let embeddedUrls = [];
                     for (let anchor of embededAnchors) {
                         if (anchor.href.startsWith("https://fiicen.jp/circle/") && !embeddedUrls.includes(anchor.href)) {
@@ -1114,6 +1116,37 @@ function modifyDynamicCircle(circle, data) {
                 }, {once: true});
 
                 circle.__onShowMore = ()=>{doHighlight(contentDiv.querySelector("& > div.mt-1.whitespace-pre-wrap.break-all"));}; // on show-more-button pressed
+            }
+        }
+
+        if (contentDivProps && !contentDivProps.children[1].props.truncatePrevented && contentDivProps.children[1].props.previewMaxLength < contentDivProps.children[1].props.text.length
+            && contentDiv.querySelector("& > div")[Object.keys(contentDiv).filter(key=>key.startsWith("__reactProps"))[0]].children.findLast((ch)=>ch.type != "button")?.props.children.at(-1).props?.hasOwnProperty("href"))
+        {
+            // this is mention or hashtag or link, so prevent being truncated
+            let offset = contentDivProps.children[1].props.previewMaxLength;
+            let isLink;
+
+            if (contentDiv.querySelector("& > div")[Object.keys(contentDiv).filter(key=>key.startsWith("__reactProps"))[0]].children[0].props.children.at(-1).props.hasOwnProperty("children")) {
+                // mention or hashtag
+                isLink = false;
+                offset -= contentDiv.querySelector("& > div")[Object.keys(contentDiv).filter(key=>key.startsWith("__reactProps"))[0]].children[0].props.children.at(-1).props.children[1].length;
+            } else {
+                // link
+                isLink = true;
+                offset -= contentDiv.querySelector("& > div")[Object.keys(contentDiv).filter(key=>key.startsWith("__reactProps"))[0]].children[0].props.children.at(-1).props.href.length;
+            }
+
+            let fullm = contentDivProps.children[1].props.text.slice(offset).match(/^\S+/);
+
+            let anchor = contentDiv.querySelector("&> div.mt-1.whitespace-pre-wrap.break-all > span > a:last-child");
+
+            if (anchor) {
+                anchor.href = anchor.getAttribute("href") + fullm[0].slice(contentDivProps.children[1].props.previewMaxLength - offset);
+                contentDivProps.children[1].props.previewMaxLength = offset + fullm[0].length;
+            }
+
+            if (contentDivProps.children[1].props.previewMaxLength >= contentDivProps.children[1].props.text.length) {
+                contentDiv.querySelector("&> div.mt-1.whitespace-pre-wrap.break-all > span + button")?.click();
             }
         }
     } catch(e) {
@@ -2040,6 +2073,45 @@ Event.prototype.stopPropagation = (function() {
     }
 });
 
+// link embed
+
+function handleEmbedAnchor(anchor) {
+    let targetUrl = new URL(anchor.href);
+    if (["www.nicovideo.jp", "nicovideo.jp", "sp.nicovideo.jp", "nico.ms"].includes(targetUrl.host) && (targetUrl.pathname.startsWith("/watch/") || targetUrl.pathname.startsWith("/shorts/"))) {
+        // Niconico video
+        targetUrl.host = "embed.nicovideo.jp";
+        targetUrl.pathname = "/watch/" + targetUrl.pathname.split("/").at(-1);
+        targetUrl.search = "?persistence=1&oldScript=1&from=0&allowProgrammaticFullScreen=1";
+
+        let iframe = document.createElement("iframe");
+        iframe.setAttribute("allowfullscreen", "");
+        iframe.allow = "autoplay; picture-in-picture";
+        iframe.src = targetUrl.href;
+        iframe.className = "second-bg relative z-[1] aspect-video w-full rounded-xl";
+        anchor.replaceWith(iframe);
+    } else if (targetUrl.host == "youtube.com" && targetUrl.pathname.startsWith("/shorts/")) {
+        // youtube shorts
+        targetUrl.pathname = "/embed/" + targetUrl.pathname.split("/").at(-1);
+        targetUrl.search = "";
+
+        let iframe = document.createElement("iframe");
+        iframe.setAttribute("allowfullscreen", "");
+        iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+        iframe.src = targetUrl.href;
+        iframe.className = "second-bg relative z-[1] aspect-square w-full rounded-xl";
+        anchor.replaceWith(iframe);
+    }
+    /* else if (["x.com", "twitter.com"].includes(targetUrl.host) && targetUrl.pathname.match(/^\/[^/]+\/status\/\d+$/)) {
+        let tweetId = targetUrl.pathname.split("/").at(-1);
+        //https://platform.twitter.com/embed/Tweet.html?frame=false&hideCard=false&hideThread=false&id=1913397311033786400&lang=ja
+
+        let iframe = document.createElement("iframe");
+        iframe.src = "https://platform.twitter.com/embed/Tweet.html?frame=false&hideCard=false&hideThread=false&lang=ja&id=" + tweetId;
+        iframe.className = "second-bg relative z-[1] aspect-square w-full rounded-xl";
+        anchor.replaceWith(iframe);
+    }*/ // Fiicenのスクリプトが掴んでいる
+}
+
 var observer = new MutationObserver((records, obs)=>{
     for (let record of records) {
         for (let node of record.addedNodes) {
@@ -2052,6 +2124,9 @@ var observer = new MutationObserver((records, obs)=>{
                     } catch (e) {console.error(e);}
                 } else if (node.matches("div.fixed:has(> div.base-bg.absolute:first-child:last-child > div.p-4:not(:first-child):last-child > button.w-full.rounded-full):has(> div.base-bg.absolute:first-child:last-child > .base-bg-float.sticky + div > form)")) {
                     // circle detail
+                    node.querySelectorAll("&> div > div:not(.sticky):not(.p-4) > div.base-border:not(.flex):not(.text-sm) > div:not(.relative) > div:not(.flex):nth-child(2) > div.mt-1.whitespace-pre-wrap.break-all > span > a, &> div > div:not(.sticky):not(.p-4) > div.base-border:not(.flex):not(.text-sm) > div.relative > div > div.base-border > div.mt-1.whitespace-pre-wrap.break-all > span > a")
+                        .forEach(handleEmbedAnchor);
+
                     // highlight muted words
                     node.querySelectorAll("& > div > div:not(.sticky):not(.p-4) > div.base-border:not(.flex):not(.text-sm) > div:not(.relative) > div:not(.flex):nth-child(2) > div.mt-1.whitespace-pre-wrap.break-all, & > div > div:not(.sticky):not(.p-4) > div.base-border:not(.flex):not(.text-sm) > div.relative > div > div.base-border > div.mt-1.whitespace-pre-wrap.break-all")
                         .forEach(doHighlight);
@@ -2069,6 +2144,9 @@ var observer = new MutationObserver((records, obs)=>{
             for (let node of record.removedNodes) {
                 if (node.matches("button.relative.text-sm.font-semibold.text-main")) {
                     // it's show more button, so check links again
+                    record.target.querySelectorAll("&> span > a")
+                        .forEach(handleEmbedAnchor);
+
                     // call __onShowMore of circle element
                     let onShowMore = record.target.parentElement.parentElement.parentElement.__onShowMore;
                     if (onShowMore) {
@@ -2092,6 +2170,8 @@ var observer = new MutationObserver((records, obs)=>{
                         circles[i], 
                         circleDatas[i].props.defaultCircle
                     );
+                    circles[i].querySelectorAll("& > div:nth-last-child(2) > div:nth-last-child(2) > div.mt-1.whitespace-pre-wrap.break-all > span:not(.quoted-circle):has(> a) > a")
+                        .forEach(handleEmbedAnchor);
                 }
                 if (location.pathname.startsWith("/field/") && circleAmount == 0) {
                     // sometimes badges are not added for some reason
