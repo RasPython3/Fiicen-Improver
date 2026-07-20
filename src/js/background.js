@@ -206,6 +206,11 @@ chrome.runtime.onMessage.addListener((message, sender) => {
             systemTheme: settings.systemTheme
           }, ()=>{});
         }
+        if (settings.hasOwnProperty("customStyle")) {
+          chrome.storage.local.set({
+            customStyle: settings.customStyle
+          }, ()=>{});
+        }
         if (settings.hasOwnProperty("asyncNotification")) {
           chrome.storage.local.set({
             asyncNotification: settings.asyncNotification
@@ -230,6 +235,7 @@ chrome.runtime.onMessage.addListener((message, sender) => {
       chrome.storage.local.get({
         datasaver: false,
         systemTheme: false,
+        customStyle: null,
         asyncNotification: true,
         defaultHome: "/home",
         debug: false,

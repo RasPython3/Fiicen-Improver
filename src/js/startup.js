@@ -45,6 +45,7 @@ const observer = new MutationObserver((mutationList, observer)=>{
 
 chrome.storage.local.get({
     systemTheme: false,
+    customStyle: null
 }, (items)=>{
     // initialize
     if (items.systemTheme) {
@@ -52,11 +53,14 @@ chrome.storage.local.get({
         changeTheme();
         observer.observe(document.documentElement, config);
     }
+    if (items.customStyle == "compact") {
+        document.documentElement.classList.add("__custom_style__compact");
+    }
 });
 
 chrome.storage.local.onChanged.addListener(
     (changes)=>{
-        if (changes.systemTheme != undefined) {
+        if (changes.systemTheme !== undefined) {
             if (changes.systemTheme.newValue) {
                 isDark.addEventListener("change", onSystemThemeChange);
                 changeTheme();
@@ -66,6 +70,13 @@ chrome.storage.local.onChanged.addListener(
                 observer.disconnect();
                 document.documentElement.classList.remove("dark", "system-dark");
                 document.documentElement.classList.replace("application-dark", "dark");
+            }
+        }
+        if (changes.customStyle !== undefined) {
+            if (changes.customStyle.newValue == "compact") {
+                document.documentElement.classList.add("__custom_style__compact");
+            } else {
+                document.documentElement.classList.remove("__custom_style__compact");
             }
         }
     }
