@@ -216,6 +216,11 @@ chrome.runtime.onMessage.addListener((message, sender) => {
             defaultHome: settings.defaultHome == "/home/following" ? "/home/following" : "/home"
           }, ()=>{});
         }
+        if (settings.hasOwnProperty("mutedWords")) {
+          chrome.storage.local.set({
+            mutedWords: Array.from(settings.mutedWords).map((word)=>word.toString().toLowerCase())
+          }, ()=>{});
+        }
         if (settings.hasOwnProperty("debug")) {
           chrome.storage.local.set({
             debug: settings.debug
@@ -232,6 +237,7 @@ chrome.runtime.onMessage.addListener((message, sender) => {
         systemTheme: false,
         asyncNotification: true,
         defaultHome: "/home",
+        mutedWords: [],
         debug: false,
       }, (items)=>{
         responseData = {

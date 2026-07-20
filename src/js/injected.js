@@ -62,6 +62,11 @@ const testers = [
 
 var defaultHome = "/home";
 
+var mutedWords = [];
+mutedWords._ready = new Promise((resolve, reject)=>{
+    mutedWords._set_ready = resolve;
+});
+
 var circleAmount = 0;
 
 var circleCache = new Map()
@@ -75,7 +80,7 @@ function messageExt(request, value=undefined) {
     let promise = new Promise((resolve, reject)=>{
         let listener = (e)=>{
             let data = JSON.parse(e.detail);
-            if (data.response == request && data.id == id) {
+            if (data && data.response == request && data.id == id) {
                 window.removeEventListener("ext-message", listener);
                 _msgIds.splice(_msgIds.indexOf(id), 1);
                 resolve(data.value);
@@ -101,6 +106,10 @@ window.addEventListener("ext-message", (e)=>{
                 let changes = JSON.parse(data.value);
                 if (changes.defaultHome) {
                     defaultHome = changes.defaultHome.newValue || "/home";
+                }
+                if (changes.mutedWords != undefined) {
+                    mutedWords.splice(0, mutedWords.length, ...Array.from(changes.mutedWords.newValue || []));
+                    mutedWords._set_ready();
                 }
                 break;
             case "updateNotificationCount":
@@ -521,6 +530,14 @@ async function onLoaded() { // first load or nextjs's router
             defaultHome = settings.defaultHome || "/home";
         });
     }
+
+    // load muted words
+    messageExt("getSettings").then((settings)=>{
+            mutedWords.splice(0, mutedWords.length, ...(settings.mutedWords || []));
+            mutedWords._set_ready();
+    });
+    await mutedWords._ready;
+
     if (location.pathname.startsWith("/field/")) {
         let qrPopup = document.querySelector("div:has(> h3 + img[src^=\"data:\"] + p:nth-child(3))");
         if (location.pathname.match("\\/field\\/"+username+"(?:[?/].*)?$") && qrPopup != undefined) {
@@ -1028,10 +1045,71 @@ function addQuoteButton(popupWindow, data) {
     return false;
 }
 
+function doHighlight(contentDiv) {
+    // highlight muting words
+
+    if (!CSS.highlights) {
+        return;
+    }
+
+    let ranges = [];
+
+    contentDiv.querySelectorAll("& > span > :where(span, a)")
+        .forEach((el)=>{
+            let text = el.textContent.toLowerCase();
+            mutedWords.forEach((word)=>{
+                if (text.includes(word)) {
+                    console.log(contentDiv, word);
+                    let offset = 0;
+                    while (offset < text.length) {
+                        let index = text.indexOf(word, offset);
+                        if (index < 0) {
+                            break;
+                        } else {
+                            let range = new Range();
+                            range.setStart(el.childNodes[0], index);
+                            range.setEnd(el.childNodes[0], index + word.length);
+                            ranges.push(range);
+                            offset = index + 1;
+                        }
+                    }
+                }
+            });
+        });
+
+    const mutedWordsHighlight = CSS.highlights.get("muted-words") || new Highlight();
+
+    ranges.flat().forEach((r)=>mutedWordsHighlight.add(r));
+
+    CSS.highlights.set("muted-words", mutedWordsHighlight);
+}
+
 function modifyDynamicCircle(circle, data) {
     try {
+        let contentDiv = circle.querySelector("& > div:nth-last-child(2) > div:nth-last-child(2):has(> div.mt-1.whitespace-pre-wrap.break-all)");
+        let contentDivProps = contentDiv ? contentDiv[Object.keys(contentDiv).filter(key=>key.startsWith("__reactProps"))[0]] : null;
+
         if (data && data.id) {
             circleCache.set(data.id, data);
+
+            // check muting words
+            let text = data.text != null ? data.text : data.refly_from?.text;
+
+            if ("string" == typeof text && mutedWords.some((word)=>text.includes(word)) && !circle.classList.contains("__muted")) { // FIXME: impl
+                // mute it
+                circle.classList.add("__muted");
+                console.log(circle, data, mutedWords.filter((word)=>text.includes(word)));
+                
+                circle.querySelector("& > div:not(.base-border) > div > button.absolute.inset-0")?.addEventListener("click", (ev)=>{
+                    circle.classList.remove("__muted");
+                    ev.preventDefault();
+                    ev.stopImmediatePropagation();
+
+                    doHighlight(contentDiv.querySelector("& > div.mt-1.whitespace-pre-wrap.break-all"));
+                }, {once: true});
+
+                circle.__onShowMore = ()=>{doHighlight(contentDiv.querySelector("& > div.mt-1.whitespace-pre-wrap.break-all"));}; // on show-more-button pressed
+            }
         }
     } catch(e) {
         console.error(e);
@@ -1227,6 +1305,88 @@ function modifyEmbed(url) {
     })();
 }
 
+function createModal(title, beforeClose=undefined) {
+    let modal = document.createElement("div");
+
+    modal.className = "fixed bottom-0 left-0 z-10 h-screen w-screen duration-300 pointer-events-none bg-transparent z-20 flex flex-col justify-end p-4 md:justify-center undefined";
+
+    modal.append(
+        document.createElement("div")
+    );
+
+    modal.firstChild.className = "base-bg mx-auto h-2/3 w-full max-w-xl rounded-3xl scale-75 opacity-0 blur overflow-y-auto duration-300 h-auto p-4"
+
+    modal.firstChild.append(
+        document.createElement("div"),
+        document.createElement("div")
+    );
+
+    modal.firstChild.firstChild.className = "mb-2 flex items-center justify-between";
+    modal.firstChild.lastChild.className = "flex flex-col gap-4 text-left";
+
+    modal.firstChild.firstChild.append(
+        document.createElement("h1"),
+        document.createElement("button")
+    );
+
+    modal.firstChild.firstChild.firstChild.className = "text-xl font-bold";
+    modal.firstChild.firstChild.firstChild.innerText = title;
+    
+    modal.firstChild.firstChild.lastChild.className = "base-bg-hover rounded-full p-2";
+
+    modal.firstChild.firstChild.lastChild.append(
+        document.createElementNS("http://www.w3.org/2000/svg","svg")
+    );
+
+    modal.firstChild.firstChild.lastChild.firstChild.setAttribute("class", "size-5");
+    modal.firstChild.firstChild.lastChild.firstChild.setAttribute("fill", "none");
+    modal.firstChild.firstChild.lastChild.firstChild.setAttribute("viewBox", "0 0 24 24");
+    modal.firstChild.firstChild.lastChild.firstChild.setAttribute("stroke", "currentColor");
+    modal.firstChild.firstChild.lastChild.firstChild.setAttribute("strokeWidth", "1.5");
+
+    modal.firstChild.firstChild.lastChild.firstChild.append(
+        document.createElementNS("http://www.w3.org/2000/svg","path")
+    );
+
+    modal.firstChild.firstChild.lastChild.firstChild.firstChild.setAttribute("stroke-linecap", "round");
+    modal.firstChild.firstChild.lastChild.firstChild.firstChild.setAttribute("stroke-linejoin", "round");
+    modal.firstChild.firstChild.lastChild.firstChild.firstChild.setAttribute("d", "M6 18 18 6M6 6l12 12");
+
+    modal.firstChild.lastChild.append(
+        document.createElement("div")
+    );
+
+    modal.firstChild.lastChild.firstChild.append(
+        document.createElement("div")
+    );
+
+    let openModal = ()=>{
+        modal.classList.add("bg-black/20");
+        modal.classList.remove("pointer-events-none", "bg-transparent");
+        modal.children[0].classList.remove("blur", "scale-75", "opacity-0");
+    }
+
+
+    let closeModal = ()=>{
+        if (beforeClose) {
+            beforeClose();
+        }
+        modal.classList.remove("bg-black/20");
+        modal.classList.add("pointer-events-none", "bg-transparent");
+        modal.children[0].classList.add("blur", "scale-75", "opacity-0");
+    };
+
+    modal.querySelector("button").onclick = closeModal;
+
+    modal.onclick = (ev)=>{
+        if (ev.target == modal) {
+            closeModal();
+        }
+    };
+
+    return {modal: modal, body: modal.firstChild.lastChild.firstChild.firstChild, open: openModal, close: closeModal};
+}
+
 // modify settings page
 function modifySettings() {
     if (location.pathname == "/settings/language-and-display/visual" && document.querySelector("input.fiicen-improver-checkbox[name=\"prefer-system-theme\"]") == undefined) {
@@ -1264,9 +1424,160 @@ function modifySettings() {
     let settingList = document.querySelector("main > div > ul");
     let settingItem;
 
+    if (location.pathname == "/settings/privacy-and-security/what-you-see" && document.querySelector("main ul > li:has(> a[href=\"/settings/privacy-and-security/what-you-see/muted-accounts\"]) + li:not(:has(> a))") == undefined) {
+        // muted words settings
+        let detailSettingList = document.querySelector("main ul:has(> li > a[href=\"/settings/privacy-and-security/what-you-see/muted-accounts\"])");
+
+        // setting item
+
+        let muteSettingItem = document.createElement("li");
+
+        muteSettingItem.className = "relative false _fiicen_improver_settings";
+
+        muteSettingItem.append(document.createElement("div"));
+        muteSettingItem.firstChild.append(
+            document.createElement("div"),
+            document.createElementNS("http://www.w3.org/2000/svg","svg")
+        );
+
+        muteSettingItem.firstChild.className = "base-bg-hover flex items-center justify-between p-4";
+
+        muteSettingItem.firstChild.firstChild.appendChild(document.createElement("p"));
+        muteSettingItem.firstChild.firstChild.firstChild.innerText = "ミュート中の言葉を管理";
+
+        muteSettingItem.firstChild.lastChild.setAttribute("class", "size-6 shrink-0 opacity-50");
+        muteSettingItem.firstChild.lastChild.setAttribute("fill", "currentColor");
+        muteSettingItem.firstChild.lastChild.setAttribute("viewBox", "0 0 24 24");
+        muteSettingItem.firstChild.lastChild.setAttribute("stroke", "none");
+
+        muteSettingItem.firstChild.lastChild.append(
+            document.createElementNS("http://www.w3.org/2000/svg","path")
+        );
+
+        muteSettingItem.firstChild.lastChild.firstChild.setAttribute("d", "M 3 4 C 3 3.448 3.448 3 4 3 L 19.978 3 C 20.241 2.994 20.506 3.092 20.707 3.293 C 20.908 3.494 21.006 3.759 21 4.022 L 21 20 C 21 20.552 20.552 21 20 21 C 19.448 21 19 20.552 19 20 L 19 6.414 L 4.707 20.707 C 4.317 21.098 3.683 21.098 3.293 20.707 C 2.902 20.317 2.902 19.683 3.293 19.293 L 17.586 5 L 4 5 C 3.448 5 3 4.552 3 4 Z");
+
+        // setting modal
+
+        let {
+            modal: muteSettingModal,
+            body: muteSettingBody,
+            open: openMuteSettingModal,
+            close: closeMuteSettingModal
+        } = createModal("ミュート中の言葉を管理", ()=>{history.pushState({}, '', location.pathname);});
+
+        muteSettingBody.classList.add("flex", "flex-col", "max-h-\[80vh\]", "h-80");
+
+        let muteWordForm = document.createElement("form");
+        muteWordForm.className = "flex flex-row gap-2 mb-2";
+
+        muteWordForm.append(document.createElement("div"));
+        muteWordForm.lastChild.className = "form-field w-full";
+        muteWordForm.lastChild.append(document.createElement("input"));
+        muteWordForm.lastChild.lastChild.type = "text";
+        muteWordForm.lastChild.lastChild.name = "word";
+        muteWordForm.lastChild.lastChild.placeholder = "ミュートする言葉を入力...";
+        muteWordForm.lastChild.lastChild.required = true;
+        muteWordForm.lastChild.lastChild.className = "size-full disabled:opacity-50";
+
+        muteWordForm.append(document.createElement("input"));
+        muteWordForm.lastChild.type = "submit";
+        muteWordForm.lastChild.value = "追加";
+        muteWordForm.lastChild.className = "accent-bg w-20 rounded-full px-6 py-2 font-bold disabled:opacity-50";
+
+
+        muteSettingBody.append(muteWordForm);
+
+        muteSettingBody.append(document.createElement("ul"));
+        muteSettingBody.lastChild.style.overflowY = "scroll";
+
+        let updateMutedWords = (words)=>{
+            muteSettingBody.lastChild.replaceChildren(document.createElement("div"));
+            muteSettingBody.lastChild.firstChild.className = "size-8 animate-spin rounded-full border-4 border-main/50 border-t-main mx-auto";
+
+            Array.from(muteWordForm.elements).forEach((el)=>{
+                el.disabled = true;
+            });
+
+            return new Promise((resolve, reject)=>{
+                messageExt("setSettings", {mutedWords: words}).finally(()=>{
+                    // mutedWords would already be updated by update event handler
+                    messageExt("getSettings").then((settings)=>{
+                        mutedWords.splice(0, mutedWords.length, ...settings.mutedWords);
+                        Array.from(muteWordForm.elements).forEach((el)=>{
+                            el.disabled = false;
+                        });
+                        showMutedWords();
+                    }).then(resolve).catch(reject);
+                });
+            });
+        };
+
+        let showMutedWords = ()=>{
+            muteSettingBody.lastChild.replaceChildren();
+            mutedWords.forEach((word)=>{
+                muteSettingBody.lastChild.appendChild(
+                    document.createElement("li")
+                );
+
+                muteSettingBody.lastChild.lastChild.className = "base-bg-hover overflow-hidden p-4 flex gap-1 items-center justify-between";
+
+                muteSettingBody.lastChild.lastChild.append(
+                    document.createElement("span"),
+                    document.createElement("button")
+                );
+
+                muteSettingBody.lastChild.lastChild.firstChild.innerText = word;
+
+                muteSettingBody.lastChild.lastChild.lastChild.innerText = "解除";
+                muteSettingBody.lastChild.lastChild.lastChild.className = "rounded-full border border-danger px-6 py-2 font-bold text-danger duration-300 hover:bg-danger/10 disabled:opacity-50";
+
+                muteSettingBody.lastChild.lastChild.lastChild.onclick = (e)=>{
+                    updateMutedWords(mutedWords.filter((w)=>w != word));
+                }
+            });
+        };
+
+        showMutedWords();
+
+        muteWordForm.onsubmit = (e)=>{
+            e.preventDefault();
+            let word = e.target.elements["word"]?.value?.toLowerCase();
+
+            if (!word) {
+                window.alert("言葉を入力してください");
+            } else if (mutedWords.includes(word)) {
+                window.alert("その言葉はすでに登録済みです");
+            } else {
+                e.target.elements["word"].value = "";
+                updateMutedWords([...mutedWords, word]);
+            }
+
+            e.target.elements["word"]?.focus();
+        };
+
+        muteSettingItem.append(muteSettingModal);
+
+        detailSettingList.append(muteSettingItem);
+
+        muteSettingItem.children[0].addEventListener("click", ()=>{
+            if (location.hash != "#fiicen-improver-settings--muted-words") {
+                location.hash = "#fiicen-improver-settings--muted-words";
+            }
+            showMutedWords();
+            openMuteSettingModal();
+        });
+
+        if (location.hash == "#fiicen-improver-settings--muted-words") {
+            showMutedWords();
+            openMuteSettingModal();
+        }
+    }
+
+    let settingList = document.querySelector("main > div > ul");
+    let settingItem;
+
     if (settingList.lastChild.lastChild.tagName.toUpperCase() != "DIV") {
         settingItem = document.createElement("li");
-        let settingPopup = document.createElement("div");
 
         // setting item
 
@@ -1294,60 +1605,14 @@ function modifySettings() {
 
         settingItem.firstChild.lastChild.firstChild.setAttribute("d", "M 3 4 C 3 3.448 3.448 3 4 3 L 19.978 3 C 20.241 2.994 20.506 3.092 20.707 3.293 C 20.908 3.494 21.006 3.759 21 4.022 L 21 20 C 21 20.552 20.552 21 20 21 C 19.448 21 19 20.552 19 20 L 19 6.414 L 4.707 20.707 C 4.317 21.098 3.683 21.098 3.293 20.707 C 2.902 20.317 2.902 19.683 3.293 19.293 L 17.586 5 L 4 5 C 3.448 5 3 4.552 3 4 Z");
 
-        // setting popup
-        settingPopup.className = "fixed bottom-0 left-0 z-10 h-screen w-screen duration-300 pointer-events-none bg-transparent z-20 flex flex-col justify-end p-4 md:justify-center undefined";
+        // setting modal
 
-        settingPopup.append(
-            document.createElement("div")
-        );
-
-        settingPopup.firstChild.className = "base-bg mx-auto h-2/3 w-full max-w-xl rounded-3xl scale-75 opacity-0 blur overflow-y-auto duration-300 h-auto p-4"
-
-        settingPopup.firstChild.append(
-            document.createElement("div"),
-            document.createElement("div")
-        );
-
-        settingPopup.firstChild.firstChild.className = "mb-2 flex items-center justify-between";
-        settingPopup.firstChild.lastChild.className = "flex flex-col gap-4 text-left";
-
-        settingPopup.firstChild.firstChild.append(
-            document.createElement("h1"),
-            document.createElement("button")
-        );
-
-        settingPopup.firstChild.firstChild.firstChild.className = "text-xl font-bold";
-        settingPopup.firstChild.firstChild.firstChild.innerText = "Fiicen Improver の設定";
-        
-        settingPopup.firstChild.firstChild.lastChild.className = "base-bg-hover rounded-full p-2";
-
-        settingPopup.firstChild.firstChild.lastChild.append(
-            document.createElementNS("http://www.w3.org/2000/svg","svg")
-        );
-
-        settingPopup.firstChild.firstChild.lastChild.firstChild.setAttribute("class", "size-5");
-        settingPopup.firstChild.firstChild.lastChild.firstChild.setAttribute("fill", "none");
-        settingPopup.firstChild.firstChild.lastChild.firstChild.setAttribute("viewBox", "0 0 24 24");
-        settingPopup.firstChild.firstChild.lastChild.firstChild.setAttribute("stroke", "currentColor");
-        settingPopup.firstChild.firstChild.lastChild.firstChild.setAttribute("strokeWidth", "1.5");
-
-        settingPopup.firstChild.firstChild.lastChild.firstChild.append(
-            document.createElementNS("http://www.w3.org/2000/svg","path")
-        );
-
-        settingPopup.firstChild.firstChild.lastChild.firstChild.firstChild.setAttribute("stroke-linecap", "round");
-        settingPopup.firstChild.firstChild.lastChild.firstChild.firstChild.setAttribute("stroke-linejoin", "round");
-        settingPopup.firstChild.firstChild.lastChild.firstChild.firstChild.setAttribute("d", "M6 18 18 6M6 6l12 12");
-
-        settingPopup.firstChild.lastChild.append(
-            document.createElement("div")
-        );
-
-        settingPopup.firstChild.lastChild.firstChild.append(
-            document.createElement("div")
-        );
-
-        let settingBody = settingPopup.firstChild.lastChild.firstChild.firstChild;
+        let {
+            modal: settingModal,
+            body: settingBody,
+            open: openSettingModal,
+            close: closeSettingModal
+        } = createModal("Fiicen Improver の設定", ()=>{history.pushState({}, '', location.pathname);});
 
         for (let item of [
             {name: "datasaver", text: "データセーバー"},
@@ -1397,6 +1662,7 @@ function modifySettings() {
         messageExt("extURL", "about.html").then((about_url)=>{
             settingBody.querySelector("section:nth-last-child(2) > a").href = about_url;
         });
+
         settingBody.lastChild.lastChild.target = "_blank";
         settingBody.lastChild.lastChild.innerText = "Fiicen Improver について...";
 
@@ -1434,33 +1700,15 @@ function modifySettings() {
             }
         });
 
-        settingItem.append(settingPopup);
+        settingItem.append(settingModal);
 
         settingList.append(settingItem);
-
 
         settingItem.children[0].addEventListener("click", ()=>{
             if (location.hash != "#fiicen-improver-settings") {
                 location.hash = "#fiicen-improver-settings";
             }
-            settingItem.children[1].classList.add("bg-black/20");
-            settingItem.children[1].classList.remove("pointer-events-none", "bg-transparent");
-            settingItem.children[1].children[0].classList.remove("blur", "scale-75", "opacity-0");
-        });
-
-        let close = ()=>{
-            history.pushState({}, '', location.pathname);
-            settingItem.children[1].classList.remove("bg-black/20");
-            settingItem.children[1].classList.add("pointer-events-none", "bg-transparent");
-            settingItem.children[1].children[0].classList.add("blur", "scale-75", "opacity-0");
-        };
-
-        settingItem.children[1].querySelector("button").addEventListener("click", close);
-
-        settingItem.children[1].addEventListener("click", (ev)=>{
-            if (ev.target == settingItem.children[1]) {
-                close();
-            }
+            openSettingModal();
         });
     } else {
         settingItem = settingList.lastChild;
@@ -1771,12 +2019,17 @@ var observer = new MutationObserver((records, obs)=>{
     for (let record of records) {
         for (let node of record.addedNodes) {
             if (node.parentElement == document.body && node.classList.contains("fixed")) {
-                // node would be popup
                 if (node.matches("div.fixed:has(> div.base-bg.absolute:first-child:last-child > div.p-4:not(:first-child):last-child > button.w-full.rounded-full):has(> div.base-bg.absolute:first-child:last-child > .base-bg-hover)")) {
+                    // node would be popup
                     try {
                         let circle_id = node[Object.keys(node).filter((key)=>key.startsWith("__reactProps"))[0]].children.props.children.find((child)=>child && child.props && child.props.id != undefined).props.id;
                         addQuoteButton(node, circleCache.get(circle_id));
                     } catch (e) {console.error(e);}
+                } else if (node.matches("div.fixed:has(> div.base-bg.absolute:first-child:last-child > div.p-4:not(:first-child):last-child > button.w-full.rounded-full):has(> div.base-bg.absolute:first-child:last-child > .base-bg-float.sticky + div > form)")) {
+                    // circle detail
+                    // highlight muted words
+                    node.querySelectorAll("& > div > div:not(.sticky):not(.p-4) > div.base-border:not(.flex):not(.text-sm) > div:not(.relative) > div:not(.flex):nth-child(2) > div.mt-1.whitespace-pre-wrap.break-all, & > div > div:not(.sticky):not(.p-4) > div.base-border:not(.flex):not(.text-sm) > div.relative > div > div.base-border > div.mt-1.whitespace-pre-wrap.break-all")
+                        .forEach(doHighlight);
                 } else if (node.matches("div.fixed:has(> img, div.w-full.h-full img.rounded-full)")) {
                     // zoomed image
                     let bigImg = node.querySelector("img");
@@ -1787,14 +2040,26 @@ var observer = new MutationObserver((records, obs)=>{
                 }
             }
         }
+        if (record.target.matches("div.mt-1.whitespace-pre-wrap.break-all")) {
+            for (let node of record.removedNodes) {
+                if (node.matches("button.relative.text-sm.font-semibold.text-main")) {
+                    // it's show more button, so check links again
+                    // call __onShowMore of circle element
+                    let onShowMore = record.target.parentElement.parentElement.parentElement.__onShowMore;
+                    if (onShowMore) {
+                        onShowMore();
+                    }
+                }
+            }
+        }
     }
     try {
         circleAmount = 0;
         let circleParents = document.querySelectorAll(":where(div:where(div:first-child, div:first-child + div) + header + main > div > div > div:first-child, main:not(div:where(div:first-child, div:first-child + div) + header + main) > div:first-child > div:first-child, div:where(.p-4, .px-4.pt-2) > div > div.flex.flex-col.gap-4:has( > div.relative.flex))");
         for (let circleParent of circleParents) {
             let _circleAmount = circleParent._circleAmount || 0;
-            let circles = circleParent.children;
-            let circleDatas = circleParent[Object.keys(circleParent).filter((key)=>key.startsWith("__reactProps"))[0]].children.props.children;
+            let circles = Array.from(circleParent.children).filter((child)=>child.matches("div.relative"));
+            let circleDatas = Array.from(circleParent[Object.keys(circleParent).filter((key)=>key.startsWith("__reactProps"))[0]].children.props.children).filter((prop)=>prop.type != "div");
             if (_circleAmount < circles.length) {
                 circleParent._circleAmount = circles.length;
                 for (let i = _circleAmount; i < circles.length; i++) {
