@@ -1790,7 +1790,7 @@ var observer = new MutationObserver((records, obs)=>{
     }
     try {
         circleAmount = 0;
-        let circleParents = document.querySelectorAll(":where(div:where(div:first-child, div:first-child + div) + header + main > div > div > div:first-child, main:not(div:where(div:first-child, div:first-child + div) + header + main) > div:first-child > div:first-child, div.flex.flex-col.gap-4:has( > div.relative.flex))");
+        let circleParents = document.querySelectorAll(":where(div:where(div:first-child, div:first-child + div) + header + main > div > div > div:first-child, main:not(div:where(div:first-child, div:first-child + div) + header + main) > div:first-child > div:first-child, div:where(.p-4, .px-4.pt-2) > div > div.flex.flex-col.gap-4:has( > div.relative.flex))");
         for (let circleParent of circleParents) {
             let _circleAmount = circleParent._circleAmount || 0;
             let circles = circleParent.children;

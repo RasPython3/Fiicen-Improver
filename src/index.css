@@ -6,7 +6,7 @@ body:not(:has(> div.fixed:not(.pointer-events-none))) {
 
 :where(div:where(:has(> div:first-child), :has(> div:first-child + div > button)):has(> div + header + main:last-child) > main > div > div > div:first-child > div.relative,
 main:not(div:where(:has(> div:first-child), :has(> div:first-child + div > button)):has(> div + header + main:last-child) > main) > div > div > div.relative,
-div.flex.flex-col.gap-4 > div.relative.flex,
+div:where(.p-4, .px-4.pt-2) > div > div.flex.flex-col.gap-4 > div.relative.flex,
 div.min-h-screen.border-x > div:first-child > div:first-child,
 body > div.fixed.inset-0 > div.base-bg.absolute > div.base-bg-float.sticky + div:not(.p-4) > div:first-child) {
     > div:nth-last-child(2):not(.relative),
@@ -286,9 +286,18 @@ div:has(> main:not(.p-4):not(.w-screen):first-child:last-child) {
     display: flex;
 }
 
-main:not(.p-4):not(.w-screen):not(.w-full), div:not(.w-full) > header:has(+ main:not(.p-4):not(.w-screen)) {
+main:not(.py-4):not(.p-4):not(.w-screen):not(.w-full), div:not(.w-full) > header:has(+ main:not(.py-4):not(.p-4):not(.w-screen):not(.w-full)) {
     width: 36rem;
     max-width: calc(100vw - 2rem);
+
+    & .w-screen:not(.absolute):not(.fixed) {
+        max-width: calc(100vw - 2rem);
+    }
+}
+
+main.py-4:not(.p-4):not(.w-screen):not(.w-full), div:not(.w-full) > header.w-full:has(+ main.py-4:not(.p-4):not(.w-screen):not(.w-full)) {
+    width: 36rem;
+    max-width: 100vw;
 }
 
 div:not(.w-full) > header:where(.sticky, .md\:sticky):has(+ main:not(.p-4):not(.w-screen)) {
@@ -348,6 +357,19 @@ div.min-h-screen.border-x {
 div:where(:has(> div:first-child), :has(> div:first-child + div > button)):has(> div + header + main:last-child) > div:first-child > div > div:last-child > p {
     overflow-wrap: anywhere;
     white-space: break-spaces;
+}
+
+/* make some setting pages scrollable, like follower manager or muting manager */
+main.grid > div.overflow-hidden:has(> header:first-child + div:last-child > ul:first-child) {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    max-height: 100vh;
+
+    > header:first-child + div:last-child {
+        height: 100%;
+        overflow-y: scroll;
+    }
 }
 
 /* QR button */
