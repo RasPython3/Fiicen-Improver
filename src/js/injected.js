@@ -785,17 +785,12 @@ async function onLoaded() { // first load or nextjs's router
             }
             for (let circleIndex = 0; circleIndex < circles.length; circleIndex++) {
                 let circle = circles[circleIndex];
+                let props = circle.parentElement[Object.keys(circle.parentElement).filter((key)=>key.startsWith("__reactProps"))[0]].children.props.children.filter((prop)=>prop.type != "div")[circleIndex].props.defaultCircle;
                 clearInterval(circle.__timer_id);
                 if (circle.matches(":has(> a)")) {
                     continue;
                 }
                 circle.__timer_id = setInterval((circle)=>{
-                    let props;
-                    try {
-                        props = circle.parentElement[Object.keys(circle.parentElement).filter((key)=>key.startsWith("__reactProps"))[0]].children.props.children[circleIndex].props.defaultCircle;
-                    } catch (e) {
-                        return;
-                    }
                     clearInterval(circle.__timer_id);
                     modifyDynamicCircle(circle, props);
                     modifyCircle(props);
