@@ -106,6 +106,10 @@ window.addEventListener("ext-message", (e)=>{
                 let changes = JSON.parse(data.value);
                 if (changes.defaultHome) {
                     defaultHome = changes.defaultHome.newValue || "/home";
+                    let homebutton = document.querySelector("a[href=\"/home\"]:has(> img)");
+                    if (homebutton) {
+                        homebutton.href = defaultHome;
+                    }
                 }
                 if (changes.mutedWords != undefined) {
                     mutedWords.splice(0, mutedWords.length, ...Array.from(changes.mutedWords.newValue || []));
@@ -528,6 +532,7 @@ async function onLoaded() { // first load or nextjs's router
         homebutton._overwritten = true;
         messageExt("getSettings").then((settings)=>{
             defaultHome = settings.defaultHome || "/home";
+            homebutton.href = defaultHome;
         });
     }
 
