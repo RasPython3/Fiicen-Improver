@@ -4,14 +4,19 @@ body:not(:has(> div.fixed:not(.pointer-events-none))) {
     overflow: initial ! important;
 }
 
-:where(div:where(:has(> div:first-child), :has(> div:first-child + div > button)):has(> div + header + main:last-child) > main > div > div > div:first-child > div.relative,
-main:not(div:where(:has(> div:first-child), :has(> div:first-child + div > button)):has(> div + header + main:last-child) > main) > div > div > div.relative,
-div:where(.p-4, .px-4.pt-2) > div > div.flex.flex-col.gap-4 > div.relative.flex,
-div.min-h-screen.border-x > div:first-child > div:first-child,
-body > div.fixed.inset-0 > div.base-bg.absolute > div.base-bg-float.sticky + div:not(.p-4) > div:first-child) {
+:where(
+  div:where(:has(> div:first-child), :has(> div:first-child + div > button)):has(> div + header + main:last-child) > main > div > div > div:first-child > div > div.relative, /* field */
+  main:not(div:where(:has(> div:first-child), :has(> div:first-child + div > button)):has(> div + header + main:last-child) > main) > div > div.flex-col > div > div.relative, /* home */
+  main.py-4 > div.px-4 > div > div.flex.flex-col.gap-4 > div > div.relative.flex, /* search */
+  div.mt-10 > h2 + div > div.flex.flex-col.gap-4 > div > div.relative.flex, /* search */
+  div.min-h-screen.border-x > div:first-child > div:first-child, /* tag */
+  body > div.fixed.inset-0 > div.base-bg.absolute > div.base-bg-float.sticky + div:not(.p-4) > div:first-child, /* detail */
+  body > div.fixed.inset-0 > div.base-bg.absolute > div.p-4 > div > div.flex.flex-col.gap-4 > div > div.relative.flex /* replies on detail */
+) {
+    /* circle content */
     > div:nth-last-child(2):not(.relative),
-    > div:nth-last-child(2) > div:last-child button.absolute.inset-0 + div > div > div:nth-child(2) > div:first-child > div:not(.relative),
-    > div:nth-last-child(2) > div:last-child button.absolute.inset-0 + div > div > div:nth-child(2) > div:first-child > div.relative > div,
+    > div:nth-last-child(2) > div:last-child button.absolute.inset-0 + div > div > div:nth-child(2) > div:first-child > div:not(.relative), /* old style */
+    > div:nth-last-child(2) > div:last-child button.absolute.inset-0 + div > div > div:nth-child(2) > div:first-child > div.relative > div, /* old style */
     > div .quoted-circle > div,
     > div.relative:not(:last-child) > div,
     > div.relative:not(:last-child) + div:last-child:not(.relative),
@@ -218,6 +223,11 @@ header.sticky.left-0 > div:first-child > div {
     .md\:grid-cols-\[1fr_1\.618fr\] .md\:max-w-sm {
         max-width: unset;
     }
+}
+
+main.grid > div.hidden + div.relative.flex > div:has(+ form) > div:last-child > div.flex-col > div.flex > div.flex > div.flex > div.flex-col > div:not(.whitespace-pre-wrap) img {
+    min-width: 12rem;
+    --imprv-saved: 1;
 }
 
 main > div > header + div:has(> h1:first-child) + div:has(> ul:first-child) {

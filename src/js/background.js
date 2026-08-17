@@ -16,11 +16,13 @@ chrome.notifications.onClicked.addListener((notificationId)=>{
 
 fetch("https://fiicen.jp/search/tag?q=%00").then((res)=>{
   res.text().then((pagehtml)=>{
-    const pagejspath = pagehtml.match(/<script(?= )[^>]* src="(\/_next\/static\/chunks\/app(?=\/)[^"]*\/page-[0-9a-z-]+[.]js)"/)?.at(1);
+    //const pagejspath = pagehtml.match(/<script(?= )[^>]* src="(\/_next\/static\/chunks\/app(?=\/)[^"]*\/page-[0-9a-z-]+[.]js)"/)?.at(1);
+    const pagejsnum = parseInt(pagehtml.match(/,\\"\$L(\d+)\\",null,\{\\"notificationCount\\":\d+,\\"messageCount\\":\d+\}/)?.at(1) || "-1");
+    const pagejspath = pagehtml.match(`\\\\n${pagejsnum}:I\\[\\d+,\\[(?:\\\\"[^"]*\\\\",){3}\\\\"([^"]*)\\\\"`)?.at(1);
     if (pagejspath) {
       fetch(new URL(pagejspath, "https://fiicen.jp/")).then((res)=>{
         res.text().then((pagejs)=>{
-          NextActionValue = pagejs.match(/\("([0-9a-z]+)"\)[^"]+[.]results\)/)?.at(1);
+          NextActionValue = pagejs.match(/\("([0-9a-z]+)",[^)]+"serverFetch"\)/)?.at(1);
           console.log(NextActionValue);
           setTimeout(repeatNotificationCheck, 1000);
         });

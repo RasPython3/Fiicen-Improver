@@ -272,7 +272,7 @@ function modifyUser(userData) {
 var __timer_id;
 
 function redrawCircles() {
-    let circleParent = document.querySelector(":where(div:where(div:first-child, div:first-child + div) + header + main > div > div > div:first-child, main:not(:nth-child(3)) > div > div, header + div.flex > div.mt-10 > div:last-child > div.flex):has(> div.relative):not(:has(> div.aspect-square))");
+    let circleParent = document.querySelector(":where(div:where(div:first-child, div:first-child + div) + header + main > div > div > div:first-child, main:not(:nth-child(3)) > div > div.flex-col, main:not(:nth-child(3)) > div > div > div.flex-col, header + div.flex > div.mt-10 > div:last-child > div.flex):has(> div > div.relative):not(:has(> div.aspect-square))");
     if (circleParent) {
         let updater = circleParent[Object.keys(circleParent).filter(key=>key.startsWith("__reactProps"))[0]].children.props.value;
         updater(null);
@@ -777,7 +777,7 @@ async function onLoaded() { // first load or nextjs's router
         }
         clearInterval(__timer_id);
         __timer_id = setInterval(()=>{
-            let circles = document.querySelectorAll(":where(div:where(div:first-child, div:first-child + div) + header + main > div > div > div:first-child, main:not(div:where(div:first-child, div:first-child + div) + header + main) > div:first-child > div, header + div.flex > div.mt-10 > div:last-child > div.flex) > div.relative:not(.aspect-square)");
+            let circles = document.querySelectorAll(":where(div:where(div:first-child, div:first-child + div) + header + main > div > div > div:first-child, main:not(div:where(div:first-child, div:first-child + div) + header + main) > div:first-child :where(main > div > div.flex-col, main > div > div > div.flex-col), header + div.flex > div.mt-10 > div:last-child > div.flex) > div > div.relative:not(.aspect-square)");
             if (circles.length == 0) {
                 return;
             } else {
@@ -785,7 +785,11 @@ async function onLoaded() { // first load or nextjs's router
             }
             for (let circleIndex = 0; circleIndex < circles.length; circleIndex++) {
                 let circle = circles[circleIndex];
-                let props = circle.parentElement[Object.keys(circle.parentElement).filter((key)=>key.startsWith("__reactProps"))[0]].children.props.children.filter((prop)=>prop.type != "div")[circleIndex].props.defaultCircle;
+                let props = circle.parentElement[Object.keys(circle.parentElement).filter((key)=>key.startsWith("__reactProps"))[0]]?.children.props.defaultCircle;
+                if (!props) {
+                    console.log(circle);
+                    return;
+                }
                 clearInterval(circle.__timer_id);
                 if (circle.matches(":has(> a)")) {
                     continue;
@@ -2153,10 +2157,10 @@ var observer = new MutationObserver((records, obs)=>{
     }
     try {
         circleAmount = 0;
-        let circleParents = document.querySelectorAll(":where(div:where(div:first-child, div:first-child + div) + header + main > div > div > div:first-child, main:not(div:where(div:first-child, div:first-child + div) + header + main) > div:first-child > div:first-child, div:where(.p-4, .px-4.pt-2) > div > div.flex.flex-col.gap-4:has( > div.relative.flex))");
+        let circleParents = document.querySelectorAll(":where(div:where(div:first-child, div:first-child + div) + header + main > div > div > div:first-child, main:not(div:where(div:first-child, div:first-child + div) + header + main) > div:first-child > div:first-child, div:where(.p-4, .px-4.pt-2) > div > div.flex.flex-col.gap-4:has( > div > div.relative.flex))");
         for (let circleParent of circleParents) {
             let _circleAmount = circleParent._circleAmount || 0;
-            let circles = Array.from(circleParent.children).filter((child)=>child.matches("div.relative"));
+            let circles = Array.from(circleParent.children).filter((child)=>child.matches("div:has(> div.relative)")).map((child)=>child.firstElementChild);
             let circleDatas = Array.from(circleParent[Object.keys(circleParent).filter((key)=>key.startsWith("__reactProps"))[0]].children.props.children).filter((prop)=>prop.type != "div");
             if (_circleAmount < circles.length) {
                 circleParent._circleAmount = circles.length;
