@@ -1779,11 +1779,13 @@ function modifySettings() {
 // Improve post form
 
 document.addEventListener("paste", (e)=>{
-    if (!e.target.form || !e.target.form.elements["media_attachments"]) {
+    if (!e.target.form) {
         return;
     }
-    let mediaInput = e.target.form.elements["media_attachments"];
-    addMediaFiles(mediaInput, e.clipboardData.files);
+    let mediaInput = Array.from(e.target.form.elements).find((el)=>el.matches("input.hidden[multiple][accept*=\"image/\"]")); //e.target.form.elements["media_attachments"];
+    if (mediaInput) {
+        addMediaFiles(mediaInput, e.clipboardData.files);
+    }
 }); 
 
 function addMediaFiles(targetInput, files) {
@@ -1820,7 +1822,8 @@ window.addEventListener("dragenter", (e)=>{
             f = f.parentElement;
         }
 
-        if (f.elements["media_attachments"] && !f.classList.contains("drag-in")) {
+        if (Array.from(f.elements).find((el)=>el.matches("input.hidden[multiple][accept*=\"image/\"]"))
+            && !f.classList.contains("drag-in")) {
             f.classList.add("drag-in");
 
             let ondragleave = (e)=>{
@@ -1841,7 +1844,7 @@ window.addEventListener("dragenter", (e)=>{
                 f.removeEventListener("dragleave", ondragleave);
                 f.removeEventListener("dragover", ondragover);
                 f.classList.remove("drag-in");
-                let mediaInput = f.elements["media_attachments"];
+                let mediaInput = Array.from(f.elements).find((el)=>el.matches("input.hidden[multiple][accept*=\"image/\"]"));
                 addMediaFiles(mediaInput, e.dataTransfer.files || []);
             };
 
@@ -1853,6 +1856,10 @@ window.addEventListener("dragenter", (e)=>{
 });
 
 // Hack fetch(...)
+
+function parseResponseJSON(text) {
+    
+}
 
 window.fetch = async (...args)=>{
     if (!_loadedCalled) {
@@ -1971,7 +1978,7 @@ window.fetch = async (...args)=>{
                     result
                 );
             } catch(e) {
-                console.error(e);
+                //console.error(e);
                 return new Response(text, result);
             }
         } else if ((args.length == 1 || args[1].method == undefined || args[1].method.toLowerCase() == "get") && args[0].search.includes("_rsc=")) {
